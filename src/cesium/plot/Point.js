@@ -135,6 +135,7 @@ export default class Point {
           id: data.plotId,
           plottype: data.plotType,
           layer: "标绘点",
+          drawtype:'point',
           position: Cesium.Cartesian3.fromDegrees(Number(data.longitude), Number(data.latitude), Number(data.elevation || 0)),
           billboard: {
             image: data.icon,
@@ -182,6 +183,7 @@ export default class Point {
           id: data.plotId,
           plottype: data.plotType,
           layer: "标绘点",
+          drawtype:'point',
           position: Cesium.Cartesian3.fromDegrees(Number(data.longitude), Number(data.latitude), Number(data.elevation || 0)),
           billboard: {
             image: data.icon,

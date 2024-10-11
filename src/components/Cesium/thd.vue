@@ -760,14 +760,7 @@ export default {
             });
             //加载中心点
             viewer.entities.add({
-                // properties: {
-                //   type: "震中",
-                //   time: this.centerPoint.time,
-                //   name: this.centerPoint.position,
-                //   lat: this.centerPoint.latitude,
-                //   lon: this.centerPoint.longitude,
-                //   describe: this.centerPoint.position,
-                // },
+
                 position: Cesium.Cartesian3.fromDegrees(
                     parseFloat(this.centerPoint.geom.coordinates[0]),
                     parseFloat(this.centerPoint.geom.coordinates[1]),
@@ -1433,6 +1426,7 @@ export default {
             let that = this;
             // 在屏幕空间事件处理器中添加左键点击事件的处理逻辑
             window.viewer.screenSpaceEventHandler.setInputAction(async (click) => {
+
                 // 检查点击位置是否拾取到实体
                 let pickedEntity = window.viewer.scene.pick(click.position);
                 window.selectedEntity = pickedEntity?.id;
@@ -1443,7 +1437,7 @@ export default {
                 // 如果拾取到实体
                 if (Cesium.defined(pickedEntity)) {
                     let entity = window.selectedEntity;
-
+                  // console.log(entity,"entity======================")
                     // 计算图标的世界坐标
                     this.selectedEntityPosition = this.calculatePosition(click.position);
                     this.updatePopupPosition(); // 确保位置已更新
@@ -1484,7 +1478,9 @@ export default {
                     if (entity._layer === "标绘点") {
                         this.timelinePopupVisible = true;
                         this.timelinePopupPosition = this.selectedEntityPopupPosition; // 更新位置
-                        this.timelinePopupData = this.extractDataForTimeline(entity);
+                        // this.timelinePopupData = this.extractDataForTimeline(entity);
+                      this.timelinePopupData={}
+                      this.timelinePopupData = window.selectedEntity.properties.data ? window.selectedEntity.properties.data.getValue() : ""
                         this.routerPopupVisible = false;
                     } else if (entity._billboard) {
                         // 如果点击的是路标
@@ -1665,10 +1661,12 @@ export default {
          * @returns {Object} 返回一个新对象，包含plotid、plotname和centerPoint属性
          */
         extractDataForTimeline(entity) {
+          console.log(entity,"===================")
             return {
                 plotid: entity.id,
                 plotname: entity.plottype,
-                centerPoint: this.centerPoint
+                centerPoint: this.centerPoint,
+                drawtype:entity.drawtype,
             };
         },
 

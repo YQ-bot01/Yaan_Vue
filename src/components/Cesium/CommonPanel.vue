@@ -418,7 +418,7 @@ export default {
       let that = this;
       // 1. 请求获取标绘点信息
       getPlotInfos({ plotId, plotType }).then(res => {
-        // console.log("点击获取",res)
+        console.log("点击获取",res)
         // 2. 初始化 item 对象，存储标绘信息
         let item = {
           starttime: null,

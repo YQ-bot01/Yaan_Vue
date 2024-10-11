@@ -69,14 +69,10 @@ export default {
     'eqid'
   ],
   mounted() {
-      // console.log("this.eqid1111111111111------------",this.eqid)
       if(this.eqid === 'be3a5ea4-8dfd-a0a2-2510-21845f17960b'){
           this.ifShowData = true
           this.fetchData()
-
       }
-      // console.log("ifShowData---------------",this.ifShowData)
-
   },
   watch: {
     currentTime(newVal) {

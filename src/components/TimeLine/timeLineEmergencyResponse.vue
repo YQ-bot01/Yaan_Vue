@@ -53,11 +53,10 @@ export default {
       'eqid'
   ],
   mounted() {
-    // if(this.eqid === 'be3a5ea48dfda0a2251021845f17960b'){
     if(this.eqid === 'be3a5ea4-8dfd-a0a2-2510-21845f17960b'){
       this.ifShowData = true
+      this.init()
     }
-    this.init()
   },
   watch: {
     currentTime(newVal) {
@@ -70,15 +69,10 @@ export default {
     init() {
         getEmergencyResponse().then(res => {
           this.EmergencyResponseResponsecontent = res
-            // console.log("ifShowData---------------",this.ifShowData)
-          // console.log("EmergencyResponse------",this.EmergencyResponseResponsecontent)
           this.updateEmergencyResponse(this.currentTime)
         })
-
-      // this.EmergencyResponseResponsecontent = [...EmergencyResponse]
     },
     async updateEmergencyResponse(currentTime){
-      // console.log( "this.EmergencyResponseResponsecontent",this.EmergencyResponseResponsecontent)
       const activities =await this.EmergencyResponseResponsecontent.filter((activity) => {
         return (
             new Date(activity.responseTime) <= currentTime
