@@ -680,8 +680,7 @@
     <!--    </div>-->
 
     <!--经纬度跳转-->
-    <div
-        style="display: flex; align-items: center; position: absolute; top: 95.25%; left: 0.5%; z-index: 1000; pointer-events: none;">
+    <div style="display: flex; align-items: center; position: absolute; top: 95.25%; left: 0.5%; z-index: 1000; pointer-events: none;">
       <div @click="togglePositionFlyTo" class="positionFlyToButton" style="pointer-events: auto;">
         <img src="../../assets/icons/svg/positionFlyTo.svg" title="经纬度跳转"
              style="width: 31px; height: 31px;">
@@ -1077,6 +1076,7 @@ import yaAnVillage from "@/assets/geoJson/yaan.json"
 import CommandScreenEqList from "@/components/Cesium/CommandScreenEqList.vue"
 import {getModelData} from "@/api/system/tiltPhotography.js";
 import layer from "@/cesium/layer.js";
+import modelicon from '@/assets/icons/svg/3dmodel04.svg';
 
 export default {
   computed: {
@@ -1728,11 +1728,11 @@ export default {
     //------------------地图初始化---------------
     init() {
       let clock;
+      let that = this
       getEqListById({id: this.eqid}).then(res => {
         console.log(res)
         //震中标绘点
         this.centerPoint = res
-
 
         // 设置中心点的标识和时间信息
         this.centerPoint.plotId = res.eqid
@@ -1758,6 +1758,45 @@ export default {
         const terrainProviderViewModels = getTerrainProviderViewModelsArr();
         let isThirdParty = true; // 标记当前是否为第三方地形
 
+        // 倾斜模型加载
+        getModelData().then(res => {
+          console.log("倾斜模型数据，新加的点，", res)
+          // 创建一个数组来保存实体和对应的数据
+          const entities = [];
+
+          for (let i = 0; i < res.length; i++) {
+            let alltiltPhotography = viewer.entities.add({
+              position: Cesium.Cartesian3.fromDegrees(res[i].geom.coordinates[0], res[i].geom.coordinates[1]),
+              layer: "倾斜模型",
+              // point: {
+              //   pixelSize: 20,
+              //   color: Cesium.Color.fromCssColorString("#e0c79b"),
+              //   clampToGround: true,
+              // },
+              billboard: {
+                image: modelicon,
+                width: 40,
+                height: 40,
+                // eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                // color: Cesium.Color.WHITE.withAlpha(1),
+                // scale: 0.8,
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 禁用，导致图标在高度计算或与地形交互时出现闪烁。 原作用：绑定到地形高度,让billboard贴地
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+              },
+              // 自定义属性，保存对应的数据
+              data: res[i],
+              // 添加名称属性
+              name: res[i].name + "倾斜模型"
+            });
+            // 将实体保存到数组中
+            entities.push(alltiltPhotography);
+          }
+        })
+
+        // 设置cesium的指南针、比例尺、放大缩小重置
+        this.init_cesium_navigation(this.centerPoint.longitude,this.centerPoint.latitude,viewer)
+
+        // 坡度分析绑定地形自动加载地形
         const switchToLocalDEM = () => {
           // 切换地形提供者
           if (isThirdParty) {
@@ -1778,55 +1817,9 @@ export default {
           // 切换标记，准备下次切换
           isThirdParty = !isThirdParty;
         };
-
-        getModelData().then(res => {
-          console.log("倾斜模型数据，新加的点，", res)
-          // 创建一个数组来保存实体和对应的数据
-          const entities = [];
-
-          for (let i = 0; i < res.length; i++) {
-            var alltiltPhotography = viewer.entities.add({
-              position: Cesium.Cartesian3.fromDegrees(res[i].geom.coordinates[0], res[i].geom.coordinates[1]),
-              layer: "倾斜模型",
-              point: {
-                pixelSize: 20,
-                color: Cesium.Color.fromCssColorString("#e0c79b"),
-                clampToGround: true,
-              },
-              // billboard: {
-              //   image: 'path/to/your/icon.png', // 替换为你的图标路径
-              //   width: 40, // 图标的宽度（可选）
-              //   height: 40, // 图标的高度（可选）
-              //   verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // 图标的垂直对齐方式
-              // },
-              // 自定义属性，保存对应的数据
-              data: res[i],
-              // 添加名称属性
-              name: res[i].name + "倾斜模型"
-            });
-            // 将实体保存到数组中
-            entities.push(alltiltPhotography);
-          }
-        })
+        document.getElementById('slope').addEventListener('click', switchToLocalDEM);
 
         // 绑定按钮点击事件
-        document.getElementById('slope').addEventListener('click', switchToLocalDEM);
-        let options = {}
-        // 用于在使用重置导航重置地图视图时设置默认视图控制。接受的值是Cesium.Cartographic 和 Cesium.Rectangle.
-        // options.defaultResetView = Cesium.Cartographic.fromDegrees(103.00, 29.98, 1000, new Cesium.Cartographic)
-        // 用于启用或禁用罗盘。true是启用罗盘，false是禁用罗盘。默认值为true。如果将选项设置为false，则罗盘将不会添加到地图中。
-        options.enableCompass = true
-        // 用于启用或禁用缩放控件。true是启用，false是禁用。默认值为true。如果将选项设置为false，则缩放控件将不会添加到地图中。
-        options.enableZoomControls = true
-        // 用于启用或禁用距离图例。true是启用，false是禁用。默认值为true。如果将选项设置为false，距离图例将不会添加到地图中。
-        options.enableDistanceLegend = true
-        // 用于启用或禁用指南针外环。true是启用，false是禁用。默认值为true。如果将选项设置为false，则该环将可见但无效。
-        options.enableCompassOuterRing = true
-        options.resetTooltip = "重置视图";
-        options.zoomInTooltip = "放大";
-        options.zoomOutTooltip = "缩小";
-        //新版必须new  CesiumNavigation ,可以查看作者github
-        window.navigation = new CesiumNavigation(viewer, options)
         document.getElementsByClassName('cesium-geocoder-input')[0].placeholder = '请输入地名进行搜索'
         document.getElementsByClassName('cesium-baseLayerPicker-sectionTitle')[0].innerHTML = '影像服务'
         document.getElementsByClassName('cesium-baseLayerPicker-sectionTitle')[1].innerHTML = '地形服务'
@@ -1843,7 +1836,7 @@ export default {
         });
 
         viewer.clock.multiplier = 3600
-        let that = this
+
         viewer.clock.onTick.addEventListener(function (clock) {
           // console.log(clock.currentTime,"clock.currentTime")
           if(clock.currentTime){
@@ -1961,6 +1954,38 @@ export default {
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
       })
 
+    },
+    init_cesium_navigation(longitude,latitude,viewer){
+      let options = {}
+      // 用于启用或禁用罗盘。true是启用罗盘，false是禁用罗盘。默认值为true。如果将选项设置为false，则罗盘将不会添加到地图中。
+      options.enableCompass = true
+      // 用于启用或禁用缩放控件。true是启用，false是禁用。默认值为true。如果将选项设置为false，则缩放控件将不会添加到地图中。
+      options.enableZoomControls = true
+      // 用于启用或禁用比例尺。true是启用，false是禁用。默认值为true。如果将选项设置为false，距离图例将不会添加到地图中。
+      options.enableDistanceLegend = true
+      // 用于启用或禁用指南针外环。true是启用，false是禁用。默认值为true。如果将选项设置为false，则该环将可见但无效。
+      options.enableCompassOuterRing = true
+      // 重置按钮
+      options.defaultResetView = new Cartographic(CesiumMath.toRadians(longitude), CesiumMath.toRadians(latitude), 200000)
+      options.resetTooltip = "重置视图";
+      options.zoomInTooltip = "放大";
+      options.zoomOutTooltip = "缩小";
+      //新版必须new CesiumNavigation ,可以查看作者github
+      window.navigation = new CesiumNavigation(viewer, options)
+      let compass = document.getElementsByClassName('compass')[0]
+      compass.addEventListener('dblclick', function () {
+        // 设置相机飞行到指北视角
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, viewer.camera.positionCartographic.height), // 目标位置
+          orientation: {
+            heading: Cesium.Math.toRadians(0), // 朝向正北
+            pitch: Cesium.Math.toRadians(-90), // 向下俯视
+            roll: 0 // 不倾斜
+          },
+          duration: 3, // 动画持续时间，单位为秒
+          easingFunction: Cesium.EasingFunction.LINEAR // 动画缓动函数
+        });
+      }, false);
     },
     updateMapAndVariableBeforeInit() {
       timeLine.fly(this.centerPoint.longitude, this.centerPoint.latitude, 60000, 5).then(() => {
@@ -2085,6 +2110,17 @@ export default {
           let entity = window.selectedEntity;
           console.log(entity, "拾取entity")
 
+          // 如果 entity 没有 _layer 字段，且当前选中图层是特定图层时跳过
+          if (!entity._layer &&!pickedEntity.id._properties.sourceName) {
+            this.eqCenterPanelVisible = false;
+            this.routerPopupVisible = false;
+            this.plotShowOnlyPanelVisible = false;
+            this.dataSourcePopupVisible = false
+              return;
+          }
+
+
+
           // 新增判断：跳过行政区划实体
           if (entity._layer === '行政区划') {
             this.plotShowOnlyPanelVisible = false;
@@ -2134,6 +2170,13 @@ export default {
             console.log("PanelData 震中", this.PanelData)
           } else if (entity._layer === "倾斜模型") {
 
+            const terrainProviderViewModels = getTerrainProviderViewModelsArr()
+            window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand();
+            window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[1];
+            const currentLayer = document.querySelector(`[title="${true ? '第三方地形' : 'WGS84标准球体'}"]`);
+            if (currentLayer) {
+              currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
+            }
             // 获取实体的自定义属性
 
             let row = entity.data;
@@ -3313,6 +3356,8 @@ export default {
       this.removethdRegions() //移除区域图层和相关标签
       // this.removeAllEmergencySites();
       this.removeDistrict();  //清除行政区域
+      this.removeSuppliesList();  //清除行政区域物资点
+      this.removeOldLabels();   // 清除清除行政区域旧的标签
       // 要素图层复选框跟着变化
       this.selectedlayersLocal = this.selectedlayersLocal.filter(item =>
           item !== '救援队伍分布要素图层' && item !== '应急物资存储要素图层'
@@ -3633,6 +3678,9 @@ export default {
     handleDistrictClick() {
       let district = this.selectedRegions[0]
       this.selectedDataByRegions = []
+
+      this.removeOldLabels();
+
       //清除半径查询实体标签
       this.removethdRegions()
       this.removeAllEmergencySites();
@@ -3739,6 +3787,15 @@ export default {
       }
       this.selectedRegions = []
       this.panels.marchRegionsDialog = false
+    },
+
+    // **改进的清除方法**
+    removeOldLabels() {
+      viewer.entities.values.forEach(entity => {
+        if (entity.label) {
+          viewer.entities.remove(entity);  // **只删除区域标签**
+        }
+      });
     },
 
     /**
@@ -3911,7 +3968,7 @@ export default {
 
       // 判断是否选定了灾损预估-经济损失要素图层
       const hasDisasterLossEstimationEconomicLossLayer = this.selectedDisasterEstimate.includes('灾损预估-经济损失要素图层');
-      // 如果选定了灾损预估-人员伤亡要素图层，则添加该要素图层
+      // 如果选定了灾损预估-经济损失要素图层，则添加该要素图层
       if(hasDisasterLossEstimationEconomicLossLayer){
         this.removethdRegions();
         this.addThemeLayer(this.layerData.ecoData,'economicLoss');
@@ -4747,6 +4804,7 @@ export default {
       }
     },
     toggleSlopeAnalysis(websock){
+
       this.showSlopeAnalysis = !this.showSlopeAnalysis;
       if (this.showSlopeAnalysis) {
         // 还原
