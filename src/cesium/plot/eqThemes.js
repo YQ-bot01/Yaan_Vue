@@ -1002,7 +1002,7 @@ export function handleOutputData(eqid, eqqueueId, eqFullName, type) {
         let jueceData = [];
 
         for (let i = 0; i < res.data.length; i++) {
-          const fullPath = `${zaiSunFuZhuJueCe}${data[i].sourceFile}`;
+          const fullPath = `${zaiSunFuZhuJueCeLocal}${data[i].sourceFile}`;
           console.log("docxUrl:", fullPath); // 检查路径是否正确
           const reportObject = {
             docxUrl: fullPath,
