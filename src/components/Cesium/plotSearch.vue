@@ -1,6 +1,6 @@
 <template>
   <div class="eqTable" v-show="isLeftShow">
-    <div class="eqListContent" v-if="currentTab === '震害事件'">
+    <div class="eqListContent">
       <div class="pop">
         <div class="pop_header">
           <span class="pop_title">标绘查询</span>
@@ -20,7 +20,7 @@
           <!-- 圆圈震级 -->
           <div style="width: 55px">
             <div class="eqMagnitude">
-<!--              <img width="30px" height="30px" :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">-->
+              <!--              <img width="30px" height="30px" :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">-->
               <img width="30px" height="30px" :src="'http://localhost:8080'+'/uploads/PlotsPic/' +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">
             </div>
           </div>
@@ -32,7 +32,7 @@
                         {{ plot.plotInfo.plotType }}
                         </span>
             <br/>
-<!--             伤亡和出队信息-->
+            <!--             伤亡和出队信息-->
             <div class="disaster-info">
               <!-- 标绘类型 -->
               <div>
@@ -57,22 +57,24 @@
             <!-- 地点、道路、POI 和经纬度 -->
             <div class="location-info">
               <div style="display: flex; align-items: center;">
-               <strong>具体地点：</strong>
-               <div class="local-place-wrapper">
-                 <span class="info-label small-text local-place">{{ plot.locationInfo.address }} （{{ plot.locationInfo.address_position }}方向 {{ plot.locationInfo.address_distance }} 米）</span>
-               </div>
+                <strong>具体地点：</strong>
+                <div class="local-place-wrapper">
+                  <span class="info-label small-text local-place">{{ plot.locationInfo.address }} （{{ plot.locationInfo.address_position }}方向 {{ plot.locationInfo.address_distance }} 米）</span>
+                </div>
               </div>
               <span class="info-label small-text"><strong>附近道路：</strong>{{ plot.locationInfo.road }} （距离 {{ plot.locationInfo.road_distance }} 米）</span>
               <br>
-<!--              <span class="info-label"><strong>附近 POI：</strong>{{ plot.locationInfo.poi }} （{{ plot.locationInfo.poi_position }}方向 {{ plot.locationInfo.poi_distance }} 米）</span>-->
-<!--              <br>-->
+              <!--              <span class="info-label"><strong>附近 POI：</strong>{{ plot.locationInfo.poi }} （{{ plot.locationInfo.poi_position }}方向 {{ plot.locationInfo.poi_distance }} 米）</span>-->
+              <!--              <br>-->
               <span class="info-label small-text"><strong>标绘经纬：</strong>{{ parseFloat(plot.plotInfo.longitude).toFixed(2) }}°E, {{ parseFloat(plot.plotInfo.latitude).toFixed(2) }}°N</span>
+              <br>
+              <span class="info-label small-text"><strong>时间范围：</strong>{{this.timestampToTimeChina(plot.plotInfo.startTime)}}-{{this.timestampToTimeChina(plot.plotInfo.endTime)}}</span>
               <br>
             </div>
           </div>
 
           <!-- 详情按钮 -->
-<!--          <div class="eqTapToInfo" @click="toTab(eq)">详情</div>-->
+          <!--          <div class="eqTapToInfo" @click="toTab(eq)">详情</div>-->
         </div>
       </div>
 
@@ -89,57 +91,6 @@
         />
       </div>
     </div>
-
-
-    <!--   指定地震   -->
-    <div class="thisEq" v-if="currentTab !== '震害事件' && selectedTabData">
-      <div class="eqInfo">
-        <div style="height: 30px;display: flex;align-items: center">
-          <div class="button return" @click="back()">返回</div>
-        </div>
-        <div style="height: 10px;background-color: #054576"></div>
-        <el-divider content-position="left">
-          <!--            <img src="../../../assets/icons/TimeLine/收起展开箭头左.png" style="height: 15px; width: 15px;">-->
-          地震信息
-        </el-divider>
-        <div style="padding: 1px 20px 10px 20px;color: white">
-          <!-- 显示选项卡内容 -->
-          <h4>地震名称：{{ selectedTabData.earthquakeName }}</h4>
-          <p>发震时刻：{{ selectedTabData.occurrenceTime }}</p>
-          <p>震中经纬：{{ selectedTabData.longitude }}°E, {{ selectedTabData.latitude }}°N</p>
-          <p>地震震级：{{ selectedTabData.magnitude }}</p>
-          <p>震源深度：{{ selectedTabData.depth }}千米</p>
-          <p>参考位置：{{ selectedTabData.earthquakeName }}</p>
-        </div>
-
-        <div style="height: 10px;background-color: #054576"></div>
-
-        <el-divider content-position="left"> 专题图</el-divider>
-
-        <div style="height: 420px">
-          <div class="eqTheme">
-            <div class="button themes history"
-                 style="width: 120px;"
-                 v-for="item in thematicMapData"
-                 :key="item.name"
-                 @click="previewMap(item)"> {{ item.name }}
-            </div>
-          </div>
-        </div>
-
-        <div style="height: 10px;background-color: #054576"></div>
-        <el-divider content-position="left"> 灾情报告</el-divider>
-        <div class="eqTheme">
-          <div class="button themes history"
-               v-for="item in reportData"
-               style="width: 120px;"
-               @click="exportCesiumScene(item)"
-          >{{ item.name }}
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
   <div class="fold" :style="{ width: isFoldUnfolding ? '30px' : '10px' }" @mouseenter="isFoldUnfolding = true"
        @mouseleave="isFoldUnfolding = false" v-show="isFoldShow" @click="isLeftShow = false,isFoldShow = false">
@@ -152,16 +103,13 @@
 </template>
 
 <script>
-import DisasterDamageAssessmentImageData
-  from "../../assets/images/ThematicMap/DisasterDamageAssessment/LuShan/DisasterDamageAssessmentImageData.json"
-import TwoAndThreeDIntegrationImageData
-  from "../../assets/images/ThematicMap/TwoAndThreeDIntegration/LuShan/TwoAndThreeDIntegrationImageData.json"
 import {getExcelPlotInfo, getPlot, getPlotIcon} from '@/api/system/plot'
 import * as Cesium from "cesium";
 import eqMark from '@/assets/images/DamageAssessment/eqMark.png';
 import yaan from "@/assets/geoJson/yaan1.json";
 import axios from "axios";
 import {tianDitulocalApi} from "@/utils/server.js";
+import timeTransfer from "@/cesium/tool/timeTransfer.js";
 
 export default {
   name: "plotSearch",
@@ -187,7 +135,7 @@ export default {
     },
     plotArray: {
       handler(newData) {
-          this.getPlot({ plotArray: newData });
+        this.getPlot({ plotArray: newData });
       },
       deep: true, // 深度监听
     },
@@ -197,91 +145,40 @@ export default {
       isFoldShow: true,
       isFoldUnfolding: false,
       isLeftShow: true,
-      isHistoryEqPointsShow: false,
       selectPlotData: [],
-      selectedPlotType: null, // 选择框绑定的值
-      uniquePlotTypes: null,
       noDataMessage: null,
-
-      currentTab: '震害事件', // 默认选项卡设置为『震害事件』
       // 列表地震
       listEqPoints: [],
       // 行政区划
       RegionLabels: [],
-      sichuanRegionLabels: [],
       title: "",
-      thematicMapData: [],
-      reportData: [],
-      disasterDamageAssessmentReport: [
-        {
-          name: '地震灾害预评估与处置工作报告',
-          path: '/ThematicMap/DisasterDamageAssessment/LuShan/workReport.pdf'
-        }],
-      twoAndThreeDIntegrationReport: [
-        {
-          name: '灾情简报',
-          path: '/ThematicMap/TwoAndThreeDIntegration/LuShan/DisasterBriefing.pdf'
-        },
-        {
-          name: '震区基本情况报告',
-          path: '/ThematicMap/TwoAndThreeDIntegration/LuShan/BasicSituationReport.pdf'
-        }
-      ],
       filteredEqData: [],
       pagedEqData: [],
-      getEqData: [],
-      selectedTabData: null,
-
       total: 0,
       pageSize: 10,
       currentPage: 1,
-      selectedEqPoint: '',
 
     }
   },
   mounted() {
-    this.fetch()
-    // this.getPlot(this.eqid)
+    this.getPlot(this.eqid)
   },
   methods : {
-    // 根据父组件传值来判断调用哪些专题图
-    fetch() {
-      if (this.thematicMapClass === 'DisasterDamageAssessment') {
-        this.thematicMapData = DisasterDamageAssessmentImageData
-        this.reportData = this.disasterDamageAssessmentReport
-      } else {
-        this.thematicMapData = TwoAndThreeDIntegrationImageData
-        this.reportData = this.twoAndThreeDIntegrationReport
+    async getReverseGeocode(lon, lat) {
+      try {
+        const response = await axios.get(`${tianDitulocalApi}/geocoder`, {
+          params: {
+            postStr: JSON.stringify({lon, lat, ver: 1}),
+            type: 'geocode',
+            tk: '7b6b98b997001a1c5557356e8518e3b4'
+          }
+        });
+        return response.data.result.addressComponent;
+      } catch (error) {
+        console.error("逆地理编码失败:", error);
+        return null;
       }
     },
-    exportCesiumScene(item) {
-      if (item.path) {
-        const link = document.createElement('a');
-        link.href = item.path;
-        link.download = item.name; // 指定下载的文件名
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    },
-    // getAssetsFile() {
-    //   this.imgshowURL = new URL(this.imgurlFromDate, import.meta.url).href
-    // },
-     async getReverseGeocode(lon, lat) {
-       try {
-         const response = await axios.get(`${tianDitulocalApi}/geocoder`, {
-           params: {
-             postStr: JSON.stringify({lon, lat, ver: 1}),
-             type: 'geocode',
-             tk: '7b6b98b997001a1c5557356e8518e3b4'
-           }
-         });
-         return response.data.result.addressComponent;
-       } catch (error) {
-         console.error("逆地理编码失败:", error);
-         return null;
-       }
-     },
     async getPlot(params) {
       console.log("params",params)
       try {
@@ -332,14 +229,14 @@ export default {
               })
           );
 
-            // 将新的数据累加到现有的数据中
+          // 将新的数据累加到现有的数据中
           updatedRes.push(...processedBatchData); // 合并当前批次数据
           // 将新增数据累加到现有数据中
           this.selectPlotData = [...this.selectPlotData, ...updatedRes];  // 累加新的标绘点
           this.filteredEqData = [...this.filteredEqData, ...updatedRes];  // 同步更新筛选后的数据
           this.updatePagedEqData(); // 更新分页数据
           this.noDataMessage = null;
-          }
+        }
       } catch (error) {
         console.error("获取地震列表或处理失败:", error);
       }
@@ -466,9 +363,9 @@ export default {
 
 
     locateEq(plot) {
-        // 提取标绘的经纬度
-        const longitude = parseFloat(plot.plotInfo.longitude);
-        const latitude = parseFloat(plot.plotInfo.latitude);
+      // 提取标绘的经纬度
+      const longitude = parseFloat(plot.plotInfo.longitude);
+      const latitude = parseFloat(plot.plotInfo.latitude);
       // 飞行动画持续时间（秒）
       viewer.scene.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(
@@ -524,83 +421,15 @@ export default {
       this.updatePagedEqData(); // 更新分页数据
     },
 
-
-    // 将选中的专题图信息传给父组件
-    // previewMap(item) {
-    //   this.$emit('imag-selected', item);
-    // },
-
-    back() {
-      this.currentTab = '震害事件';
-      this.selectedTabData = null;
-      //视角回雅安
-      const position = Cesium.Cartesian3.fromDegrees(
-          103.0,
-          29.98,
-          500000
-      );
-      viewer.camera.flyTo({destination: position,})
-
-      // this.removeData()
-    },
-
-    toTab(eq) {
-      this.currentTab = `${eq.earthquakeName} ${eq.magnitude}级地震`;
-      if (this.currentTab !== '震害事件') {
-
-        // 查找与选项卡名称匹配的地震数据
-        this.selectedTabData = this.getEqData.find(
-            eq => `${eq.earthquakeName} ${eq.magnitude}级地震` === this.currentTab
-        );
-        // 如果找到对应数据，调用定位函数
-        if (this.selectedTabData) {
-          this.selectEqPoint();
-        }
-      }
-    },
-
-    selectEqPoint() {
-      if (this.selectedTabData) {
-
-        // 避免选择同一选项卡时重复生成实体导致重叠
-        window.viewer.entities.remove(this.selectedEqPoint);
-
-        // 提取 selectedEqPoint
-        this.selectedEqPoint = window.viewer.entities.add({
-          position: Cesium.Cartesian3.fromDegrees(
-              Number(this.selectedTabData.longitude),
-              Number(this.selectedTabData.latitude)
-          ),
-          billboard: {
-            image: eqMark,
-            width: 25,
-            height: 25,
-            eyeOffset: new Cesium.Cartesian3(0, 0, -5000)
-          },
-          label: {
-            text: this.timestampToTime(this.selectedTabData.occurrenceTime, 'date') +
-                this.selectedTabData.earthquakeName +
-                this.selectedTabData.magnitude + '级地震',
-            font: '18px sans-serif',
-            fillColor: Cesium.Color.WHITE,
-            outlineColor: Cesium.Color.BLACK,
-            showBackground: true,
-            show: true,
-            horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
-          },
-          id: this.selectedTabData.id
-        });
-      }
-    },
-
     // 分页改变事件
     handleCurrentChange(page) {
       this.currentPage = page;
       this.updatePagedEqData();
     },
     // 时间戳转换
+    timestampToTimeChina(timestamp){
+      return timeTransfer.timestampToTimeChina(timestamp)
+    },
     timestampToTime(timestamp, format = "full") {
       let dateObj = new Date(timestamp);
       let year = dateObj.getFullYear();
@@ -634,11 +463,11 @@ export default {
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 333px;
+  width: 425px;
   height: calc(100% - 63px);
   z-index: 100;
   background: rgb(4, 20, 34);
-background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%,rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
+  background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%,rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
 }
 
 .query {
@@ -654,7 +483,7 @@ background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9)
 
 .eqCard {
   display: flex;
-  height: 150px;
+  height: 155px;
   border-bottom: #0d325f 2px solid;
   cursor: pointer;
 }
@@ -727,7 +556,7 @@ background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9)
   position: absolute;
   bottom: 0;
   width: 333px;
-background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%,rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
+  background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%,rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
   border: 2px solid #FFFFFF; /* 白色边框 */
 }
 
@@ -805,24 +634,24 @@ background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9)
   background-color: #2d3d51;
 }
 
-   /*开关*/
+/*开关*/
 .fold {
- position: absolute;
- top: 63px;
- right: 333px;
- margin: 0 auto;
- display: flex;
- align-items: center;
- justify-content: center;
- width: 10px;
- height: 36px;
+  position: absolute;
+  top: 63px;
+  right: 333px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 36px;
   background: rgb(4, 20, 34);
-background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%,rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
- -webkit-border-top-left-radius: 10px;
- -webkit-border-bottom-left-radius: 10px;
- cursor: pointer;
- z-index: 4;
- transition: width 0.3s ease; /* 宽度过渡动画 */
+  background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%,rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
+  -webkit-border-top-left-radius: 10px;
+  -webkit-border-bottom-left-radius: 10px;
+  cursor: pointer;
+  z-index: 4;
+  transition: width 0.3s ease; /* 宽度过渡动画 */
 }
 
 .unfold {
@@ -832,7 +661,7 @@ background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9)
   width: 30px;
   height: 40px;
   background: rgb(4, 20, 34);
-background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%,rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
+  background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%,rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
   cursor: pointer;
   z-index: 2;
   margin: 0;

@@ -7,15 +7,15 @@
       <div class="sub-main">
         <el-table :data="statisticInfo"
                   :header-cell-style="tableHeaderColor"
-                  :cell-style="tableColor" @row-click="flyTo"
+                  :cell-style="tableColor"
                   :row-style="{ height: '37.5px', fontSize: '13px'}"
         >
           <el-table-column label=" " min-width="16px" show-overflow-tooltip>
             <template #default="scope">
               <div style="display: flex; align-items: center; justify-content: center; height: 100%; "
                    class="arrow-container">
-                <img src="@/assets/images/arrow.png" alt="统一图片" style="width: 18px; height: 20px;"
-                     class="arrow-icon">
+<!--                <img src="@/assets/images/arrow.png" alt="统一图片" style="width: 18px; height: 20px;"-->
+<!--                     class="arrow-icon">-->
               </div>
             </template>
           </el-table-column>
@@ -349,49 +349,6 @@ export default {
       }
     }
 
-    function flyTo(row, column, cell, event) {
-      // console.log(row)
-      viewer.scene.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(
-            parseFloat(row.longitude),
-            parseFloat(row.latitude),
-            parseFloat(row.height)),
-        orientation: {
-          // 指向
-          heading: 6.283185307179581,
-          // 视角
-          pitch: -1.5688168484696687,
-          roll: 0.0
-        },
-        duration: 2 // 飞行动画持续时间（秒）
-      });
-
-      if (row.height === 2000) {
-
-        let entity = window.pointDataSource.entities.getById(row.plotId);
-
-// 透明度变化的时间间隔（毫秒）
-        let intervalTime1 = 200;
-// 当前透明度因子
-        let colorFactor = 1.0;
-// 设置定时器，每隔 intervalTime1 毫秒改变一次透明度
-        let intervalId1 = setInterval(() => {
-          colorFactor = colorFactor === 1.0 ? 0.5 : 1.0;
-          // 更新实体的透明度
-          entity.billboard.color = Cesium.Color.fromAlpha(Cesium.Color.WHITE, colorFactor);
-        }, intervalTime1);
-
-// 停止时间（毫秒）
-        let stoptime = 5000; // 例如，2000毫秒后停止变化
-        setTimeout(() => {
-          clearInterval(intervalId1);
-          colorFactor = 1.0;
-          // 确保在停止后将透明度设置回 1.0
-          entity.billboard.color = Cesium.Color.fromAlpha(Cesium.Color.WHITE, colorFactor);
-        }, stoptime);
-      }
-
-    }
 
     const tableHeaderColor = () => ({
       'background': 'linear-gradient(180deg, rgba(27,60,108,0.09) 0%, rgba(20,83,174,1) 100%)',
@@ -438,7 +395,6 @@ export default {
       toggleEntities,
       getRescueActionCasualtiesPlotAndInfo,
       statisticInfo,
-      flyTo,
       formatPeople,
       tableHeaderColor,
       tableColor,

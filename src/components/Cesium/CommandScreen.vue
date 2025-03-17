@@ -16,7 +16,7 @@
         <div class="list-dialog__content" style="height: calc(100% - 30);">
           <timeLineCasualtyStatisticthd
               :zoomLevel="zoomLevel"
-              :pointsLayer="pointsLayer"
+              :pointsLayer="plots"
               :currentTime="currentTimeString"
           />
         </div>
@@ -1356,8 +1356,6 @@ export default {
         modelid: null
       },
 
-      pointsLayer: [], //传到子组件
-
       // 视角输入经纬度高度跳转------------
       showPositionFlyTo: false,
       positionFlyTo: {
@@ -1754,7 +1752,11 @@ export default {
         })
         let viewer = initCesium(Cesium, "cesiumContainer", clock)
         viewer._cesiumWidget._creditContainer.style.display = 'none' // 隐藏版权信息
-
+        //取消双击视角定位
+        viewer.trackedEntity =undefined;
+        viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(
+            Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
+        );
         const terrainProviderViewModels = getTerrainProviderViewModelsArr();
         let isThirdParty = true; // 标记当前是否为第三方地形
 
@@ -1836,7 +1838,7 @@ export default {
         });
 
         viewer.clock.multiplier = 3600
-
+        let that = this
         viewer.clock.onTick.addEventListener(function (clock) {
           // console.log(clock.currentTime,"clock.currentTime")
           if(clock.currentTime){
@@ -5506,7 +5508,6 @@ export default {
 }
 
 :deep(.el-checkbox__label ) {
-  background-color: rgba(22, 53, 77, 0.9); /* 背景色 */
   color: white; /* 内容文字颜色 */
   font-size: 14px; /* 内容字号 */
   padding: 10px; /* 内容内边距 */

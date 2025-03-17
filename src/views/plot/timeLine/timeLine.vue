@@ -38,7 +38,7 @@
     <div>
       <div class="pop_left_background">
         <timeLineEmergencyResponse
-            :edit="false"
+            :edit="true"
             :eqid="eqid"
             :centerPoint="centerPoint"
             :currentTime="currentTimeString"
@@ -210,6 +210,11 @@ export default {
           clockRange: Cesium.ClockRange.CLAMPED,
         })
         let viewer = initCesium(Cesium, "cesiumContainer", clock)
+        //取消双击视角定位
+        viewer.trackedEntity =undefined;
+        viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(
+            Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
+        );
         viewer._cesiumWidget._creditContainer.style.display = 'none' // 隐藏版权信息
 
         let options = {}
