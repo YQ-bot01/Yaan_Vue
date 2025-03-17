@@ -151,8 +151,7 @@ let timeLine = {
                         let singleDigitPins = new Array(20);
                         for (let i = 0; i < singleDigitPins.length; ++i) {
                             singleDigitPins[i] = pinBuilder
-                                .fromText(`${Math.floor((i + 2) / 2)}`, Cesium.Color.VIOLET, 48)
-                                // .fromText(`${Math.floor(i /2)}`, Cesium.Color.VIOLET, 48)
+                                .fromText(`${Math.floor(i)}`, Cesium.Color.VIOLET, 48)
                                 .toDataURL();
                         }
                         let removeListener
@@ -212,8 +211,6 @@ let timeLine = {
                     window.pointDataSource = pointDataSource;
                 }
             }
-
-
             return pointDataSource
         }
         else if (datasourcename === "label") {

@@ -2,7 +2,7 @@
   <el-carousel trigger="click" height="880px" :interval="0" >
     <el-carousel-item>
       <div class="people-item">
-<!--        人员伤亡统计表格-->
+        <!--        人员伤亡统计表格-->
         <div class="people-table">
           <div class="pop">
             <div class="pop_header">
@@ -29,7 +29,7 @@
             </el-table>
           </div>
         </div>
-<!--        人员统计chart图-->
+        <!--        人员统计chart图-->
         <div class="people-chart">
           <div class="pop">
             <div class="pop_header">
@@ -41,7 +41,7 @@
       </div>
     </el-carousel-item>
     <el-carousel-item>
-      <div class="economic-item" style="left: -4%;">
+      <div class="economic-item">
         <div class="economic-table">
           <div class="pop">
             <div class="pop_header">
@@ -326,8 +326,8 @@ export default {
         },
         grid: {
           left: '12%',
-          right: '25%',
-          bottom: '10%',
+          right: '30%',
+          bottom: '18%',
           containLabel: true,
         },
         xAxis: {
@@ -469,9 +469,9 @@ export default {
       const option = {
         tooltip: {},
         grid: {
-          left: '12%',
-          right: '25%',
-          bottom: '18%',
+          left: '15%',
+          right: '32%',
+          bottom: '25%',
           containLabel: true
         },
         xAxis: {
@@ -481,7 +481,6 @@ export default {
           axisLabel: {
             color: '#fff', // 设置X轴标签颜色为白色
             interval: 0,
-            fontSize: 15,
           },
           nameTextStyle: {
             color: '#fff', // 设置X轴名称颜色为白色
@@ -510,11 +509,9 @@ export default {
           interval: 200000,
           axisLabel: {
             color: '#fff', // 设置Y轴标签颜色为白色
-            fontSize: 15,
           },
           nameTextStyle: {
             color: '#fff', // 设置Y轴名称颜色为白色
-            fontSize: 15,
           },
           axisLine: {
             show: false,
@@ -549,7 +546,6 @@ export default {
                   show: true,
                   position: "top",
                   color: '#fa9440',
-                  fontSize: 13,
                   formatter: function (p) {
                     return p.value > 0 ? (p.value) : '';
                   }
@@ -582,7 +578,7 @@ export default {
       const values = Object.values(countySizeMap);
 
       // 将县和对应的值组合为数组，方便排序和筛选
-      const countyData = counties.map((county, index) => ({ name: county, value: values[index] }));
+      const countyData = counties.map((county, index) => ({name: county, value: values[index]}));
 
       // 按值降序排序，并取前八个
       const topCounties = countyData.sort((a, b) => b.value - a.value).slice(0, 8);
@@ -595,9 +591,9 @@ export default {
       const option = {
         tooltip: {},
         grid: {
-          left: '12%',
-          right: '25%',
-          bottom: '19%',
+          left: '15%',
+          right: '31%',
+          bottom: '25%',
           containLabel: true,
         },
         xAxis: {
@@ -607,7 +603,6 @@ export default {
           axisLabel: {
             color: '#fff', // 设置X轴标签颜色为白色
             interval: 0,
-            fontSize: 15,
           },
           nameTextStyle: {
             color: '#fff', // 设置X轴名称颜色为白色
@@ -636,11 +631,9 @@ export default {
           interval: 2,
           axisLabel: {
             color: '#fff', // 设置Y轴标签颜色为白色
-            fontSize: 15,
           },
           nameTextStyle: {
             color: '#fff', // 设置Y轴名称颜色为白色
-            fontSize: 15,
           },
           axisLine: {
             show: false,
@@ -715,9 +708,6 @@ export default {
         'background-color': '#ffffff00',
       }
     },
-
-
-
 
 
     // 新写的代码
@@ -797,11 +787,11 @@ export default {
 }
 
 :deep(.el-table) {
-  --el-table-bg-color : ''
+  --el-table-bg-color: ''
 }
 
 :deep(.el-table__body-wrapper) {
-  --el-table-bg-color : '';
+  --el-table-bg-color: '';
   background-color: transparent !important;
 }
 
@@ -819,15 +809,14 @@ export default {
 }
 
 .panelChart {
-  top: 6px;
-  width: 400px;
-  height: 200px;
+  width: 500px;
+  height: 250px;
 }
 
-/*.people-item{*/
-/*  width: 530px;*/
-/*  height: 880px;*/
-/*}*/
+.people-item {
+  width: 530px;
+  height: 880px;
+}
 
 .legend {
   width: 150px;
