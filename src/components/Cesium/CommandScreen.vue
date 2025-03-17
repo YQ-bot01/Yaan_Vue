@@ -606,8 +606,6 @@
           :popupData="dataSourcePopupData"
       />
     </div>
-
-
     <commandScreenTitle
         :eqyear="eqyear"
         :eqmonth="eqmonth"
@@ -682,8 +680,7 @@
     <!--    </div>-->
 
     <!--经纬度跳转-->
-    <div
-        style="display: flex; align-items: center; position: absolute; top: 95.25%; left: 0.5%; z-index: 1000; pointer-events: none;">
+    <div style="display: flex; align-items: center; position: absolute; top: 95.25%; left: 0.5%; z-index: 1000; pointer-events: none;">
       <div @click="togglePositionFlyTo" class="positionFlyToButton" style="pointer-events: auto;">
         <img src="../../assets/icons/svg/positionFlyTo.svg" title="经纬度跳转"
              style="width: 31px; height: 31px;">
@@ -746,6 +743,26 @@
                       </svg>
                   <span class="node-text">{{ data.name }}</span>
                 </span>
+                <span v-if="data.name === '资源调度'" class="node-icon">
+                <!-- 图层要素的 SVG 图标 -->
+                  <svg t="1730574016632" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                       xmlns="http://www.w3.org/2000/svg" p-id="6181" width="28" height="28" style="margin-right: 8px;">
+                        <path
+                            d="M852.6 462.9l12.1 7.6c24.8 15.6 32.3 48.3 16.7 73.2-4.2 6.7-9.9 12.4-16.7 16.7L540.4 764.1c-17.3 10.8-39.2 10.8-56.4 0L159.3 560c-24.8-15.6-32.3-48.3-16.7-73.2 4.2-6.7 9.9-12.4 16.7-16.7l12.1-7.6L483.9 659c17.3 10.8 39.2 10.8 56.4 0l312.2-196 0.1-0.1z m0 156.1l12.1 7.6c24.8 15.6 32.3 48.3 16.7 73.2-4.2 6.7-9.9 12.4-16.7 16.7L540.4 920.2c-17.3 10.8-39.2 10.8-56.4 0L159.3 716.1c-24.8-15.6-32.3-48.3-16.7-73.2 4.2-6.7 9.9-12.4 16.7-16.7l12.1-7.6L483.9 815c17.3 10.8 39.2 10.8 56.4 0l312.2-196h0.1zM540 106.4l324.6 204.1c24.8 15.6 32.3 48.3 16.7 73.2-4.2 6.7-9.9 12.4-16.7 16.7L540.4 604c-17.3 10.8-39.2 10.8-56.4 0L159.3 399.8c-24.8-15.6-32.3-48.3-16.7-73.2 4.2-6.7 9.9-12.4 16.7-16.7l324.4-203.7c17.3-10.8 39.2-10.8 56.4 0l-0.1 0.2z"
+                            p-id="6182" fill="#ffffff"></path>
+                      </svg>
+                  <span class="node-text">{{ data.name }}</span>
+                </span>
+                <span v-if="data.name === '灾损预估'" class="node-icon">
+                <!-- 图层要素的 SVG 图标 -->
+                  <svg t="1730574016632" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                       xmlns="http://www.w3.org/2000/svg" p-id="6181" width="28" height="28" style="margin-right: 8px;">
+                        <path
+                            d="M852.6 462.9l12.1 7.6c24.8 15.6 32.3 48.3 16.7 73.2-4.2 6.7-9.9 12.4-16.7 16.7L540.4 764.1c-17.3 10.8-39.2 10.8-56.4 0L159.3 560c-24.8-15.6-32.3-48.3-16.7-73.2 4.2-6.7 9.9-12.4 16.7-16.7l12.1-7.6L483.9 659c17.3 10.8 39.2 10.8 56.4 0l312.2-196 0.1-0.1z m0 156.1l12.1 7.6c24.8 15.6 32.3 48.3 16.7 73.2-4.2 6.7-9.9 12.4-16.7 16.7L540.4 920.2c-17.3 10.8-39.2 10.8-56.4 0L159.3 716.1c-24.8-15.6-32.3-48.3-16.7-73.2 4.2-6.7 9.9-12.4 16.7-16.7l12.1-7.6L483.9 815c17.3 10.8 39.2 10.8 56.4 0l312.2-196h0.1zM540 106.4l324.6 204.1c24.8 15.6 32.3 48.3 16.7 73.2-4.2 6.7-9.9 12.4-16.7 16.7L540.4 604c-17.3 10.8-39.2 10.8-56.4 0L159.3 399.8c-24.8-15.6-32.3-48.3-16.7-73.2 4.2-6.7 9.9-12.4 16.7-16.7l324.4-203.7c17.3-10.8 39.2-10.8 56.4 0l-0.1 0.2z"
+                            p-id="6182" fill="#ffffff"></path>
+                      </svg>
+                  <span class="node-text">{{ data.name }}</span>
+                </span>
             <!-- 子节点逻辑保持原有 -->
             <el-checkbox
                 v-if="layeritems.some(item => item.name === data.name)"
@@ -755,6 +772,24 @@
             >
               <span>{{ data.name }}</span>
             </el-checkbox>
+            <el-checkbox
+                v-if="ResourceSchedulingLayers.some(item => item.name === data.name)"
+                v-model="selectedResourceScheduling"
+                :label="data.name"
+                @change="updateMapLayers"
+            >
+              <span>{{ data.name }}</span>
+            </el-checkbox>
+            <el-radio-group
+                v-if="DamageAssessmentLayers.some(item => item.name === data.name)"
+                v-model="selectedDisasterEstimate"
+                :label="data.name"
+                @click.native.prevent="toggleRadio(data.name)"
+            >
+              <el-radio :label="data.name">
+                <span>{{ data.name }}</span>
+              </el-radio>
+            </el-radio-group>
           </div>
         </template>
       </el-tree>
@@ -968,7 +1003,7 @@ import {
   addHistoryEqPoints,
   addHospitalLayer, handleTownData,
   addOvalCircles, addVillageLayer,
-  handleOutputData, removeDataSourcesLayer
+  handleOutputData, removeDataSourcesLayer, addOCTest
 } from "../../cesium/plot/eqThemes.js";
 import {MapPicUrl, ReportUrl} from "@/assets/json/thematicMap/PicNameandLocal.js"
 import thematicMapPreview from "@/components/ThematicMap/thematicMapPreview.vue";
@@ -1041,6 +1076,7 @@ import yaAnVillage from "@/assets/geoJson/yaan.json"
 import CommandScreenEqList from "@/components/Cesium/CommandScreenEqList.vue"
 import {getModelData} from "@/api/system/tiltPhotography.js";
 import layer from "@/cesium/layer.js";
+import modelicon from '@/assets/icons/svg/3dmodel04.svg';
 
 export default {
   computed: {
@@ -1141,9 +1177,9 @@ export default {
   },
   data: function () {
     return {
-      siChuanCityEntity: [],
-      siChuanCountyEntity: [],
-      siChuanVillageEntity: [],
+      siChuanCityEntity:[],
+      siChuanCountyEntity:[],
+      siChuanVillageEntity:[],
 
 
       //时间轴和时间轴的组件
@@ -1174,7 +1210,7 @@ export default {
       //---信息弹框---
       hasUpdatedPosition: false,
       selectedEntityPosition: '', //拾取的点的弹框位置
-      eqCenterPanelVisible: false,
+      eqCenterPanelVisible:false,
 
       routerPopupVisible: false, // RouterPanel弹窗的显示与隐藏
       plotShowOnlyPanelVisible: false, // TimeLinePanel弹窗的显示与隐藏
@@ -1280,7 +1316,6 @@ export default {
       selectedDisasterEstimate: ['灾损预估图层'],
       selectedResourceScheduling:['资源调度图层'],
       isMarkingLayerLocal: true,
-
       disasterReserves: [],
       emergencyTeam: [],
       emergencyShelters: [],
@@ -1663,6 +1698,7 @@ export default {
       RegionLabels: [],
 
       // flyToMarker:null,// 经纬度跳转时的定位标记
+
     };
   },
   created() {
@@ -1692,11 +1728,11 @@ export default {
     //------------------地图初始化---------------
     init() {
       let clock;
+      let that = this
       getEqListById({id: this.eqid}).then(res => {
         console.log(res)
         //震中标绘点
         this.centerPoint = res
-
 
         // 设置中心点的标识和时间信息
         this.centerPoint.plotId = res.eqid
@@ -1722,6 +1758,45 @@ export default {
         const terrainProviderViewModels = getTerrainProviderViewModelsArr();
         let isThirdParty = true; // 标记当前是否为第三方地形
 
+        // 倾斜模型加载
+        getModelData().then(res => {
+          console.log("倾斜模型数据，新加的点，", res)
+          // 创建一个数组来保存实体和对应的数据
+          const entities = [];
+
+          for (let i = 0; i < res.length; i++) {
+            let alltiltPhotography = viewer.entities.add({
+              position: Cesium.Cartesian3.fromDegrees(res[i].geom.coordinates[0], res[i].geom.coordinates[1]),
+              layer: "倾斜模型",
+              // point: {
+              //   pixelSize: 20,
+              //   color: Cesium.Color.fromCssColorString("#e0c79b"),
+              //   clampToGround: true,
+              // },
+              billboard: {
+                image: modelicon,
+                width: 40,
+                height: 40,
+                // eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                // color: Cesium.Color.WHITE.withAlpha(1),
+                // scale: 0.8,
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 禁用，导致图标在高度计算或与地形交互时出现闪烁。 原作用：绑定到地形高度,让billboard贴地
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+              },
+              // 自定义属性，保存对应的数据
+              data: res[i],
+              // 添加名称属性
+              name: res[i].name + "倾斜模型"
+            });
+            // 将实体保存到数组中
+            entities.push(alltiltPhotography);
+          }
+        })
+
+        // 设置cesium的指南针、比例尺、放大缩小重置
+        this.init_cesium_navigation(this.centerPoint.longitude,this.centerPoint.latitude,viewer)
+
+        // 坡度分析绑定地形自动加载地形
         const switchToLocalDEM = () => {
           // 切换地形提供者
           if (isThirdParty) {
@@ -1742,55 +1817,9 @@ export default {
           // 切换标记，准备下次切换
           isThirdParty = !isThirdParty;
         };
-
-        getModelData().then(res => {
-          console.log("倾斜模型数据，新加的点，", res)
-          // 创建一个数组来保存实体和对应的数据
-          const entities = [];
-
-          for (let i = 0; i < res.length; i++) {
-            var alltiltPhotography = viewer.entities.add({
-              position: Cesium.Cartesian3.fromDegrees(res[i].geom.coordinates[0], res[i].geom.coordinates[1]),
-              layer: "倾斜模型",
-              point: {
-                pixelSize: 20,
-                color: Cesium.Color.fromCssColorString("#e0c79b"),
-                clampToGround: true,
-              },
-              // billboard: {
-              //   image: 'path/to/your/icon.png', // 替换为你的图标路径
-              //   width: 40, // 图标的宽度（可选）
-              //   height: 40, // 图标的高度（可选）
-              //   verticalOrigin: Cesium.VerticalOrigin.BOTTOM, // 图标的垂直对齐方式
-              // },
-              // 自定义属性，保存对应的数据
-              data: res[i],
-              // 添加名称属性
-              name: res[i].name + "倾斜模型"
-            });
-            // 将实体保存到数组中
-            entities.push(alltiltPhotography);
-          }
-        })
+        document.getElementById('slope').addEventListener('click', switchToLocalDEM);
 
         // 绑定按钮点击事件
-        document.getElementById('slope').addEventListener('click', switchToLocalDEM);
-        let options = {}
-        // 用于在使用重置导航重置地图视图时设置默认视图控制。接受的值是Cesium.Cartographic 和 Cesium.Rectangle.
-        // options.defaultResetView = Cesium.Cartographic.fromDegrees(103.00, 29.98, 1000, new Cesium.Cartographic)
-        // 用于启用或禁用罗盘。true是启用罗盘，false是禁用罗盘。默认值为true。如果将选项设置为false，则罗盘将不会添加到地图中。
-        options.enableCompass = true
-        // 用于启用或禁用缩放控件。true是启用，false是禁用。默认值为true。如果将选项设置为false，则缩放控件将不会添加到地图中。
-        options.enableZoomControls = true
-        // 用于启用或禁用距离图例。true是启用，false是禁用。默认值为true。如果将选项设置为false，距离图例将不会添加到地图中。
-        options.enableDistanceLegend = true
-        // 用于启用或禁用指南针外环。true是启用，false是禁用。默认值为true。如果将选项设置为false，则该环将可见但无效。
-        options.enableCompassOuterRing = true
-        options.resetTooltip = "重置视图";
-        options.zoomInTooltip = "放大";
-        options.zoomOutTooltip = "缩小";
-        //新版必须new  CesiumNavigation ,可以查看作者github
-        window.navigation = new CesiumNavigation(viewer, options)
         document.getElementsByClassName('cesium-geocoder-input')[0].placeholder = '请输入地名进行搜索'
         document.getElementsByClassName('cesium-baseLayerPicker-sectionTitle')[0].innerHTML = '影像服务'
         document.getElementsByClassName('cesium-baseLayerPicker-sectionTitle')[1].innerHTML = '地形服务'
@@ -1807,10 +1836,10 @@ export default {
         });
 
         viewer.clock.multiplier = 3600
-        let that = this
+
         viewer.clock.onTick.addEventListener(function (clock) {
           // console.log(clock.currentTime,"clock.currentTime")
-          if (clock.currentTime) {
+          if(clock.currentTime){
             that.currentTime = clock.currentTime;
           }
           if (viewer.clockViewModel.shouldAnimate) {
@@ -1926,6 +1955,38 @@ export default {
       })
 
     },
+    init_cesium_navigation(longitude,latitude,viewer){
+      let options = {}
+      // 用于启用或禁用罗盘。true是启用罗盘，false是禁用罗盘。默认值为true。如果将选项设置为false，则罗盘将不会添加到地图中。
+      options.enableCompass = true
+      // 用于启用或禁用缩放控件。true是启用，false是禁用。默认值为true。如果将选项设置为false，则缩放控件将不会添加到地图中。
+      options.enableZoomControls = true
+      // 用于启用或禁用比例尺。true是启用，false是禁用。默认值为true。如果将选项设置为false，距离图例将不会添加到地图中。
+      options.enableDistanceLegend = true
+      // 用于启用或禁用指南针外环。true是启用，false是禁用。默认值为true。如果将选项设置为false，则该环将可见但无效。
+      options.enableCompassOuterRing = true
+      // 重置按钮
+      options.defaultResetView = new Cartographic(CesiumMath.toRadians(longitude), CesiumMath.toRadians(latitude), 200000)
+      options.resetTooltip = "重置视图";
+      options.zoomInTooltip = "放大";
+      options.zoomOutTooltip = "缩小";
+      //新版必须new CesiumNavigation ,可以查看作者github
+      window.navigation = new CesiumNavigation(viewer, options)
+      let compass = document.getElementsByClassName('compass')[0]
+      compass.addEventListener('dblclick', function () {
+        // 设置相机飞行到指北视角
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, viewer.camera.positionCartographic.height), // 目标位置
+          orientation: {
+            heading: Cesium.Math.toRadians(0), // 朝向正北
+            pitch: Cesium.Math.toRadians(-90), // 向下俯视
+            roll: 0 // 不倾斜
+          },
+          duration: 3, // 动画持续时间，单位为秒
+          easingFunction: Cesium.EasingFunction.LINEAR // 动画缓动函数
+        });
+      }, false);
+    },
     updateMapAndVariableBeforeInit() {
       timeLine.fly(this.centerPoint.longitude, this.centerPoint.latitude, 60000, 5).then(() => {
         viewer.clockViewModel.shouldAnimate = true;
@@ -2022,7 +2083,7 @@ export default {
           } else if (markOperate === "delete") {
             let polyId = JSON.parse(e.data).id.toString()
             that.plots = that.plots.filter(plot => plot.plotId !== polyId);
-            timeLine.deletePointById(polyId, drawType)
+            timeLine.deletePointById(polyId,drawType)
           }
         } catch (err) {
           console.log(err, 'ws中catch到错误');
@@ -2049,24 +2110,13 @@ export default {
           let entity = window.selectedEntity;
           console.log(entity, "拾取entity")
 
-          // 新增判断：跳过行政区划实体
-          if (this.selectedlayersLocal.includes('灾损预估-人员伤亡要素图层')) {
+          // 如果 entity 没有 _layer 字段，且当前选中图层是特定图层时跳过
+          if (!entity._layer &&!pickedEntity.id._properties.sourceName) {
+            this.eqCenterPanelVisible = false;
+            this.routerPopupVisible = false;
             this.plotShowOnlyPanelVisible = false;
-            this.dataSourcePopupVisible = false;
-            return;
-          }
-          // 新增判断：跳过行政区划实体
-          if (this.selectedlayersLocal.includes('灾损预估-建筑损毁要素图层')) {
-            this.plotShowOnlyPanelVisible = false;
-            this.dataSourcePopupVisible = false;
-            return;
-          }
-
-          // 新增判断：跳过行政区划实体
-          if (this.selectedlayersLocal.includes('灾损预估-经济损失要素图层')) {
-            this.plotShowOnlyPanelVisible = false;
-            this.dataSourcePopupVisible = false;
-            return;
+            this.dataSourcePopupVisible = false
+              return;
           }
 
 
@@ -2109,8 +2159,8 @@ export default {
           //   }
           // }
           // 如果点击的是标绘点
-          if (entity._layer === "震中") {
-            this.eqCenterPanelVisible = true;
+          if(entity._layer === "震中"){
+            this.eqCenterPanelVisible=true;
             this.plotShowOnlyPanelVisible = false;
             this.dataSourcePopupVisible = false
             this.routerPopupVisible = false;
@@ -2120,6 +2170,13 @@ export default {
             console.log("PanelData 震中", this.PanelData)
           } else if (entity._layer === "倾斜模型") {
 
+            const terrainProviderViewModels = getTerrainProviderViewModelsArr()
+            window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand();
+            window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[1];
+            const currentLayer = document.querySelector(`[title="${true ? '第三方地形' : 'WGS84标准球体'}"]`);
+            if (currentLayer) {
+              currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
+            }
             // 获取实体的自定义属性
 
             let row = entity.data;
@@ -2393,6 +2450,8 @@ export default {
     },
 
 
+
+
     // ------------------------------路径规划+物资匹配---------------------------
     switchPanel(action) {
       // 更新 panels 的状态，先设置所有为 false
@@ -2471,7 +2530,6 @@ export default {
     //显示所有物资点(所有点查询)
     searchAll() {
       this.panels.materialMatching = false;
-      this.panels.marchRegionsDialog = false;
       this.panels.tableVisible = true
 
       //清除半径查询实体标签
@@ -3770,7 +3828,23 @@ export default {
 
 
     updateMapLayers() {
-      console.log(this.selectedlayersLocal, "selectedlayersLocal")
+      console.log(this.selectedlayersLocal,"selectedlayersLocal")
+      // 检查选中的图层中是否包含标绘点图层
+      const hasDrawingLayer = this.selectedlayersLocal.includes('标绘点图层');
+      // 如果包含标绘点图层
+      if (hasDrawingLayer) {
+        // 确认标绘图层变更，参数为true表示已选中
+        this.handleMarkingLayerChange(true);
+        // 更新绘图状态
+        timeLine.showAllMakerPoint(this.plots)
+      } else {
+        // 确认标绘图层变更，参数为false表示未选中
+        this.handleMarkingLayerChange(false);
+        // 移除所有已存在的椭圆圈实体，以避免重复添加
+        // 移除标绘图层
+        timeLine.markerLayerHidden(this.plots);
+      }
+
       // 图层映射：添加与移除图层逻辑
       // name: 图层名；add：添加图层；remove：移除图层
       const layerActions = [
@@ -3880,39 +3954,39 @@ export default {
       });
 
       // 判断是否选定了灾损预估-人员伤亡要素图层
-      const hasDisasterLossEstimationCasualtyLayer = this.selectedlayersLocal.includes('灾损预估-人员伤亡要素图层');
+      const hasDisasterLossEstimationCasualtyLayer = this.selectedDisasterEstimate.includes('灾损预估-人员伤亡要素图层');
       // 如果选定了灾损预估-人员伤亡要素图层，则添加该要素图层
-      if (hasDisasterLossEstimationCasualtyLayer) {
+      if(hasDisasterLossEstimationCasualtyLayer){
         this.removethdRegions();
         this.addThemeLayer(this.layerData.pcData, 'personalCasualty');
         this.showPeopleLegend = true;// 指挥大屏-图层管理-人员伤亡图层图例状态
-      } else {
+      }else {
         this.removeDataSourcesLayer('personalCasualty');
         this.showPeopleLegend = false;// 指挥大屏-图层管理-经济损失图层图例状态
         this.removeRegionLabels();
       }
 
       // 判断是否选定了灾损预估-经济损失要素图层
-      const hasDisasterLossEstimationEconomicLossLayer = this.selectedlayersLocal.includes('灾损预估-经济损失要素图层');
-      // 如果选定了灾损预估-人员伤亡要素图层，则添加该要素图层
-      if (hasDisasterLossEstimationEconomicLossLayer) {
+      const hasDisasterLossEstimationEconomicLossLayer = this.selectedDisasterEstimate.includes('灾损预估-经济损失要素图层');
+      // 如果选定了灾损预估-经济损失要素图层，则添加该要素图层
+      if(hasDisasterLossEstimationEconomicLossLayer){
         this.removethdRegions();
-        this.addThemeLayer(this.layerData.ecoData, 'economicLoss');
+        this.addThemeLayer(this.layerData.ecoData,'economicLoss');
         this.showEconomicLegend = true;// 指挥大屏-图层管理-经济损失图层图例状态
-      } else {
+      }else {
         this.removeDataSourcesLayer('economicLoss');
         this.showEconomicLegend = false;// 指挥大屏-图层管理-经济损失图层图例状态
         this.removeRegionLabels();
       }
 
       // 判断是否选定了灾损预估-建筑损毁要素图层
-      const hasDisasterLossEstimationBuildingDamageLayer = this.selectedlayersLocal.includes('灾损预估-建筑损毁要素图层');
+      const hasDisasterLossEstimationBuildingDamageLayer = this.selectedDisasterEstimate.includes('灾损预估-建筑损毁要素图层');
       // 如果选定了灾损预估-建筑损毁要素图层，则添加该要素图层
-      if (hasDisasterLossEstimationBuildingDamageLayer) {
+      if(hasDisasterLossEstimationBuildingDamageLayer){
         this.removethdRegions();
-        this.addThemeLayer(this.layerData.bddData, 'buildingDamage');
+        this.addThemeLayer(this.layerData.bddData,'buildingDamage');
         this.showBuildingLegend = true; // 指挥大屏-图层管理-建筑损毁图层图例状态
-      } else {
+      }else {
         this.removeDataSourcesLayer('buildingDamage');
         this.showBuildingLegend = false; // 指挥大屏-图层管理-建筑损毁图层图例状态
         this.removeRegionLabels();
@@ -3990,7 +4064,7 @@ export default {
           depthTest: bool ? true : false, // 让 Cesium 正确处理图标的遮挡关系
           disableDepthTestDistance: Number.POSITIVE_INFINITY
         },
-        layer: tableName,
+        layer:tableName,
         properties: {
           tableName: tableName, // 动态传入的表名称
           ...element, // 将element对象展开，自动填充所有属性
@@ -4025,7 +4099,7 @@ export default {
      * @param {string} type - 要删除的实体类型
      */
     removeEntitiesByType(type) {
-      console.log("removeEntitiesByType", type)
+      console.log("removeEntitiesByType",type)
       // 获取当前窗口中所有的实体
       let entities = window.viewer.entities.values;
       // 倒序遍历实体数组，以确保删除实体时不会影响遍历
@@ -4170,7 +4244,7 @@ export default {
           this.siChuanCityEntity.push(regionLabel); // 使用 this.RegionLabels
 
         });
-        console.log("1111111111", this.siChuanCityEntity)
+        console.log("1111111111",this.siChuanCityEntity)
         console.log("市级图层加载成功！");
       }).catch(error => {
         console.error("加载市级图层失败:", error);
@@ -4482,7 +4556,7 @@ export default {
 
     showThematicMapDialog(item) {
 
-      console.log("专题图item-> ", item)
+      console.log("专题图item-> ",item)
 
       // 显示专题图弹框逻辑
       this.ifShowMapPreview = true;
@@ -4729,7 +4803,8 @@ export default {
         this.showSlopeAnalysis = false; // 关闭其他弹框
       }
     },
-    toggleSlopeAnalysis(websock) {
+    toggleSlopeAnalysis(websock){
+
       this.showSlopeAnalysis = !this.showSlopeAnalysis;
       if (this.showSlopeAnalysis) {
         // 还原
@@ -4890,33 +4965,6 @@ export default {
               this.setPolygonTransparent(entity);
             }
           });
-
-          sichuanCounty.features.forEach((feature) => {
-            let center = feature.properties.center;
-
-            if (center && center.length === 2) {
-              let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-              let regionlabel = viewer.entities.add(new Cesium.Entity({
-                position: position,
-                label: new Cesium.LabelGraphics({
-                  text: feature.properties.name,
-                  scale: 1,
-                  font: '18px Sans-serif',
-                  style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                  outlineWidth: 2,
-                  verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                  horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-                  fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-                  heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                  clampToGround: true,
-                  pixelOffset: new Cesium.Cartesian2(0, 0),
-                  eyeOffset: new Cesium.Cartesian3(0, 0, -10000),
-                  // distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 800000),
-                })
-              }));
-              this.RegionLabels.push(regionlabel)
-            }
-          });
           this.renderLayer(type);
         });
       }
@@ -4986,11 +5034,26 @@ export default {
       this.RegionLabels = []; // 清空数组，防止重复删除
     },
 
-    closePanel() {
+    closePanel(){
       this.panels.tableVisible = false; // 隐藏面板
 
-    }
+    },
 
+    // 单选框自定义点击选中逻辑，实现单选框可取消选中（组件默认中不包含此功能，所以自定义）
+    toggleRadio(value) {
+      if (this.selectedDisasterEstimate === value) {
+        // 如果当前选中的值等于点击的值，则取消选中
+        this.selectedDisasterEstimate = '';
+      } else {
+        // 否则选中当前值
+        this.selectedDisasterEstimate = value;
+      }
+    },
+  },
+  watch: {
+    selectedDisasterEstimate(newVal, oldVal) {
+      this.updateMapLayers();
+    },
   },
 }
 </script>
@@ -6228,4 +6291,5 @@ li {
     background-position: 0% 50%;
   }
 }
+
 </style>

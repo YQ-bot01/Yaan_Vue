@@ -139,7 +139,7 @@
 <script setup>
 import * as Cesium from 'cesium'
 import CesiumNavigation from "cesium-navigation-es6";
-import {initCesium} from '@/cesium/tool/initCesium.js'
+import {getTerrainProviderViewModelsArr, initCesium} from '@/cesium/tool/initCesium.js'
 import {Edit, Delete} from '@element-plus/icons-vue'
 
 import {
@@ -181,7 +181,7 @@ let modelStatus = true
 let modelStatusContent = ref("隐藏当前模型")
 let modelName = ''
 let queryParams = ref('');  // 搜索框关键字
-
+const terrainProviderViewModels = getTerrainProviderViewModelsArr()
 
 //----------------------------model table---------------------------------------
 let currentPage = ref(1)
@@ -271,9 +271,29 @@ function init() {
       altitudeShow.innerHTML = altiString;
     }
   }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
 }
+
+function switchToLocalDEM(){
+  // 切换地形提供者
+  if (true) {
+    window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand(); // 切换到第三方地形
+  } else {
+    window.viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand(); // 切换到仅底图
+  }
+
+  // 更新选中的地形
+  window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[true ? 1 : 0];
+
+  // 高亮当前选中的地形
+  const currentLayer = document.querySelector(`[title="${true ? '第三方地形' : 'WGS84标准球体'}"]`);
+  if (currentLayer) {
+    currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
+  }
+}
+
 function changeModel(row){
-  console.log(row)
+  switchToLocalDEM()
   if (isTerrainLoaded()){
     tz.value=row.tze
     rz.value=row.rze
