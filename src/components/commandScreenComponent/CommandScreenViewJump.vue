@@ -43,24 +43,24 @@
                       </svg>
                   <span class="node-text">行政区划跳转</span>
     </span>
-
       <el-radio-group v-model="selectedDistrictLocal">
-        <el-radio label="回到震中" @change="handleDistrictSelect('回到震中')">
-          回到震中
+        <el-radio
+            label="回到震中"
+            @click.native.prevent="handleDistrictSelect('回到震中')">回到震中
         </el-radio>
-        <!-- 额外选项：雅安市 -->
-        <el-radio label="雅安市" @change="handleDistrictSelect('雅安市')">
-          雅安市
+        <el-radio
+            label="雅安市"
+            @click.native.prevent="handleDistrictSelect('雅安市')">雅安市
         </el-radio>
         <el-radio
             v-for="district in districts"
             :key="district.adcode"
             :label="district.name"
-            @change="handleDistrictSelect(district.name)">
+            @click.native.prevent="handleDistrictSelect(district.name)"
+        >
           {{ district.name }}
         </el-radio>
       </el-radio-group>
-
     </div>
   </div>
 
@@ -150,19 +150,27 @@ export default {
     },
 
     handleDistrictSelect(districtName) {
-      //清除其他实体标签
-      layer.removeRegionLayerJump();
-      this.$emit('viewJumpSelectedDistrict', districtName);
-      this.$emit('stopTimePlay');
-      // 根据选中的区域进行处理
-      if (districtName === '雅安市') {
-        layer.addYaanCityDistrict();
-      } else if (districtName === '回到震中') {
-        this.backcenter();
+      console.log(this.selectedDistrictLocal,districtName,"11111 handleDistrictSelect")
+      if (this.selectedDistrictLocal === districtName) {
+        this.selectedDistrictLocal='';
+        layer.removeRegionLayerJump();
+        this.$emit('viewJumpSelectedDistrict', districtName);
       } else {
-        const district = this.districts.find(d => d.name === districtName);
-        if (district) {
-          layer.addCountyLayerJump(district);
+        this.selectedDistrictLocal=districtName;
+        //清除其他实体标签
+        layer.removeRegionLayerJump();
+        this.$emit('viewJumpSelectedDistrict', districtName);
+        this.$emit('stopTimePlay');
+        // 根据选中的区域进行处理
+        if (districtName === '雅安市') {
+          layer.addYaanCityDistrict();
+        } else if (districtName === '回到震中') {
+          this.backcenter();
+        } else {
+          const district = this.districts.find(d => d.name === districtName);
+          if (district) {
+            layer.addCountyLayerJump(district);
+          }
         }
       }
     },

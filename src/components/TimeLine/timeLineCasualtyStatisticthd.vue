@@ -14,8 +14,6 @@
             <template #default="scope">
               <div style="display: flex; align-items: center; justify-content: center; height: 100%; "
                    class="arrow-container">
-<!--                <img src="@/assets/images/arrow.png" alt="统一图片" style="width: 18px; height: 20px;"-->
-<!--                     class="arrow-icon">-->
               </div>
             </template>
           </el-table-column>
