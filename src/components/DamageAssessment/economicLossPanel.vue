@@ -16,7 +16,7 @@
       <div class="text" style="display: flex; justify-content: space-between; align-items: center;">
         <span style="margin: 0 auto">
           <span>地震造成经济损失共计约</span>
-          <span class="emphasis">{{ total.toFixed(2) }}万元</span>
+          <span class="emphasis">{{ total }}万元</span>
         </span>
 
       </div>
@@ -102,7 +102,13 @@ export default {
 
       this.copiedeconomicLossData.sort((a, b) => b.amount - a.amount);
 
-      this.total = this.copiedeconomicLossData.reduce((acc, cur) => acc + cur.amount, 0);
+      // console.log("排序后数据",this.copiedeconomicLossData)
+      this.total = this.copiedeconomicLossData.reduce((acc, cur) => {
+        const amount = parseFloat(cur.amount); // 将 cur.amount 转换为数字
+        return acc + (isNaN(amount) ? 0 : amount); // 如果转换失败，默认为 0
+      }, 0); // 初始值为 0
+
+      this.total = parseFloat(this.total.toFixed(2)); // 最终结果保留两位小数
 
       // 提取county:amount对象
       const countyAmountMap = this.copiedeconomicLossData.reduce((acc, cur) => {

@@ -672,10 +672,10 @@ export function addOCTest(eqid, eqqueueId, centerPosition) {
    * 烈度圈部分
    */
   // 本地测试请解开↓↓↓
-  // fetch(`/ThematicMap/be3a5ea4-8dfd-a0a2-2510-21845f17960b01_intensity.geojson`)
+  fetch(`/ThematicMap/be3a5ea4-8dfd-a0a2-2510-21845f17960b01_intensity.geojson`)
   // fetch(`/ThematicMap/5a72f3d7-0546-4fee-a686-627d45e5965f02_intensity.geojson`)
     // 真实数据请解开↓↓↓
-    fetch(`${zaisunimageipLocal}/profile/upload/yxcdown/${eqqueueId}/${eqqueueId}_intensity.geojson`)
+    // fetch(`${zaisunimageipLocal}/profile/upload/yxcdown/${eqqueueId}/${eqqueueId}_intensity.geojson`)
     .then((response) => response.json())
     .then((geojsonData) => {
       let ovalCirclePromise = Cesium.GeoJsonDataSource.load(geojsonData, {
@@ -792,11 +792,49 @@ export function addOCTest(eqid, eqqueueId, centerPosition) {
 export function handleTownData(town) {
   console.log("数据：", town)
 
-  const townData = town;
+  /**
+   * 乡镇级数据
+   */
+  const townBuildingDamage = town.reduce((acc, curr) => {
+    acc.push({
+      town: curr.pacName,
+      size: Number(curr.buildingDamage) || 0
+    });
+    return acc;
+  }, []);
+
+  const townEconomicLoss = town.reduce((acc, curr) => {
+    acc.push({
+      town: curr.pacName,
+      amount: Number(curr.economicLoss) || 0
+    });
+    return acc;
+  }, []);
+
+  const townPersonalCasualty = town.reduce((acc, curr) => {
+    acc.push({
+      town: curr.pacName,
+      casualty:
+        {
+          buriedCount: Number(curr.buriedCount) || 0,
+          death: Number(curr.death) || 0,
+          injury: Number(curr.injury) || 0,
+          missing: Number(curr.missing) || 0,
+          pops: Number(curr.pop) || 0,
+          resetNumber: Number(curr.resetNumber) || 0,
+        },
+      partTotal: Number(curr.death + curr.injury + curr.missing + curr.buriedCount) || 0
+    });
+    return acc;
+  }, []);
+
+  console.log(townPersonalCasualty)
+
+
   /**
    * 根据pac前6位与countyCodeMap.json中的adcode进行匹配，将乡镇级数据转换成区县级(累加)
    */
-
+  const townData = town;
     // 万平方米 万元 人
   let countyDataArray = [];
 
@@ -859,8 +897,6 @@ export function handleTownData(town) {
     }
   }
 
-  // console.log(countyDataArray);
-
   /**
    * 提取雅安市八区数据
    */
@@ -869,13 +905,13 @@ export function handleTownData(town) {
     '雨城区', '名山区', '荥经县', '汉源县', '石棉县', '天全县', '芦山县', '宝兴县'
   ];
   const yaanCountyData = countyDataArray.filter(entry => yaanCounties.includes(entry.county));
-  console.log(yaanCountyData);
+  // console.log(yaanCountyData);
 
   /**
    * 提取区县级数据中的建筑破坏、经济损失、人员伤亡数据，并转成对应格式
    */
 
-    // 建筑破坏
+  // 建筑破坏
   const buildingDamageData = yaanCountyData.map(entry => ({
       county: entry.county,
       size: parseFloat((entry.buildingDamage / 100).toFixed(2)),
@@ -884,7 +920,7 @@ export function handleTownData(town) {
   // 经济损失
   const economicLossData = yaanCountyData.map(entry => ({
     county: entry.county,
-    amount: parseFloat(entry.economicLoss),
+    amount: parseFloat(entry.economicLoss).toFixed(2),
   }));
 
   // 人员伤亡
@@ -895,10 +931,19 @@ export function handleTownData(town) {
     partTotal: entry.personalCasualty.death + entry.personalCasualty.missing + entry.personalCasualty.injury + entry.personalCasualty.buriedCount
   }))
 
+  console.log({
+    buildingDamageData,
+    economicLossData,
+    personalCasualtyData,
+  })
+
   return {
     buildingDamageData,
     economicLossData,
     personalCasualtyData,
+    townBuildingDamage,
+    townEconomicLoss,
+    townPersonalCasualty,
   }
 }
 
