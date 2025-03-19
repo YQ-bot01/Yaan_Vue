@@ -2,7 +2,7 @@
   <div class="content-body">
     <div class="header">
       <div class="header-center">
-        <span>地震应急信息服务技术支撑平台</span>
+        <span>地震灾害应急技术支撑能力提升项目</span>
       </div>
       <div class="header-time">
         <span id="time">{{ nowTime }}</span>

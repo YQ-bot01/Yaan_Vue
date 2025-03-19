@@ -1,6 +1,6 @@
 <template>
   <div class="login">
-    <h3 class="title">雅安市地震应急<br>信息服务技术支撑平台</h3>
+    <h3 class="title">地震灾害应急技术支撑能力提升项目</h3>
     <el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-form">
       <el-form-item prop="username">
         <el-input
@@ -59,7 +59,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2024-2025 地震应急信息服务技术支撑平台</span>
+      <span>Copyright © 2024-2025 地震灾害应急技术支撑能力提升项目</span>
     </div>
   </div>
 </template>

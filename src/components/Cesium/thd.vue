@@ -276,7 +276,7 @@
     </div>
 
     <div class="logo-left-weather">
-      <div class="company-name">雅安市地震应急信息服务技术支撑平台</div>
+      <div class="company-name">地震灾害应急技术支撑能力提升项目</div>
       <!-- 以下是实时获取时间的代码 -->
       <div class="logo-left-time">
         <div class="logo-time-hour">

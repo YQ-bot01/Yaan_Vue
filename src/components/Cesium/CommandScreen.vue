@@ -719,7 +719,7 @@
     <!--    图层管理弹框-->
     <div class="universalPanel" v-if="showLayerFeatures">
       <div class="panelTop">
-        <h2 class="panelName">图层管理</h2>
+        <h2 class="panelName">多源要素图层</h2>
       </div>
       <el-tree
           default-expand-all="true"
