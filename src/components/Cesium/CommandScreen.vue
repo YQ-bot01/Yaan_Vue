@@ -4582,10 +4582,7 @@ export default {
      */
     removeDataSourcesLayer(layerName) {
       // 通过图层名称获取数据源对象如果存在，则执行移除操作
-
-      console.log(window.viewer.dataSources.getByName(layerName), "removeDataSourcesLayer")
       const dataSource = window.viewer.dataSources.getByName(layerName)[0];
-      console.log(dataSource, "removeDataSourcesLayer")
       if (dataSource) {
         window.viewer.dataSources.remove(dataSource);
       }

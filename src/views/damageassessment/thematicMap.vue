@@ -202,6 +202,8 @@ import {
 import yaan from "../../assets/geoJson/yaan1.json";
 import {handleOutputData, timestampToTime} from "../../cesium/plot/eqThemes.js";
 import eqMark from "@/assets/images/DamageAssessment/eqMark.png";
+import yaAnVillage from "@/assets/geoJson/yaan.json";
+import yaAnTown from "@/assets/geoJson/yaan1.json";
 
 export default {
   components: {},
@@ -247,6 +249,10 @@ export default {
       imgUrl: '',
 
       isNoData: false,
+
+      // cesium实体
+      yaAnVillageEntity: [],
+      yaAnTownEntity: [],
     };
   },
 
@@ -424,96 +430,199 @@ export default {
             verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
             eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
           },
-          id: eq.eqid
+          id: eq.eqid,
         });
 
-        yaan.features.forEach((feature) => {
-          let center = feature.properties.center;
+        Cesium.GeoJsonDataSource.load(yaAnTown, {
+          clampToGround: false,
+          stroke: Cesium.Color.ORANGE,
+          strokeWidth: 4,
+          fill: Cesium.Color.TRANSPARENT,
+        }).then(dataSource => {
+          viewer.dataSources.add(dataSource);
+          dataSource.name = 'yaAnTownRegionLayer1';
 
-          if (center && center.length === 2) {
-            let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-            let regionlabel = viewer.entities.add(new Cesium.Entity({
-              position: position,
-              label: new Cesium.LabelGraphics({
-                text: feature.properties.name,
-                scale: 1,
-                font: '18px Sans-serif',
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          // 添加区域标签
+          yaAnTown.features.forEach(feature => {
+            const firstPolygon = feature.geometry.coordinates[0][0];
+            const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+            const centroid = this.calculateCentroid(positions);
+
+            const regionLabel = viewer.entities.add({
+              position: centroid,
+              label: {
+                text: feature.properties.name || '未命名',
+                font: '18px sans-serif',
+                fillColor: Cesium.Color.WHITE,
+                outlineColor: Cesium.Color.BLACK,
                 outlineWidth: 2,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
                 verticalOrigin: Cesium.VerticalOrigin.CENTER,
                 horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-                fillColor: Cesium.Color.fromCssColorString("#ffffff"),
                 heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                clampToGround: true,
                 pixelOffset: new Cesium.Cartesian2(0, 0),
-                eyeOffset: new Cesium.Cartesian3(0, 0, -10000),
-                // distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 800000),
-              })
-            }));
-            this.RegionLabels.push(regionlabel)
-          }
-        })
+              }
+            });
+            this.RegionLabels.push(regionLabel);
+
+          });
+        }).catch(error => {
+          console.error("加载市级图层失败:", error);
+        });
+
         this.listEqPoints.push(entity);
       });
     },
 
     // 雅安行政区划
     toggleYaanLayer() {
-      let geoPromise = Cesium.GeoJsonDataSource.load(yaan, {
-        clampToGround: this.isTerrainLoading, //贴地显示
-        stroke: Cesium.Color.RED,
-        fill: Cesium.Color.SKYBLUE.withAlpha(0.5),
-        strokeWidth: 4,
+      // 添加监听器
+      viewer.camera.changed.addEventListener(this.handleCameraChange);
+    },
+
+    handleCameraChange() {
+      // 移除道路级图层
+      this.removeDataSourcesLayer('yaAnTownRegionLayer1');
+
+      // 移除初始化的标签（因为这里有个不明ｂｕｇ无法解决）
+      this.RegionLabels.forEach(entity => {
+        viewer.entities.remove(entity);
       });
-      geoPromise.then((dataSource) => {
-        window.viewer.dataSources.add(dataSource);
-        dataSource.name = 'YaanRegionLayer';
 
-        const colors = [
-          {color: Cesium.Color.GOLD.withAlpha(0.5), name: '雨城区'},
-          {color: Cesium.Color.GOLD.withAlpha(0.5), name: '雨城区'},
-          {color: Cesium.Color.LIGHTGREEN.withAlpha(0.5), name: '名山区'},
-          {color: Cesium.Color.LAVENDER.withAlpha(0.5), name: '荥经县'},
-          {color: Cesium.Color.ORANGE.withAlpha(0.5), name: '汉源县'},
-          {color: Cesium.Color.CYAN.withAlpha(0.5), name: '石棉县'},
-          {color: Cesium.Color.TAN.withAlpha(0.5), name: '天全县'},
-          {color: Cesium.Color.SALMON.withAlpha(0.5), name: '芦山县'},
-          {color: Cesium.Color.LIGHTBLUE.withAlpha(0.5), name: '宝兴县'},
-        ];
-        dataSource.entities.values.forEach((entity, index) => {
-          const colorIndex = index % colors.length;
-          entity.polygon.material = new Cesium.ColorMaterialProperty(colors[colorIndex].color);
+
+      // 定义相机高度阈值
+      const COUNTY_LAYER_HEIGHT = 100000; // 区县级图层的高度阈值
+      const BUFFER_THRESHOLD = 50000; // 缓冲阈值
+      const height = viewer.camera.positionCartographic.height; // 获取相机高度
+      // 根据高度动态加载或移除图层
+      if (height > COUNTY_LAYER_HEIGHT + BUFFER_THRESHOLD) {
+        // 移除道路级标签
+        this.yaAnVillageEntity.forEach(entity => {
+          viewer.entities.remove(entity);
         });
+        // 移除道路级图层
+        this.removeDataSourcesLayer('yaAnVillageRegionLayer');
+        // 加载区县级图层
+        if (!viewer.dataSources.getByName('yaAnTownRegionLayer')[0]) {
+          this.loadYaAnTown(viewer);
+        }
+      } else if (height < COUNTY_LAYER_HEIGHT - BUFFER_THRESHOLD) {
+        // 移除区县标签
+        this.yaAnTownEntity.forEach(entity => {
+          viewer.entities.remove(entity);
+        });
+        this.removeDataSourcesLayer('yaAnTownRegionLayer');
+        // 加载道路级图层
+        if (!viewer.dataSources.getByName('yaAnVillageRegionLayer')[0]) {
+          this.loadYaAnVillage(viewer);
+        }
+      }
+    },
 
-        yaan.features.forEach((feature) => {
-          let center = feature.properties.center;
+    // 加载道路图层
+    loadYaAnVillage(viewer) {
+      Cesium.GeoJsonDataSource.load(yaAnVillage, {
+        clampToGround: false,
+        stroke: Cesium.Color.RED,
+        strokeWidth: 4,
+        fill: Cesium.Color.TRANSPARENT,
+      }).then(dataSource => {
+        viewer.dataSources.add(dataSource);
+        dataSource.name = 'yaAnVillageRegionLayer';
 
-          if (center && center.length === 2) {
-            let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-            let regionlabel = viewer.entities.add(new Cesium.Entity({
-              position: position,
-              label: new Cesium.LabelGraphics({
-                text: feature.properties.name,
-                scale: 1,
-                font: '18px Sans-serif',
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                outlineWidth: 2,
-                verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-                fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                clampToGround: true,
-                pixelOffset: new Cesium.Cartesian2(0, 0),
-                eyeOffset: new Cesium.Cartesian3(0, 0, -10000),
-                // distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 800000),
-              })
-            }));
-            this.RegionLabels.push(regionlabel)
-          }
-        })
-        //雅安行政区加载 end
-      })
+        // 添加区域标签
+        yaAnVillage.features.forEach(feature => {
+          const firstPolygon = feature.geometry.coordinates[0][0];
+          const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+          const centroid = this.calculateCentroid(positions);
 
+          const regionLabel = viewer.entities.add({
+            position: centroid,
+            label: {
+              text: feature.properties.name || '未命名',
+              font: '18px sans-serif',
+              fillColor: Cesium.Color.WHITE,
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 2,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              verticalOrigin: Cesium.VerticalOrigin.CENTER,
+              horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              pixelOffset: new Cesium.Cartesian2(0, 0),
+            }
+          });
+          this.yaAnVillageEntity.push(regionLabel); // 使用 this.RegionLabels
+
+        });
+      }).catch(error => {
+        console.error("加载市级图层失败:", error);
+      });
+    },
+
+    // 加载区县图层
+    loadYaAnTown(viewer) {
+      Cesium.GeoJsonDataSource.load(yaAnTown, {
+        clampToGround: false,
+        stroke: Cesium.Color.ORANGE,
+        strokeWidth: 4,
+        fill: Cesium.Color.TRANSPARENT,
+      }).then(dataSource => {
+        viewer.dataSources.add(dataSource);
+        dataSource.name = 'yaAnTownRegionLayer';
+
+        // 添加区域标签
+        yaAnTown.features.forEach(feature => {
+          const firstPolygon = feature.geometry.coordinates[0][0];
+          const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+          const centroid = this.calculateCentroid(positions);
+
+          const regionLabel = viewer.entities.add({
+            position: centroid,
+            label: {
+              text: feature.properties.name || '未命名',
+              font: '18px sans-serif',
+              fillColor: Cesium.Color.WHITE,
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 2,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              verticalOrigin: Cesium.VerticalOrigin.CENTER,
+              horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              pixelOffset: new Cesium.Cartesian2(0, 0),
+            }
+          });
+          this.yaAnTownEntity.push(regionLabel);
+
+        });
+      }).catch(error => {
+        console.error("加载市级图层失败:", error);
+      });
+    },
+
+    // 计算多边形的质心
+    calculateCentroid(positions) {
+      let centroid = Cesium.Cartesian3.ZERO;
+      positions.forEach(pos => {
+        centroid = Cesium.Cartesian3.add(centroid, pos, new Cesium.Cartesian3());
+      });
+      return Cesium.Cartesian3.divideByScalar(centroid, positions.length, new Cesium.Cartesian3());
+    },
+
+
+    /**
+     * 移除数据源图层
+     *
+     * 本函数通过指定的图层名称，从当前窗口的 viewer 数据源中移除该图层如果图层存在，则会被成功移除
+     * 此操作用于清理或更新地图显示，确保地图界面的准确性和时效性
+     *
+     * @param {string} layerName - 图层名称，用于标识特定的图层
+     */
+    removeDataSourcesLayer(layerName) {
+      // 通过图层名称获取数据源对象如果存在，则执行移除操作
+      const dataSource = window.viewer.dataSources.getByName(layerName)[0];
+      if (dataSource) {
+        window.viewer.dataSources.remove(dataSource);
+      }
     },
 
     // -----------------------------------------------------------------------------------------------------------------
