@@ -781,18 +781,34 @@
             >
               <span>{{ data.name }}</span>
             </el-checkbox>
-            <el-radio-group
-                v-if="DamageAssessmentLayers.some(item => item.name === data.name)"
-                v-model="selectedDisasterEstimate"
-                :label="data.name"
-                @click.native.prevent="toggleRadio(data.name)"
-            >
-              <el-radio :label="data.name">
+            <template v-if="DamageAssessmentLayers.some(item => item.name === data.name)">
+              <el-checkbox
+                  v-if="DamageAssessmentLayers.find(item => item.name === data.name)?.type === 'multipleChoice'"
+                  v-model="selectedlayersLocal"
+                  :label="data.name"
+                  @change="updateMapLayers"
+              >
                 <span>{{ data.name }}</span>
-              </el-radio>
-            </el-radio-group>
+              </el-checkbox>
+              <!--              这里需要使用@click.native.prevent才能实现，仅仅是@click.native会被默认行为所覆盖-->
+              <el-radio-group
+                  v-else
+                  v-model="selectedDisasterEstimate"
+                  @click.native.prevent="toggleRadio(data.name)"
+              >
+                <el-radio :label="data.name">
+                  <span>{{ data.name }}</span>
+                </el-radio>
+              </el-radio-group>
+            </template>
+
+
+
           </div>
         </template>
+
+
+
       </el-tree>
     </div>
 
@@ -1298,9 +1314,9 @@ export default {
         {id: '2', name: '应急物资存储要素图层'},
       ],
       DamageAssessmentLayers: [
-        {id: '0', name: '历史地震要素图层'},
-        {id: '1', name: '断裂带要素图层'},
-        {id: '2', name: '烈度圈要素图层'},
+        {id: '0', name: '历史地震要素图层',type:'multipleChoice'},
+        {id: '1', name: '断裂带要素图层',type:'multipleChoice'},
+        {id: '2', name: '烈度圈要素图层',type:'multipleChoice'},
         {id: '3', name: '灾损预估-人员伤亡要素图层'},
         {id: '4', name: '灾损预估-经济损失要素图层'},
         {id: '5', name: '灾损预估-建筑损毁要素图层'},
