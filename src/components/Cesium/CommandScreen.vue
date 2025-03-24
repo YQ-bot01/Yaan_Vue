@@ -5224,9 +5224,9 @@ export default {
   display: block;
   position: absolute;
   top: 95%;
-  left: 10%;
+  left: 12.5%;
   z-index: 999999 !important;
-  width: 5%;
+  width: 7%;
 }
 
 

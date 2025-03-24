@@ -257,7 +257,7 @@
     </div>
 
     <div class="logo-left-weather">
-      <div class="company-name">雅安市地震应急信息服务技术支撑平台</div>
+      <div class="company-name">{{useTitleStore().pageTitle}}</div>
       <!-- 以下是实时获取时间的代码 -->
       <div class="logo-left-time">
         <div class="logo-time-hour">
@@ -654,6 +654,7 @@ import {gcj02towgs84, wgs84togcj02} from "@/api/tool/wgs_gcj_encrypts.js";
 import arrow from "@/cesium/drawArrow/drawPlot.js";
 import {AmapApiLocal} from "@/utils/server.js";
 import {tianditu} from "@/utils/server.js";
+import {useTitleStore} from "../../store/index.js";
 
 export default {
   computed: {
@@ -1094,6 +1095,7 @@ export default {
     }
   },
   methods: {
+    useTitleStore,
 
     outputData() {
       handleOutputData(this.eqid, this.eqqueueId, null, 'thematicMap').then((res) => {

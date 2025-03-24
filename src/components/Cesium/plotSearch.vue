@@ -590,7 +590,7 @@ export default {
 .fold {
   position: absolute;
   top: 63px;
-  right: 333px;
+  right: 423px;
   margin: 0 auto;
   display: flex;
   align-items: center;

@@ -68,7 +68,7 @@
         <div v-if="!showStatus">
           <div class="header-div">
         <span>
-          <span>态势标绘信息</span>
+          <span>信息标注信息</span>
         </span>
           </div>
           <div class="Marking-info-panel">
