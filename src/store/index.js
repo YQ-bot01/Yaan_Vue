@@ -22,5 +22,18 @@ export const useGlobalStore = defineStore('globalEqId', {
     }
 });
 
+export const useTitleStore = defineStore('title', {
+    state: () => ({
+        // pageTitle: '地震灾害应急技术支撑能力提升项目'
+        pageTitle: '雅安市地震应急信息服务技术支撑平台'
+    }),
+    actions: {
+        setTitle(newTitle) {
+            this.pageTitle = newTitle;
+            document.title = newTitle; // 同步更新浏览器标题
+        }
+    }
+});
+
 // 导出 store
 export default store;
