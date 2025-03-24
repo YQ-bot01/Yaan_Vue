@@ -522,7 +522,7 @@ export default {
   background-color: rgba(32, 99, 150, 0.8);
   border-radius: 20px;
   height: 6%;
-  width: 12%;
+  width: 15%;
   top: 12%;
   position: absolute;
   z-index: 512;
