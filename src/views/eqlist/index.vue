@@ -335,14 +335,9 @@
 <script>
 import {
   addEq,
-  getAllEq,
-  deleteeq,
-  updataEq,
-  queryEq,
-  fromEq,
   eqEventTrigger,
   deletedEq,
-  getAllEqList, queryEqList, fromEqList, eqProgress, eqEventReassessment
+  queryEqList, fromEqList, eqProgress, eqEventReassessment
 } from '@/api/system/eqlist'
 import {getEqList} from "@/api/system/damageassessment.js";
 
@@ -1125,7 +1120,6 @@ export default {
         }
       });
 
-      // this.dialogContent.occurrenceTime = this.formatDateToBackend(this.dialogContent.occurrenceTime); // 调用方法格式化时间
       console.log("formatDateToBackend格式化时间commit：", this.dialogContent.occurrenceTime);
       this.dialogContent.occurrenceTime = this.formatISODateTimeToBackend(this.dialogContent.occurrenceTime); // 调用方法格式化时间
       console.log("formatDateToBackend“T”->' 'commit：", this.dialogContent.occurrenceTime);

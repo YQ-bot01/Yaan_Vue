@@ -74,7 +74,7 @@ export default {
       menuItems: [
         {title: '灾情总览', component: 'dataStats'},
         {title: '灾损预估', component: 'damageThemeAssessment'},
-        {title: '标绘统计', component: 'model'},
+        {title: '标绘统计', component: 'cartographicStatistics'},
       ],
       rightMenuItems: [
         {title: '资源调度', component: 'layerChoose'},

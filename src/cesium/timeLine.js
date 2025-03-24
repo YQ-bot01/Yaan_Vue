@@ -917,7 +917,6 @@ let timeLine = {
                 }
             }
             let entitylabel=window.labeldataSource.entities.getById(item.plotId+'_label')
-            // console.log(entitylabel,"entitylabel")
             if (entitylabel) {
                 entitylabel.show = false
             }

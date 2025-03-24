@@ -55,14 +55,11 @@
         :total="total"
     >
     </el-pagination>
-
-
   </div>
 </template>
 
 <script>
-import {getAllEq, deleteeq, queryEq, updataEq, fromEq, addEq, queryEqList, getAllEqList} from '@/api/system/eqlist'
-import {searchEmergencyShelters} from "../../../api/system/emergency.js";
+import {queryEqList, getAllEqList} from '@/api/system/eqlist'
 
 export default {
   name: "timelineeqlist",

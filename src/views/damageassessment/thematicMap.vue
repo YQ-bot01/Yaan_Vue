@@ -183,7 +183,6 @@
           <el-button plain type="primary" @click="handleClosePreview()" style="margin-left: 200px;">关闭</el-button>
         </div>
       </div>
-
     </div>
 
   </div>
