@@ -212,6 +212,7 @@ export default {
       this.selectedId = id; // 更新选中的按钮ID
     },
     jumpRealTime() {
+      this.findLastRecordTimeAndContent()
       window.viewer.clockViewModel.shouldAnimate = true;
       viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date());
       this.findLastRecordTimeAndContent()
