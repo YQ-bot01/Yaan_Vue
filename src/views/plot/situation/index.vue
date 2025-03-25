@@ -352,7 +352,7 @@ export default {
           icon: `<svg class="svg-icon" aria-hidden="true" style="width: 32px;height: 32px"><use xlink:href="#icon-dict" fill=""></use></svg>`,
           items: [],
           action: 'exportCesiumTheme',
-          showDropdown: false
+          showDropdown: false,
         },
       ],
       panels: {
@@ -929,8 +929,9 @@ export default {
       this.excelContent = []
       this.selectVisible = false;
       this.selectedNodes = []
-      this.isLoaded = false
-      this.loading = false
+      this.isLoaded = false;
+      this.loading = false;
+
 
       console.log(this.$refs.tree.getCheckedKeys())
       // 逐个取消勾选
