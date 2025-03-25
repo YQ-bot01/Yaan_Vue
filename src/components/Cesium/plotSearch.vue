@@ -133,6 +133,7 @@ export default {
     },
     plotArray: {
       handler(newData) {
+        console.log(newData,"newData plotArray")
         this.getPlot({ plotArray: newData });
       },
       deep: true, // 深度监听
@@ -189,11 +190,14 @@ export default {
         }
 
         if (params.plotArray) {
+          this.plots = [];
+          this.filteredEqData = [];
           console.log("通过 plotArray 获取数据", params.plotArray);
           let plotArray = Array.isArray(params.plotArray)
               ? params.plotArray
               : [params.plotArray]; // 如果不是数组，则转为数组
-          this.plots=[...this.plots,...plotArray]
+          this.plots=plotArray
+          // this.plots=[...this.plots,...plotArray]
           this.filteredEqData=this.plots
           console.log(this.plots,"params.plotArray")
           this.noDataMessage = null;
@@ -214,6 +218,7 @@ export default {
 
       let pagedEqDatatmpArr=[]
       batchData.forEach(item=>{
+        console.log(item.plotInfo.plotType,"item.plotInfo.plotTypem")
         if(item.plotInfo.plotType==="直线箭头"||item.plotInfo.plotType==="攻击箭头"||item.plotInfo.plotType==="钳击箭头"){
           item.plotInfo.icon=item.plotInfo.plotType
         }
