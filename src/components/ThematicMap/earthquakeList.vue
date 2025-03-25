@@ -88,20 +88,18 @@
           </div>
         </div>
 
-          <div style="height: 10px;background-color: #054576"></div>
-          <el-divider content-position="left"> 灾情报告</el-divider>
-          <div class="eqTheme">
-            <div class="button themes history"
-                 v-for="(item,index) in reportData"
-                 style="width: 120px;font-size: 14px;"
-                 @click="handleDownloadReport(item.docxUrl)"
-            >{{ item.theme }}
-            </div>
+        <div style="height: 10px;background-color: #054576"></div>
+        <el-divider content-position="left"> 灾情报告</el-divider>
+        <div class="eqTheme">
+          <div class="button themes history"
+               v-for="(item,index) in reportData"
+               style="width: 120px;font-size: 14px;"
+               @click="handleDownloadReport(item.docxUrl)"
+          >{{ item.theme }}
           </div>
-<!--        </div>-->
+        </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -151,20 +149,22 @@ export default {
     this.getEq()
   },
   methods: {
-    handlePanel(type){
-      console.log(this.selectedTabData,"this.selectedEqData")
-      if(type=='thematicMap'){
+    handlePanel(type) {
+      console.log(this.selectedTabData, "this.selectedEqData")
+      if (type == 'thematicMap') {
 
         handleOutputData(this.selectedTabData.eqid, this.selectedTabData.eqqueueId, this.selectedTabData.earthquakeFullName, type).then((res) => {
-          console.log("res.themeData",res.themeData)
+          console.log("res.themeData", res.themeData)
           this.thematicMapData = res.themeData
           this.$emit('outputDataimgs', res.themeData);
-          if(this.selectedTabData.eqid=="be3a5ea4-8dfd-a0a2-2510-21845f17960b"){
-            this.thematicMapData.push({theme:"坡面分析图",imgUrl:"/ThematicMap/TwoAndThreeDIntegration/LuShan/GradeAnalysis.jpg"})
+          if (this.selectedTabData.eqid == "be3a5ea4-8dfd-a0a2-2510-21845f17960b") {
+            this.thematicMapData.push({
+              theme: "坡面分析图",
+              imgUrl: "/ThematicMap/TwoAndThreeDIntegration/LuShan/GradeAnalysis.jpg"
+            })
           }
-          this.thematicMapData.push({theme:"遥感影像图",imgUrl:""})
-          this.thematicMapData.push({theme:"三维模型图",imgUrl:""})
-
+          this.thematicMapData.push({theme: "遥感影像图", imgUrl: ""})
+          this.thematicMapData.push({theme: "三维模型图", imgUrl: ""})
 
 
           // console.log(res)
@@ -173,10 +173,10 @@ export default {
         });
 
       }
-      if(type=='report'){
+      if (type == 'report') {
         handleOutputData(this.selectedTabData.eqid, this.selectedTabData.eqqueueId, this.selectedTabData.earthquakeFullName, type).then((res) => {
           this.reportData = res.themeData
-          console.log(this.reportData,"this.reportData")
+          console.log(this.reportData, "this.reportData")
           // this.outputDatareports = res.themeData;
           // console.log(this.outputDatareports.themeData)
           this.$emit('outputDatareports', res.themeData); // 发送eq数据到父组件
@@ -225,9 +225,9 @@ export default {
     getEq() {
       let that = this
       getEqList().then(res => {
-        console.log("返回的数据1",res.data)
-        let resData = res.data.filter(item =>  item.magnitude  >= 4.0)
-        console.log("过滤后",resData)
+        console.log("返回的数据1", res.data)
+        let resData = res.data.filter(item => item.magnitude >= 4.0)
+        console.log("过滤后", resData)
         that.getEqData = resData
         that.total = resData.length
         let data = []
@@ -464,7 +464,7 @@ export default {
   height: calc(100% - 50px);
   z-index: 3;
   background: rgb(4, 20, 34);
-  background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%,rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
+  background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%, rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
 }
 
 .query {
@@ -555,7 +555,7 @@ export default {
   position: absolute;
   bottom: 0;
   width: 333px;
-  background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%,rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
+  background: linear-gradient(270deg, rgba(4, 20, 34, 1) 0%, rgba(14, 37, 61, 0.9) 41%, rgba(26, 54, 77, 0.75) 66%, rgba(42, 89, 135, 0.45) 88%, rgba(47, 82, 117, 0.3) 95%, rgba(44, 69, 94, 0) 100%);
   border: 2px solid #FFFFFF; /* 白色边框 */
 }
 

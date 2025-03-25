@@ -92,7 +92,7 @@
         </el-pagination>
       </el-form>
       <el-form v-if="showToolbar" class="noteContainer">
-        <div class="modelAdj">态势标绘工具<span style="margin-left: 10px;" @click="showToolbar = false">隐藏工具栏</span></div>
+        <div class="modelAdj">信息标注工具<span style="margin-left: 10px;" @click="showToolbar = false">隐藏工具栏</span></div>
         <el-row>
           <el-col :span="13">
             <el-tree class="plotTool" :data="plotTreeData" :props="defaultProps" @node-click="handleNodeClick"
@@ -101,9 +101,8 @@
           <el-col :span="11">
           <span class="plotTreeItem" v-for="(item,index) in plotTreeClassification" @click="treeItemClick(item)">
             <el-tooltip class="plottreetooltip" effect="dark" :content="item.name" placement="top-start">
-<!--              <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()">-->
-              <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"
-                   width="17%" height="43.3px">
+<!--              <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"  width="17%" height="43.3px">-->
+              <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()" width="17%" height="43.3px">
             </el-tooltip>
           </span>
           </el-col>
@@ -240,9 +239,8 @@
                 style="width: 100%">
         <el-table-column label="图标" width="50">
           <template v-slot="scope">
-<!--        <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()">-->
-            <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()"
-                 alt="icon" style="width: 20px; height: 20px;"/>
+<!--        <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>-->
+            <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>
           </template>
         </el-table-column>
         <el-table-column prop="plotType" label="类型" width="180"></el-table-column>
@@ -3448,7 +3446,7 @@ img {
   z-index: 100;
   position: absolute;
   top: 64px;
-  right: 362px;
+  right: 452px;
 }
 
 /*导入弹窗*/

@@ -34,7 +34,7 @@
       </div>
     </div>
     <div class="logo-left-weather">
-      <div class="company-name">地震灾害应急技术支撑能力提升项目</div>
+      <div class="company-name">{{useTitleStore().pageTitle}}</div>
       <!-- 以下是实时获取时间的代码 -->
       <div class="logo-left-time">
         <div class="logo-time-hour">
@@ -57,6 +57,8 @@
 </template>
 
 <script>
+import {useTitleStore} from "../../store/index.js";
+
 export default {
   props:['centerPoint'],
   watch: {
@@ -74,7 +76,7 @@ export default {
       menuItems: [
         {title: '灾情总览', component: 'dataStats'},
         {title: '灾损预估', component: 'damageThemeAssessment'},
-        {title: '标绘统计', component: 'model'},
+        {title: '标绘统计', component: 'cartographicStatistics'},
       ],
       rightMenuItems: [
         {title: '资源调度', component: 'layerChoose'},
@@ -88,6 +90,7 @@ export default {
     this.startRealTimeClock('current-time', 'current-date');//菜单栏左上角实时获取时间
   },
   methods: {
+    useTitleStore,
     isActive(component) {
       return this.activeComponent === component;
     },

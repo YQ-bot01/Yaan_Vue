@@ -20,7 +20,6 @@
           <!-- 圆圈震级 -->
           <div style="width: 55px">
             <div class="eqMagnitude">
-              <!--              <img width="30px" height="30px" :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">-->
               <img width="30px" height="30px" :src="'http://localhost:8080'+'/uploads/PlotsPic/' +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">
             </div>
           </div>
@@ -36,7 +35,7 @@
             <div class="disaster-info">
               <!-- 标绘类型 -->
               <div>
-                <span class="info-label">所属地点 :{{ plot.locationInfo.city }}{{ plot.locationInfo.county }} {{ plot.locationInfo.town }}</span>
+                <span class="info-label">所属地点 :{{ plot.plotInfo.belongCity }}{{ plot.plotInfo.belongCounty }} {{ plot.plotInfo.belongTown }}</span>
               </div>
 
               <!-- 伤亡人数 -->
@@ -59,13 +58,11 @@
               <div style="display: flex; align-items: center;">
                 <strong>具体地点：</strong>
                 <div class="local-place-wrapper">
-                  <span class="info-label small-text local-place">{{ plot.locationInfo.address }} （{{ plot.locationInfo.address_position }}方向 {{ plot.locationInfo.address_distance }} 米）</span>
+                  <span class="info-label small-text local-place">{{ plot.plotInfo.locationAddress }} （{{ plot.plotInfo.locationAddressPosition }}方向 {{ plot.plotInfo.locationAddressDistance }} 米）</span>
                 </div>
               </div>
-              <span class="info-label small-text"><strong>附近道路：</strong>{{ plot.locationInfo.road }} （距离 {{ plot.locationInfo.road_distance }} 米）</span>
+              <span class="info-label small-text"><strong>附近道路：</strong>{{ plot.plotInfo.locationRoad }} （距离 {{ plot.plotInfo.locationRoadDistance }} 米）</span>
               <br>
-              <!--              <span class="info-label"><strong>附近 POI：</strong>{{ plot.locationInfo.poi }} （{{ plot.locationInfo.poi_position }}方向 {{ plot.locationInfo.poi_distance }} 米）</span>-->
-              <!--              <br>-->
               <span class="info-label small-text"><strong>标绘经纬：</strong>{{ parseFloat(plot.plotInfo.longitude).toFixed(2) }}°E, {{ parseFloat(plot.plotInfo.latitude).toFixed(2) }}°N</span>
               <br>
               <span class="info-label small-text"><strong>时间范围：</strong>{{this.timestampToTimeChina(plot.plotInfo.startTime)}}-{{this.timestampToTimeChina(plot.plotInfo.endTime)}}</span>
@@ -164,21 +161,6 @@ export default {
     this.getPlot(this.eqid)
   },
   methods : {
-    async getReverseGeocode(lon, lat) {
-      try {
-        const response = await axios.get(`${tianDitulocalApi}/geocoder`, {
-          params: {
-            postStr: JSON.stringify({lon, lat, ver: 1}),
-            type: 'geocode',
-            tk: '7b6b98b997001a1c5557356e8518e3b4'
-          }
-        });
-        return response.data.result.addressComponent;
-      } catch (error) {
-        console.error("逆地理编码失败:", error);
-        return null;
-      }
-    },
     async getPlot(params) {
       console.log("params",params)
       try {
@@ -187,7 +169,6 @@ export default {
           // console.log("通过 eqid 获取数据", params.eqid);
           this.selectPlotData = [];
           this.filteredEqData = [];
-
           // 获取 plot 数据
           let res = await getPlot({ eqid: params.eqid });
           console.log("通过 eqid 获取数据",res)
@@ -214,23 +195,9 @@ export default {
 
           const updatedRes = [];
           let batchData= await getExcelPlotInfo(plotIds, plotTypes);
-          // console.log("batchData",batchData)
-          // 立即处理和展示当前批次数据
-          const processedBatchData = await Promise.all(
-              batchData.map(async (plot) => {
-                if (plot.plotInfo && plot.plotInfo.longitude && plot.plotInfo.latitude) {
-                  const locationInfo = await this.getReverseGeocode(
-                      plot.plotInfo.longitude,
-                      plot.plotInfo.latitude
-                  );
-                  return {...plot, locationInfo};
-                }
-                return plot;
-              })
-          );
-
           // 将新的数据累加到现有的数据中
-          updatedRes.push(...processedBatchData); // 合并当前批次数据
+          updatedRes.push(...batchData); // 合并当前批次数据
+          // console.log(batchData,"processedBatchData locationInfo")
           // 将新增数据累加到现有数据中
           this.selectPlotData = [...this.selectPlotData, ...updatedRes];  // 累加新的标绘点
           this.filteredEqData = [...this.filteredEqData, ...updatedRes];  // 同步更新筛选后的数据
@@ -255,28 +222,13 @@ export default {
 
         console.log(`加载第 ${i / batchSize + 1} 批数据`);
         const batchData = await getExcelPlotInfo(batchPlotIds, batchPlotTypes);
-
-        // 立即处理和展示当前批次数据
-        const processedBatchData = await Promise.all(
-            batchData.map(async (plot) => {
-              if (plot.plotInfo && plot.plotInfo.longitude && plot.plotInfo.latitude) {
-                const locationInfo = await this.getReverseGeocode(
-                    plot.plotInfo.longitude,
-                    plot.plotInfo.latitude
-                );
-                return {...plot, locationInfo};
-              }
-              return plot;
-            })
-        );
-
+        console.log("updatedRes",batchData)
         // 将新的数据累加到现有的数据中
-        updatedRes.push(...processedBatchData); // 合并当前批次数据
+        updatedRes.push(...batchData); // 合并当前批次数据
       }
-
+      this.selectPlotData = updatedRes;  // 累加新的标绘点
+      this.filteredEqData = updatedRes;  // 同步更新筛选后的数据
       // 将新增数据累加到现有数据中
-      this.selectPlotData = [...this.selectPlotData, ...updatedRes];  // 累加新的标绘点
-      this.filteredEqData = [...this.filteredEqData, ...updatedRes];  // 同步更新筛选后的数据
       this.updatePagedEqData(); // 更新分页数据
 
     },
@@ -303,63 +255,63 @@ export default {
     },
 
     // 地图渲染查询地震点(根据页码、根据搜索框)
-    renderQueryEqPoints() {
-      // this.eqThemes.show.isshowOvalCircle = false
-
-      this.listEqPoints.forEach(entity => window.viewer.entities.remove(entity));
-      this.listEqPoints = [];
-
-      this.pagedEqData.forEach(eq => {
-        const entity = window.viewer.entities.add({
-          position: Cesium.Cartesian3.fromDegrees(Number(eq.longitude), Number(eq.latitude)),
-          billboard: {
-            image: eqMark,
-            width: 20,
-            height: 20,
-            eyeOffset: new Cesium.Cartesian3(0, 0, -5000)
-          },
-          label: {
-            text: this.timestampToTime(eq.occurrenceTime, 'date') + eq.earthquakeName + eq.magnitude + '级地震',
-            font: '18px sans-serif',
-            fillColor: Cesium.Color.WHITE,
-            outlineColor: Cesium.Color.BLACK,
-            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-            showBackground: true,
-            show: false,
-            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-            clampToGround: true,
-            horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
-          },
-          id: eq.eqid
-        });
-        yaan.features.forEach((feature) => {
-          let center = feature.properties.center;
-
-          if (center && center.length === 2) {
-            let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-            let regionlabel = viewer.entities.add(new Cesium.Entity({
-              position: position,
-              label: new Cesium.LabelGraphics({
-                text: feature.properties.name,
-                scale: 1,
-                font: '18px Sans-serif',
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                outlineWidth: 2,
-                verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-                fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-                pixelOffset: new Cesium.Cartesian2(0, 0),
-                eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
-              })
-            }));
-            this.RegionLabels.push(regionlabel)
-          }
-        })
-        this.listEqPoints.push(entity);
-      });
-    },
+    // renderQueryEqPoints() {
+    //   // this.eqThemes.show.isshowOvalCircle = false
+    //
+    //   this.listEqPoints.forEach(entity => window.viewer.entities.remove(entity));
+    //   this.listEqPoints = [];
+    //
+    //   this.pagedEqData.forEach(eq => {
+    //     const entity = window.viewer.entities.add({
+    //       position: Cesium.Cartesian3.fromDegrees(Number(eq.longitude), Number(eq.latitude)),
+    //       billboard: {
+    //         image: eqMark,
+    //         width: 20,
+    //         height: 20,
+    //         eyeOffset: new Cesium.Cartesian3(0, 0, -5000)
+    //       },
+    //       label: {
+    //         text: this.timestampToTime(eq.occurrenceTime, 'date') + eq.earthquakeName + eq.magnitude + '级地震',
+    //         font: '18px sans-serif',
+    //         fillColor: Cesium.Color.WHITE,
+    //         outlineColor: Cesium.Color.BLACK,
+    //         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+    //         showBackground: true,
+    //         show: false,
+    //         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    //         clampToGround: true,
+    //         horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
+    //         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+    //         eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
+    //       },
+    //       id: eq.eqid
+    //     });
+    //     yaan.features.forEach((feature) => {
+    //       let center = feature.properties.center;
+    //
+    //       if (center && center.length === 2) {
+    //         let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
+    //         let regionlabel = viewer.entities.add(new Cesium.Entity({
+    //           position: position,
+    //           label: new Cesium.LabelGraphics({
+    //             text: feature.properties.name,
+    //             scale: 1,
+    //             font: '18px Sans-serif',
+    //             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+    //             outlineWidth: 2,
+    //             verticalOrigin: Cesium.VerticalOrigin.CENTER,
+    //             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+    //             fillColor: Cesium.Color.fromCssColorString("#ffffff"),
+    //             pixelOffset: new Cesium.Cartesian2(0, 0),
+    //             eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
+    //           })
+    //         }));
+    //         this.RegionLabels.push(regionlabel)
+    //       }
+    //     })
+    //     this.listEqPoints.push(entity);
+    //   });
+    // },
 
 
     locateEq(plot) {
@@ -638,7 +590,7 @@ export default {
 .fold {
   position: absolute;
   top: 63px;
-  right: 333px;
+  right: 423px;
   margin: 0 auto;
   display: flex;
   align-items: center;

@@ -59,6 +59,7 @@ import {useCesiumStore} from "@/store/modules/cesium.js";
 import {insertPlotAndInfo} from '@/api/system/plot.js'
 import generalCompute from "@/cesium/plot/generalCompute.js";
 import dayjs from "dayjs";
+import TimeTransfer from "@/cesium/tool/timeTransfer.js";
 
 export default {
   name: "addMarkDialog",
@@ -170,6 +171,14 @@ export default {
           belongCounty:null,
           belongTown:null,
 
+          locationAddress:null,
+          locationAddressDistance:null,
+          locationAddressPosition:null,
+          loocationPoi:null,
+          locationPoiDistance:null,
+          locationRoad:null,
+          locationRoadDistance:null,
+
         },
         plotinfo:{
           plotId:null,
@@ -190,6 +199,13 @@ export default {
       assemblyData.plot.belongCity=locationInfo.city
       assemblyData.plot.belongCounty=locationInfo.county
       assemblyData.plot.belongTown=locationInfo.town
+      assemblyData.plot.locationAddress=locationInfo.address
+      assemblyData.plot.locationAddressDistance=locationInfo.address_distance
+      assemblyData.plot.locationAddressPosition=locationInfo.address_position
+      assemblyData.plot.loocationPoi=locationInfo.poi
+      assemblyData.plot.locationPoiDistance=locationInfo.poi_distance
+      assemblyData.plot.locationRoad=locationInfo.road
+      assemblyData.plot.locationRoadDistance=locationInfo.road_distance
       // 组装plotinfo
       assemblyData.plotinfo = {
         ...data2,     //展开data2的内容
@@ -199,21 +215,7 @@ export default {
     },
     // 时间戳转换成日期格式，将时间戳转换成 xx年xx月xx日xx时xx分xx秒格式
     timestampToTime(timestamp) {
-      let DateObj = new Date(timestamp)
-      // 将时间转换为 XX年XX月XX日XX时XX分XX秒格式
-      let year = DateObj.getFullYear()
-      let month = DateObj.getMonth() + 1
-      let day = DateObj.getDate()
-      let hh = DateObj.getHours()
-      let mm = DateObj.getMinutes()
-      let ss = DateObj.getSeconds()
-      month = month > 9 ? month : '0' + month
-      day = day > 9 ? day : '0' + day
-      hh = hh > 9 ? hh : '0' + hh
-      mm = mm > 9 ? mm : '0' + mm
-      ss = ss > 9 ? ss : '0' + ss
-      // return `${year}年${month}月${day}日${hh}时${mm}分${ss}秒`
-      return `${year}-${month}-${day}T${hh}:${mm}:${ss}`
+      return TimeTransfer.timestampToTimeWithT(timestamp)
     },
 
     guid() {

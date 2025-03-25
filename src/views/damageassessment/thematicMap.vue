@@ -183,7 +183,6 @@
           <el-button plain type="primary" @click="handleClosePreview()" style="margin-left: 200px;">关闭</el-button>
         </div>
       </div>
-
     </div>
 
   </div>
@@ -775,18 +774,6 @@ export default {
       }
 
       this.isPanelShow[type] = !this.isPanelShow[type];
-      //  if (this.isPanelShow.AssistantDecision){
-      //   //辅助决策报告
-      //   this.isNoData = false
-      //   this.outputData.themeData = [
-      //     {
-      //       docxUrl: "http://59.213.183.7/image" +
-      //           "/EqProduct/357a36dd-00b6-4562-90fd-abc66a294f60" +
-      //           "/1/本地产品/灾情报告/02月28日10时38分四川省雅安市荥经县荥河镇发生6.8级地震（辅助决策信息一）.docx",
-      //       theme: "灾情报告1"
-      //     },
-      //   ]
-      // }
       if (this.isPanelShow.thematicMap || this.isPanelShow.report|| this.isPanelShow.AssistantDecision) {
 
         getEqOutputMaps(this.eqid, this.eqqueueId).then((res) => {

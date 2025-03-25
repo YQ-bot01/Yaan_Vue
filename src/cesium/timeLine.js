@@ -797,13 +797,13 @@ let timeLine = {
         }
         //救援队伍 单位,人数人
         if (plotType === "已出发队伍" || plotType === "正在参与队伍" || plotType === "待命队伍") {
-            if (res.plotTypeInfo.teamName) {
+            if (res.plotTypeInfo && res.plotTypeInfo.teamName) {
                 labeltext = labeltext + ":" + res.plotTypeInfo.teamName
             }
-            if (res.plotTypeInfo.personnelCount) {
+            if (res.plotTypeInfo && res.plotTypeInfo.personnelCount) {
                 labeltext = labeltext + res.plotTypeInfo.personnelCount + "人"
             }
-            if (res.plotTypeInfo.teamName == null && res.plotTypeInfo.personnelCount == 0) {
+            if (res.plotTypeInfo && res.plotTypeInfo.teamName && res.plotTypeInfo.teamName == null && res.plotTypeInfo.personnelCount && res.plotTypeInfo.personnelCount == 0) {
                 labeltext = labeltext + "1队"
             }
         }
@@ -917,7 +917,6 @@ let timeLine = {
                 }
             }
             let entitylabel=window.labeldataSource.entities.getById(item.plotId+'_label')
-            // console.log(entitylabel,"entitylabel")
             if (entitylabel) {
                 entitylabel.show = false
             }
