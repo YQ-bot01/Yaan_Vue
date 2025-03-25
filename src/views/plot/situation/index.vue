@@ -288,9 +288,10 @@
     <!--      地震列表组件-点击列表“详情”显示专题图列表      -->
     <plotSearch
         :eqid="eqid"
-        :plotArray="plotArray"
-    ></plotSearch>
 
+        :plotArray="plotList"
+    ></plotSearch>
+<!--    :plotArray="plotArray"-->
 
   </div>
 </template>
