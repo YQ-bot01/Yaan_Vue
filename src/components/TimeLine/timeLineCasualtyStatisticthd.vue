@@ -156,15 +156,15 @@ export default {
     }
 
 // 实现 Cesium 实体的切换显示
-    function toggleEntities(entityName, show) {
-      if (entityGroups.value[entityName] !== undefined) {
-        entityGroups.value[entityName].forEach(entity => {
-          entity.show = show;
-        });
-      } else {
-        console.error(`Entity ${entityName} is undefined.`);
-      }
-    }
+//     function toggleEntities(entityName, show) {
+//       if (entityGroups.value[entityName] !== undefined) {
+//         entityGroups.value[entityName].forEach(entity => {
+//           entity.show = show;
+//         });
+//       } else {
+//         console.error(`Entity ${entityName} is undefined.`);
+//       }
+//     }
 
     async function getRescueActionCasualtiesPlotAndInfo(pointsLayer) {
 
@@ -390,7 +390,7 @@ export default {
 
     return {
       entityGroups,
-      toggleEntities,
+      // toggleEntities,
       getRescueActionCasualtiesPlotAndInfo,
       statisticInfo,
       formatPeople,

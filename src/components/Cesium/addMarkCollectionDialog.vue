@@ -240,7 +240,7 @@ export default {
 
     // 时间戳转换成日期格式，将时间戳转换成 xx年xx月xx日xx时xx分xx秒格式
     timestampToTime(timestamp) {
-      return TimeTransfer.timestampToTimeWithT(timestamp)
+      return timeTransfer.timestampToTimeWithT(timestamp)
     },
 
     guid() {

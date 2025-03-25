@@ -23,6 +23,7 @@
       </div>
       <plotSearch
           :eqid="eqid"
+          :plotArray="plots"
       ></plotSearch>
     </div>
     <div v-if="activeComponent === 'layerChoose'" class="thd-listTablePint">

@@ -62,7 +62,7 @@ import {getPlot} from "../../api/system/plot.js";
 import cesiumPlot from '@/cesium/plot/cesiumPlot'
 import generalCompute from "@/cesium/plot/generalCompute.js";
 import dayjs from "dayjs";
-import TimeTransfer from "@/cesium/tool/timeTransfer.js";
+import timeTransfer from "@/cesium/tool/timeTransfer.js";
 
 export default {
   name: "addPolygonDialog",
@@ -295,7 +295,7 @@ export default {
     },
     // 时间戳转换成日期格式，将时间戳转换成 xx年xx月xx日xx时xx分xx秒格式
     timestampToTime(timestamp) {
-      return TimeTransfer.timestampToTimeWithT(timestamp)
+      return timeTransfer.timestampToTimeWithT(timestamp)
     },
     guid() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
