@@ -44,12 +44,13 @@
               </div>
 
               <!-- 出队信息 -->
-              <div v-if="plot.plotInfo.plotType === '已出发队伍'|| plot.plotInfo.plotType === '正在参与队伍'||plot.plotInfo.plotType === '待命队伍' "  style="display: flex; align-items: center;">
-                <span class="info-label">队伍名称:</span>
+              <div v-if="plot.plotInfo.plotType === '已出发队伍'|| plot.plotInfo.plotType === '正在参与队伍'||plot.plotInfo.plotType === '待命队伍' &&((plot.plotTypeInfo && plot.plotTypeInfo.personnelCount)||(plot.plotTypeInfo && plot.plotTypeInfo.teamName))"  style="display: flex; align-items: center;">
+                <span class="info-label"  v-if="plot.plotTypeInfo && plot.plotTypeInfo.teamName">队伍名称:</span>
                 <div class="team-name-wrapper">
-                  <span class="highlight highlight-info team-name">{{ plot.plotTypeInfo.teamName }}</span>
+                  <span class="highlight highlight-info team-name" v-if="plot.plotTypeInfo && plot.plotTypeInfo.teamName">{{ plot.plotTypeInfo.teamName }}</span>
                 </div>
-                <span class="info-label large-text">出队人数：</span><span class="highlight highlight-success large-text">{{ plot.plotTypeInfo.personnelCount }} 人</span>
+                <span class="info-label large-text"  v-if="plot.plotTypeInfo && plot.plotTypeInfo.personnelCount">出队人数：</span>
+                <span class="highlight highlight-success large-text" v-if="plot.plotTypeInfo && plot.plotTypeInfo.personnelCount">{{ plot.plotTypeInfo.personnelCount }} 人</span>
               </div>
             </div>
 
@@ -80,7 +81,7 @@
         <el-pagination
             small
             layout="total, prev, pager, next"
-            :total="filteredEqData.length"
+            :total="plots.length"
             :page-size="pageSize"
             :current-page.sync="currentPage"
             @current-change="handleCurrentChange"
@@ -139,6 +140,7 @@ export default {
   },
   data() {
     return {
+      plots:[],
       isFoldShow: true,
       isFoldUnfolding: false,
       isLeftShow: true,
@@ -171,6 +173,7 @@ export default {
           this.filteredEqData = [];
           // 获取 plot 数据
           let res = await getPlot({ eqid: params.eqid });
+          this.plots=res
           console.log("通过 eqid 获取数据",res)
           if (!res || res.length === 0) {
             this.pagedEqData = [];
@@ -181,136 +184,83 @@ export default {
           }
 
           this.noDataMessage = null;
-          await this.processPlotData(res); // 处理获取的数据
+          await this.updatePagedEqData()
         }
 
         if (params.plotArray) {
           console.log("通过 plotArray 获取数据", params.plotArray);
-          // 如果是单个对象，转换为数组处理
-          const plotArray = Array.isArray(params.plotArray)
+          let plotArray = Array.isArray(params.plotArray)
               ? params.plotArray
               : [params.plotArray]; // 如果不是数组，则转为数组
-          const plotIds = plotArray.map((plot) => plot.plotId);
-          const plotTypes = plotArray.map((plot) => plot.plotType);
+          this.plots=[...this.plots,...plotArray]
 
-          const updatedRes = [];
-          let batchData= await getExcelPlotInfo(plotIds, plotTypes);
-          // 将新的数据累加到现有的数据中
-          updatedRes.push(...batchData); // 合并当前批次数据
-          // console.log(batchData,"processedBatchData locationInfo")
-          // 将新增数据累加到现有数据中
-          this.selectPlotData = [...this.selectPlotData, ...updatedRes];  // 累加新的标绘点
-          this.filteredEqData = [...this.filteredEqData, ...updatedRes];  // 同步更新筛选后的数据
-          this.updatePagedEqData(); // 更新分页数据
+          console.log(this.ploys,"params.plotArray")
           this.noDataMessage = null;
+          await this.updatePagedEqData()
         }
       } catch (error) {
         console.error("获取地震列表或处理失败:", error);
       }
     },
-
-    async processPlotData(res) {
-      console.log(res,"processPlotData")
-      const plotIds = res.map((plot) => plot.plotId);
-      const plotTypes = res.map((plot) => plot.plotType);
-
-      const batchSize = 10;
-      const updatedRes = [];
-      for (let i = 0; i < plotIds.length; i += batchSize) {
-        const batchPlotIds = plotIds.slice(i, i + batchSize);
-        const batchPlotTypes = plotTypes.slice(i, i + batchSize);
-
-        console.log(`加载第 ${i / batchSize + 1} 批数据`);
-        const batchData = await getExcelPlotInfo(batchPlotIds, batchPlotTypes);
-        console.log("updatedRes",batchData)
-        // 将新的数据累加到现有的数据中
-        updatedRes.push(...batchData); // 合并当前批次数据
-      }
-      this.selectPlotData = updatedRes;  // 累加新的标绘点
-      this.filteredEqData = updatedRes;  // 同步更新筛选后的数据
-      // 将新增数据累加到现有数据中
-      this.updatePagedEqData(); // 更新分页数据
-
-    },
-
-    // 分页数据更新
-    updatePagedEqData() {
+    async updatePagedEqData(){
       const start = (this.currentPage - 1) * this.pageSize;
       const end = this.currentPage * this.pageSize;
-      // this.pagedEqData = this.filteredEqData.slice(start, end);
-      let pagedEqDatatmp = this.filteredEqData.slice(start, end);
+      let pagedEqDatatmp = this.plots.slice(start, end);
+      const batchPlotIds = pagedEqDatatmp.map((plot) => plot.plotId);
+      const batchPlotTypes = pagedEqDatatmp.map((plot) => plot.plotType);
+      const batchData = await getExcelPlotInfo(batchPlotIds, batchPlotTypes);
+      console.log("updatedRes processDataEqid",batchData)
+
       let pagedEqDatatmpArr=[]
-      pagedEqDatatmp.forEach(item=>{
+      batchData.forEach(item=>{
         if(item.plotInfo.plotType==="直线箭头"||item.plotInfo.plotType==="攻击箭头"||item.plotInfo.plotType==="钳击箭头"){
           item.plotInfo.icon=item.plotInfo.plotType
         }
         pagedEqDatatmpArr.push(item)
       })
       this.pagedEqData=pagedEqDatatmpArr
-      console.log("pagedEqData:", this.pagedEqData)
-
-      // 清除之前的点并重新添加
-      // viewer.entities.removeAll();
-      // this.renderQueryEqPoints();
     },
 
-    // 地图渲染查询地震点(根据页码、根据搜索框)
-    // renderQueryEqPoints() {
-    //   // this.eqThemes.show.isshowOvalCircle = false
+    // async processPlotData(res) {
+    //   console.log(res,"processPlotData")
+    //   const plotIds = res.map((plot) => plot.plotId);
+    //   const plotTypes = res.map((plot) => plot.plotType);
     //
-    //   this.listEqPoints.forEach(entity => window.viewer.entities.remove(entity));
-    //   this.listEqPoints = [];
+    //   const batchSize = 10;
+    //   const updatedRes = [];
+    //   for (let i = 0; i < plotIds.length; i += batchSize) {
+    //     const batchPlotIds = plotIds.slice(i, i + batchSize);
+    //     const batchPlotTypes = plotTypes.slice(i, i + batchSize);
     //
-    //   this.pagedEqData.forEach(eq => {
-    //     const entity = window.viewer.entities.add({
-    //       position: Cesium.Cartesian3.fromDegrees(Number(eq.longitude), Number(eq.latitude)),
-    //       billboard: {
-    //         image: eqMark,
-    //         width: 20,
-    //         height: 20,
-    //         eyeOffset: new Cesium.Cartesian3(0, 0, -5000)
-    //       },
-    //       label: {
-    //         text: this.timestampToTime(eq.occurrenceTime, 'date') + eq.earthquakeName + eq.magnitude + '级地震',
-    //         font: '18px sans-serif',
-    //         fillColor: Cesium.Color.WHITE,
-    //         outlineColor: Cesium.Color.BLACK,
-    //         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-    //         showBackground: true,
-    //         show: false,
-    //         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-    //         clampToGround: true,
-    //         horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
-    //         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-    //         eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
-    //       },
-    //       id: eq.eqid
-    //     });
-    //     yaan.features.forEach((feature) => {
-    //       let center = feature.properties.center;
+    //     console.log(`加载第 ${i / batchSize + 1} 批数据`);
+    //     const batchData = await getExcelPlotInfo(batchPlotIds, batchPlotTypes);
+    //     console.log("updatedRes",batchData)
+    //     // 将新的数据累加到现有的数据中
+    //     updatedRes.push(...batchData); // 合并当前批次数据
+    //   }
+    //   this.selectPlotData = updatedRes;  // 累加新的标绘点
+    //   this.filteredEqData = updatedRes;  // 同步更新筛选后的数据
+    //   // 将新增数据累加到现有数据中
+    //   this.updatePagedEqData(); // 更新分页数据
     //
-    //       if (center && center.length === 2) {
-    //         let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-    //         let regionlabel = viewer.entities.add(new Cesium.Entity({
-    //           position: position,
-    //           label: new Cesium.LabelGraphics({
-    //             text: feature.properties.name,
-    //             scale: 1,
-    //             font: '18px Sans-serif',
-    //             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-    //             outlineWidth: 2,
-    //             verticalOrigin: Cesium.VerticalOrigin.CENTER,
-    //             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-    //             fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-    //             pixelOffset: new Cesium.Cartesian2(0, 0),
-    //             eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
-    //           })
-    //         }));
-    //         this.RegionLabels.push(regionlabel)
-    //       }
-    //     })
-    //     this.listEqPoints.push(entity);
-    //   });
+    // },
+
+    // 分页数据更新
+    // updatePagedEqData() {
+    //   const start = (this.currentPage - 1) * this.pageSize;
+    //   const end = this.currentPage * this.pageSize;
+    //   this.pagedEqData = this.filteredEqData.slice(start, end);
+    //   let pagedEqDatatmp = this.filteredEqData.slice(start, end);
+    //   let pagedEqDatatmpArr=[]
+    //   pagedEqDatatmp.forEach(item=>{
+    //     if(item.plotInfo.plotType==="直线箭头"||item.plotInfo.plotType==="攻击箭头"||item.plotInfo.plotType==="钳击箭头"){
+    //       item.plotInfo.icon=item.plotInfo.plotType
+    //     }
+    //     pagedEqDatatmpArr.push(item)
+    //   })
+    //   this.pagedEqData=pagedEqDatatmpArr
+    //   // return this.pagedEqData
+    //   console.log("pagedEqData:", this.pagedEqData)
     // },
 
 
