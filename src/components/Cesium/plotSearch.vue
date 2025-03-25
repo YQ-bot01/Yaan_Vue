@@ -81,7 +81,7 @@
         <el-pagination
             small
             layout="total, prev, pager, next"
-            :total="plots.length"
+            :total="filteredEqData.length"
             :page-size="pageSize"
             :current-page.sync="currentPage"
             @current-change="handleCurrentChange"
@@ -144,14 +144,15 @@ export default {
       isFoldShow: true,
       isFoldUnfolding: false,
       isLeftShow: true,
-      selectPlotData: [],
+
       noDataMessage: null,
       // 列表地震
       listEqPoints: [],
       // 行政区划
       RegionLabels: [],
       title: "",
-      filteredEqData: [],
+      // selectPlotData: [],
+      filteredEqData: [], //所有应该显示的点
       pagedEqData: [],
       total: 0,
       pageSize: 10,
@@ -169,20 +170,20 @@ export default {
         // 判断是通过 eqid 还是 plotArray 调用
         if (params.eqid) {
           // console.log("通过 eqid 获取数据", params.eqid);
-          this.selectPlotData = [];
+          this.plots = [];
           this.filteredEqData = [];
           // 获取 plot 数据
           let res = await getPlot({ eqid: params.eqid });
           this.plots=res
+          this.filteredEqData=this.plots
           console.log("通过 eqid 获取数据",res)
           if (!res || res.length === 0) {
             this.pagedEqData = [];
             this.filteredEqData = [];
-            this.selectPlotData = [];
+            // this.selectPlotData = [];
             this.noDataMessage = "该地震暂无标绘数据";
             return;
           }
-
           this.noDataMessage = null;
           await this.updatePagedEqData()
         }
@@ -193,8 +194,8 @@ export default {
               ? params.plotArray
               : [params.plotArray]; // 如果不是数组，则转为数组
           this.plots=[...this.plots,...plotArray]
-
-          console.log(this.ploys,"params.plotArray")
+          this.filteredEqData=this.plots
+          console.log(this.plots,"params.plotArray")
           this.noDataMessage = null;
           await this.updatePagedEqData()
         }
@@ -205,7 +206,7 @@ export default {
     async updatePagedEqData(){
       const start = (this.currentPage - 1) * this.pageSize;
       const end = this.currentPage * this.pageSize;
-      let pagedEqDatatmp = this.plots.slice(start, end);
+      let pagedEqDatatmp = this.filteredEqData.slice(start, end);
       const batchPlotIds = pagedEqDatatmp.map((plot) => plot.plotId);
       const batchPlotTypes = pagedEqDatatmp.map((plot) => plot.plotType);
       const batchData = await getExcelPlotInfo(batchPlotIds, batchPlotTypes);
@@ -220,48 +221,6 @@ export default {
       })
       this.pagedEqData=pagedEqDatatmpArr
     },
-
-    // async processPlotData(res) {
-    //   console.log(res,"processPlotData")
-    //   const plotIds = res.map((plot) => plot.plotId);
-    //   const plotTypes = res.map((plot) => plot.plotType);
-    //
-    //   const batchSize = 10;
-    //   const updatedRes = [];
-    //   for (let i = 0; i < plotIds.length; i += batchSize) {
-    //     const batchPlotIds = plotIds.slice(i, i + batchSize);
-    //     const batchPlotTypes = plotTypes.slice(i, i + batchSize);
-    //
-    //     console.log(`加载第 ${i / batchSize + 1} 批数据`);
-    //     const batchData = await getExcelPlotInfo(batchPlotIds, batchPlotTypes);
-    //     console.log("updatedRes",batchData)
-    //     // 将新的数据累加到现有的数据中
-    //     updatedRes.push(...batchData); // 合并当前批次数据
-    //   }
-    //   this.selectPlotData = updatedRes;  // 累加新的标绘点
-    //   this.filteredEqData = updatedRes;  // 同步更新筛选后的数据
-    //   // 将新增数据累加到现有数据中
-    //   this.updatePagedEqData(); // 更新分页数据
-    //
-    // },
-
-    // 分页数据更新
-    // updatePagedEqData() {
-    //   const start = (this.currentPage - 1) * this.pageSize;
-    //   const end = this.currentPage * this.pageSize;
-    //   this.pagedEqData = this.filteredEqData.slice(start, end);
-    //   let pagedEqDatatmp = this.filteredEqData.slice(start, end);
-    //   let pagedEqDatatmpArr=[]
-    //   pagedEqDatatmp.forEach(item=>{
-    //     if(item.plotInfo.plotType==="直线箭头"||item.plotInfo.plotType==="攻击箭头"||item.plotInfo.plotType==="钳击箭头"){
-    //       item.plotInfo.icon=item.plotInfo.plotType
-    //     }
-    //     pagedEqDatatmpArr.push(item)
-    //   })
-    //   this.pagedEqData=pagedEqDatatmpArr
-    //   // return this.pagedEqData
-    //   console.log("pagedEqData:", this.pagedEqData)
-    // },
 
 
     locateEq(plot) {
@@ -289,18 +248,20 @@ export default {
     filterEq() {
       if (this.title) {
         const keyword = this.title.toLowerCase(); // 转为小写以支持不区分大小写的匹配
-        this.filteredEqData = this.selectPlotData.filter((eq) => {
+        this.filteredEqData = this.plots.filter((eq) => {
+          console.log("eq this.plots.filter",eq)
           // 拼接 locationInfo 的相关字段
-          const locationInfoStr = `${eq.locationInfo?.province || ''} ${eq.locationInfo?.city || ''} ${eq.locationInfo?.county || ''} ${eq.locationInfo?.town || ''} ${eq.locationInfo?.address || ''} ${eq.locationInfo?.poi || ''} ${eq.locationInfo?.road || ''}`.toLowerCase();
+          // const locationInfoStr = `${eq.plotInfo?.belongProvince || ''} ${eq.plotInfo?.belongCity || ''} ${eq.plotInfo?.belongCounty || ''} ${eq.plotInfo?.belongTown || ''} ${eq.plotInfo?.locationAddress || ''} ${eq.plotInfo?.loocationPoi || ''} ${eq.plotInfo?.locationRoad|| ''}`.toLowerCase();
+          const locationInfoStr = `${eq.belongProvince || ''} ${eq.belongCity || ''} ${eq.belongCounty || ''} ${eq.belongTown || ''} ${eq.locationAddress || ''} ${eq.loocationPoi || ''} ${eq.locationRoad|| ''}`.toLowerCase();
 
           // 拼接 plotInfo 的相关字段
-          const plotInfoStr = `${eq.plotInfo?.plotType || ''} ${eq.plotInfo?.damageForm || ''} ${eq.plotInfo?.usageType || ''}`.toLowerCase();
+          const plotInfoStr = `${eq.plotType || ''} ${eq.damageForm || ''} ${eq.usageType || ''}`.toLowerCase();
 
           // 动态拼接 plotTypeInfo 中的所有字段
-          const plotTypeInfoStr = Object.entries(eq.plotTypeInfo || {})
-              .map(([key, value]) => `${key}: ${value || ''}`) // 转成键值对字符串
-              .join(' ')
-              .toLowerCase();
+          // const plotTypeInfoStr = Object.entries(eq.plotTypeInfo || {})
+          //     .map(([key, value]) => `${key}: ${value || ''}`) // 转成键值对字符串
+          //     .join(' ')
+          //     .toLowerCase();
 
           // 其他需要匹配的字段
           const magnitudeStr = `${eq.magnitude || ''}`.toLowerCase();
@@ -310,16 +271,19 @@ export default {
           return (
               locationInfoStr.includes(keyword) ||
               plotInfoStr.includes(keyword) ||
-              plotTypeInfoStr.includes(keyword) ||
+              // plotTypeInfoStr.includes(keyword) ||
               magnitudeStr.includes(keyword) ||
               drawTypeStr.includes(keyword)
           );
         });
-      } else {
-        this.filteredEqData = this.selectPlotData; // 如果没有输入内容，返回全部数据
+        console.log(keyword,"keyword")
+      }
+      else {
+        this.filteredEqData = this.plots; // 如果没有输入内容，返回全部数据
       }
 
       this.currentPage = 1; // 重置分页
+      console.log("this.filteredEqData filterEq",this.filteredEqData)
       this.updatePagedEqData(); // 更新分页数据
     },
 
