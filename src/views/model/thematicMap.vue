@@ -35,7 +35,6 @@
         :step="step"
         style="width: 70%"
     ></thematicMapPreview>
-
   </div>
 </template>
 
@@ -43,17 +42,14 @@
 import * as Cesium from "cesium";
 import CesiumNavigation from "cesium-navigation-es6";
 import {initCesium} from "@/cesium/tool/initCesium.js";
-import {getAllEq, getAllEqList} from "@/api/system/eqlist";
 import eqMark from '@/assets/images/DamageAssessment/eqMark.png';
 import yaan from "@/assets/geoJson/yaan1.json";
 import EarthquakeList from "../../components/ThematicMap/earthquakeList.vue";
 import ThematicMapPreview from "../../components/ThematicMap/thematicMapPreview.vue";
 import html2canvas from "html2canvas";
-
 import * as turf from '@turf/turf';
 import {sampleTerrainMostDetailed} from "cesium";
 import {getEqList} from "@/api/system/damageassessment.js";
-import {handleOutputData} from "../../cesium/plot/eqThemes.js";
 
 
 export default {

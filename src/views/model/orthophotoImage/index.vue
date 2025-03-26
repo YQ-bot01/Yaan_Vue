@@ -36,32 +36,36 @@
       <el-table-column
           prop="label"
           label="正射影像名称"
-          :min-width="200"
+          :min-width="250"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <!-- 正射影像名称列 -->
       <el-table-column
           prop="name"
           label="正射影像图层"
-          :min-width="200"
+          :min-width="150"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <!-- 纬度 -->
       <el-table-column
           prop="lat"
           label="纬度"
-          :min-width="200"
+          :min-width="130"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <!-- 经度 -->
       <el-table-column
           prop="lon"
           label="经度"
-          :min-width="200"
+          :min-width="130"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <!-- 正射影像路径列 -->
@@ -70,14 +74,16 @@
           label="正射影像路径"
           :min-width="250"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <!-- 添加时间列 -->
       <el-table-column
           prop="createTime"
           label="添加时间"
-          :min-width="200"
+          :min-width="220"
           align="center"
+          show-overflow-tooltip
       >
         <template #default="{ row }">
           <span>{{ row.createTime }}</span>
@@ -88,7 +94,7 @@
       <el-table-column
           label="操作"
           align="center"
-          :min-width="250"
+          :min-width="200"
       >
         <template #default="{ row }">
           <el-button

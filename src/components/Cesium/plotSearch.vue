@@ -20,7 +20,6 @@
           <!-- 圆圈震级 -->
           <div style="width: 55px">
             <div class="eqMagnitude">
-              <!--              <img width="30px" height="30px" :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">-->
               <img width="30px" height="30px" :src="'http://localhost:8080'+'/uploads/PlotsPic/' +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">
             </div>
           </div>
@@ -36,7 +35,7 @@
             <div class="disaster-info">
               <!-- 标绘类型 -->
               <div>
-                <span class="info-label">所属地点 :{{ plot.locationInfo.city }}{{ plot.locationInfo.county }} {{ plot.locationInfo.town }}</span>
+                <span class="info-label">所属地点 :{{ plot.plotInfo.belongCity }}{{ plot.plotInfo.belongCounty }} {{ plot.plotInfo.belongTown }}</span>
               </div>
 
               <!-- 伤亡人数 -->
@@ -45,12 +44,13 @@
               </div>
 
               <!-- 出队信息 -->
-              <div v-if="plot.plotInfo.plotType === '已出发队伍'|| plot.plotInfo.plotType === '正在参与队伍'||plot.plotInfo.plotType === '待命队伍' "  style="display: flex; align-items: center;">
-                <span class="info-label">队伍名称:</span>
+              <div v-if="plot.plotInfo.plotType === '已出发队伍'|| plot.plotInfo.plotType === '正在参与队伍'||plot.plotInfo.plotType === '待命队伍' &&((plot.plotTypeInfo && plot.plotTypeInfo.personnelCount)||(plot.plotTypeInfo && plot.plotTypeInfo.teamName))"  style="display: flex; align-items: center;">
+                <span class="info-label"  v-if="plot.plotTypeInfo && plot.plotTypeInfo.teamName">队伍名称:</span>
                 <div class="team-name-wrapper">
-                  <span class="highlight highlight-info team-name">{{ plot.plotTypeInfo.teamName }}</span>
+                  <span class="highlight highlight-info team-name" v-if="plot.plotTypeInfo && plot.plotTypeInfo.teamName">{{ plot.plotTypeInfo.teamName }}</span>
                 </div>
-                <span class="info-label large-text">出队人数：</span><span class="highlight highlight-success large-text">{{ plot.plotTypeInfo.personnelCount }} 人</span>
+                <span class="info-label large-text"  v-if="plot.plotTypeInfo && plot.plotTypeInfo.personnelCount">出队人数：</span>
+                <span class="highlight highlight-success large-text" v-if="plot.plotTypeInfo && plot.plotTypeInfo.personnelCount">{{ plot.plotTypeInfo.personnelCount }} 人</span>
               </div>
             </div>
 
@@ -59,13 +59,11 @@
               <div style="display: flex; align-items: center;">
                 <strong>具体地点：</strong>
                 <div class="local-place-wrapper">
-                  <span class="info-label small-text local-place">{{ plot.locationInfo.address }} （{{ plot.locationInfo.address_position }}方向 {{ plot.locationInfo.address_distance }} 米）</span>
+                  <span class="info-label small-text local-place">{{ plot.plotInfo.locationAddress }} （{{ plot.plotInfo.locationAddressPosition }}方向 {{ plot.plotInfo.locationAddressDistance }} 米）</span>
                 </div>
               </div>
-              <span class="info-label small-text"><strong>附近道路：</strong>{{ plot.locationInfo.road }} （距离 {{ plot.locationInfo.road_distance }} 米）</span>
+              <span class="info-label small-text"><strong>附近道路：</strong>{{ plot.plotInfo.locationRoad }} （距离 {{ plot.plotInfo.locationRoadDistance }} 米）</span>
               <br>
-              <!--              <span class="info-label"><strong>附近 POI：</strong>{{ plot.locationInfo.poi }} （{{ plot.locationInfo.poi_position }}方向 {{ plot.locationInfo.poi_distance }} 米）</span>-->
-              <!--              <br>-->
               <span class="info-label small-text"><strong>标绘经纬：</strong>{{ parseFloat(plot.plotInfo.longitude).toFixed(2) }}°E, {{ parseFloat(plot.plotInfo.latitude).toFixed(2) }}°N</span>
               <br>
               <span class="info-label small-text"><strong>时间范围：</strong>{{this.timestampToTimeChina(plot.plotInfo.startTime)}}-{{this.timestampToTimeChina(plot.plotInfo.endTime)}}</span>
@@ -135,6 +133,7 @@ export default {
     },
     plotArray: {
       handler(newData) {
+        console.log(newData,"newData plotArray")
         this.getPlot({ plotArray: newData });
       },
       deep: true, // 深度监听
@@ -142,17 +141,19 @@ export default {
   },
   data() {
     return {
+      plots:[],
       isFoldShow: true,
       isFoldUnfolding: false,
       isLeftShow: true,
-      selectPlotData: [],
+
       noDataMessage: null,
       // 列表地震
       listEqPoints: [],
       // 行政区划
       RegionLabels: [],
       title: "",
-      filteredEqData: [],
+      // selectPlotData: [],
+      filteredEqData: [], //所有应该显示的点
       pagedEqData: [],
       total: 0,
       pageSize: 10,
@@ -164,201 +165,66 @@ export default {
     this.getPlot(this.eqid)
   },
   methods : {
-    async getReverseGeocode(lon, lat) {
-      try {
-        const response = await axios.get(`${tianDitulocalApi}/geocoder`, {
-          params: {
-            postStr: JSON.stringify({lon, lat, ver: 1}),
-            type: 'geocode',
-            tk: '7b6b98b997001a1c5557356e8518e3b4'
-          }
-        });
-        return response.data.result.addressComponent;
-      } catch (error) {
-        console.error("逆地理编码失败:", error);
-        return null;
-      }
-    },
     async getPlot(params) {
       console.log("params",params)
       try {
         // 判断是通过 eqid 还是 plotArray 调用
         if (params.eqid) {
           // console.log("通过 eqid 获取数据", params.eqid);
-          this.selectPlotData = [];
+          this.plots = [];
           this.filteredEqData = [];
-
           // 获取 plot 数据
           let res = await getPlot({ eqid: params.eqid });
+          this.plots=res
+          this.filteredEqData=this.plots
           console.log("通过 eqid 获取数据",res)
           if (!res || res.length === 0) {
             this.pagedEqData = [];
             this.filteredEqData = [];
-            this.selectPlotData = [];
+            // this.selectPlotData = [];
             this.noDataMessage = "该地震暂无标绘数据";
             return;
           }
-
           this.noDataMessage = null;
-          await this.processPlotData(res); // 处理获取的数据
+          await this.updatePagedEqData()
         }
 
         if (params.plotArray) {
+          this.plots = [];
+          this.filteredEqData = [];
           console.log("通过 plotArray 获取数据", params.plotArray);
-          // 如果是单个对象，转换为数组处理
-          const plotArray = Array.isArray(params.plotArray)
+          let plotArray = Array.isArray(params.plotArray)
               ? params.plotArray
               : [params.plotArray]; // 如果不是数组，则转为数组
-          const plotIds = plotArray.map((plot) => plot.plotId);
-          const plotTypes = plotArray.map((plot) => plot.plotType);
-
-          const updatedRes = [];
-          let batchData= await getExcelPlotInfo(plotIds, plotTypes);
-          // console.log("batchData",batchData)
-          // 立即处理和展示当前批次数据
-          const processedBatchData = await Promise.all(
-              batchData.map(async (plot) => {
-                if (plot.plotInfo && plot.plotInfo.longitude && plot.plotInfo.latitude) {
-                  const locationInfo = await this.getReverseGeocode(
-                      plot.plotInfo.longitude,
-                      plot.plotInfo.latitude
-                  );
-                  return {...plot, locationInfo};
-                }
-                return plot;
-              })
-          );
-
-          // 将新的数据累加到现有的数据中
-          updatedRes.push(...processedBatchData); // 合并当前批次数据
-          // 将新增数据累加到现有数据中
-          this.selectPlotData = [...this.selectPlotData, ...updatedRes];  // 累加新的标绘点
-          this.filteredEqData = [...this.filteredEqData, ...updatedRes];  // 同步更新筛选后的数据
-          this.updatePagedEqData(); // 更新分页数据
+          this.plots=plotArray
+          // this.plots=[...this.plots,...plotArray]
+          this.filteredEqData=this.plots
+          console.log(this.plots,"params.plotArray")
           this.noDataMessage = null;
+          await this.updatePagedEqData()
         }
       } catch (error) {
         console.error("获取地震列表或处理失败:", error);
       }
     },
-
-    async processPlotData(res) {
-      console.log(res,"processPlotData")
-      const plotIds = res.map((plot) => plot.plotId);
-      const plotTypes = res.map((plot) => plot.plotType);
-
-      const batchSize = 10;
-      const updatedRes = [];
-      for (let i = 0; i < plotIds.length; i += batchSize) {
-        const batchPlotIds = plotIds.slice(i, i + batchSize);
-        const batchPlotTypes = plotTypes.slice(i, i + batchSize);
-
-        console.log(`加载第 ${i / batchSize + 1} 批数据`);
-        const batchData = await getExcelPlotInfo(batchPlotIds, batchPlotTypes);
-
-        // 立即处理和展示当前批次数据
-        const processedBatchData = await Promise.all(
-            batchData.map(async (plot) => {
-              if (plot.plotInfo && plot.plotInfo.longitude && plot.plotInfo.latitude) {
-                const locationInfo = await this.getReverseGeocode(
-                    plot.plotInfo.longitude,
-                    plot.plotInfo.latitude
-                );
-                return {...plot, locationInfo};
-              }
-              return plot;
-            })
-        );
-
-        // 将新的数据累加到现有的数据中
-        updatedRes.push(...processedBatchData); // 合并当前批次数据
-      }
-
-      // 将新增数据累加到现有数据中
-      this.selectPlotData = [...this.selectPlotData, ...updatedRes];  // 累加新的标绘点
-      this.filteredEqData = [...this.filteredEqData, ...updatedRes];  // 同步更新筛选后的数据
-      this.updatePagedEqData(); // 更新分页数据
-
-    },
-
-    // 分页数据更新
-    updatePagedEqData() {
+    async updatePagedEqData(){
       const start = (this.currentPage - 1) * this.pageSize;
       const end = this.currentPage * this.pageSize;
-      // this.pagedEqData = this.filteredEqData.slice(start, end);
       let pagedEqDatatmp = this.filteredEqData.slice(start, end);
+      const batchPlotIds = pagedEqDatatmp.map((plot) => plot.plotId);
+      const batchPlotTypes = pagedEqDatatmp.map((plot) => plot.plotType);
+      const batchData = await getExcelPlotInfo(batchPlotIds, batchPlotTypes);
+      console.log("updatedRes processDataEqid",batchData)
+
       let pagedEqDatatmpArr=[]
-      pagedEqDatatmp.forEach(item=>{
+      batchData.forEach(item=>{
+        console.log(item.plotInfo.plotType,"item.plotInfo.plotTypem")
         if(item.plotInfo.plotType==="直线箭头"||item.plotInfo.plotType==="攻击箭头"||item.plotInfo.plotType==="钳击箭头"){
           item.plotInfo.icon=item.plotInfo.plotType
         }
         pagedEqDatatmpArr.push(item)
       })
       this.pagedEqData=pagedEqDatatmpArr
-      console.log("pagedEqData:", this.pagedEqData)
-
-      // 清除之前的点并重新添加
-      // viewer.entities.removeAll();
-      // this.renderQueryEqPoints();
-    },
-
-    // 地图渲染查询地震点(根据页码、根据搜索框)
-    renderQueryEqPoints() {
-      // this.eqThemes.show.isshowOvalCircle = false
-
-      this.listEqPoints.forEach(entity => window.viewer.entities.remove(entity));
-      this.listEqPoints = [];
-
-      this.pagedEqData.forEach(eq => {
-        const entity = window.viewer.entities.add({
-          position: Cesium.Cartesian3.fromDegrees(Number(eq.longitude), Number(eq.latitude)),
-          billboard: {
-            image: eqMark,
-            width: 20,
-            height: 20,
-            eyeOffset: new Cesium.Cartesian3(0, 0, -5000)
-          },
-          label: {
-            text: this.timestampToTime(eq.occurrenceTime, 'date') + eq.earthquakeName + eq.magnitude + '级地震',
-            font: '18px sans-serif',
-            fillColor: Cesium.Color.WHITE,
-            outlineColor: Cesium.Color.BLACK,
-            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-            showBackground: true,
-            show: false,
-            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-            clampToGround: true,
-            horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
-            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
-          },
-          id: eq.eqid
-        });
-        yaan.features.forEach((feature) => {
-          let center = feature.properties.center;
-
-          if (center && center.length === 2) {
-            let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-            let regionlabel = viewer.entities.add(new Cesium.Entity({
-              position: position,
-              label: new Cesium.LabelGraphics({
-                text: feature.properties.name,
-                scale: 1,
-                font: '18px Sans-serif',
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                outlineWidth: 2,
-                verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-                fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-                pixelOffset: new Cesium.Cartesian2(0, 0),
-                eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
-              })
-            }));
-            this.RegionLabels.push(regionlabel)
-          }
-        })
-        this.listEqPoints.push(entity);
-      });
     },
 
 
@@ -387,18 +253,20 @@ export default {
     filterEq() {
       if (this.title) {
         const keyword = this.title.toLowerCase(); // 转为小写以支持不区分大小写的匹配
-        this.filteredEqData = this.selectPlotData.filter((eq) => {
+        this.filteredEqData = this.plots.filter((eq) => {
+          console.log("eq this.plots.filter",eq)
           // 拼接 locationInfo 的相关字段
-          const locationInfoStr = `${eq.locationInfo?.province || ''} ${eq.locationInfo?.city || ''} ${eq.locationInfo?.county || ''} ${eq.locationInfo?.town || ''} ${eq.locationInfo?.address || ''} ${eq.locationInfo?.poi || ''} ${eq.locationInfo?.road || ''}`.toLowerCase();
+          // const locationInfoStr = `${eq.plotInfo?.belongProvince || ''} ${eq.plotInfo?.belongCity || ''} ${eq.plotInfo?.belongCounty || ''} ${eq.plotInfo?.belongTown || ''} ${eq.plotInfo?.locationAddress || ''} ${eq.plotInfo?.loocationPoi || ''} ${eq.plotInfo?.locationRoad|| ''}`.toLowerCase();
+          const locationInfoStr = `${eq.belongProvince || ''} ${eq.belongCity || ''} ${eq.belongCounty || ''} ${eq.belongTown || ''} ${eq.locationAddress || ''} ${eq.loocationPoi || ''} ${eq.locationRoad|| ''}`.toLowerCase();
 
           // 拼接 plotInfo 的相关字段
-          const plotInfoStr = `${eq.plotInfo?.plotType || ''} ${eq.plotInfo?.damageForm || ''} ${eq.plotInfo?.usageType || ''}`.toLowerCase();
+          const plotInfoStr = `${eq.plotType || ''} ${eq.damageForm || ''} ${eq.usageType || ''}`.toLowerCase();
 
           // 动态拼接 plotTypeInfo 中的所有字段
-          const plotTypeInfoStr = Object.entries(eq.plotTypeInfo || {})
-              .map(([key, value]) => `${key}: ${value || ''}`) // 转成键值对字符串
-              .join(' ')
-              .toLowerCase();
+          // const plotTypeInfoStr = Object.entries(eq.plotTypeInfo || {})
+          //     .map(([key, value]) => `${key}: ${value || ''}`) // 转成键值对字符串
+          //     .join(' ')
+          //     .toLowerCase();
 
           // 其他需要匹配的字段
           const magnitudeStr = `${eq.magnitude || ''}`.toLowerCase();
@@ -408,16 +276,19 @@ export default {
           return (
               locationInfoStr.includes(keyword) ||
               plotInfoStr.includes(keyword) ||
-              plotTypeInfoStr.includes(keyword) ||
+              // plotTypeInfoStr.includes(keyword) ||
               magnitudeStr.includes(keyword) ||
               drawTypeStr.includes(keyword)
           );
         });
-      } else {
-        this.filteredEqData = this.selectPlotData; // 如果没有输入内容，返回全部数据
+        console.log(keyword,"keyword")
+      }
+      else {
+        this.filteredEqData = this.plots; // 如果没有输入内容，返回全部数据
       }
 
       this.currentPage = 1; // 重置分页
+      console.log("this.filteredEqData filterEq",this.filteredEqData)
       this.updatePagedEqData(); // 更新分页数据
     },
 
@@ -638,7 +509,7 @@ export default {
 .fold {
   position: absolute;
   top: 63px;
-  right: 333px;
+  right: 423px;
   margin: 0 auto;
   display: flex;
   align-items: center;

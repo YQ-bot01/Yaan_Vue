@@ -184,28 +184,9 @@
     <!--    box包裹地图，截图需要-->
     <div id="box" ref="box">
       <div id="cesiumContainer">
-        <!-- TimeLinePanel 弹窗 -->
-        <commonPanel
-            :visible="timelinePopupVisible"
-            :position="timelinePopupPosition"
-            :popupData="timelinePopupData"
-            :ifedit="false"
-            @wsSendPoint="wsSendPoint"
-            @closePlotPop="closePlotPop"
-        />
-        <dataSourcePanel
-            :visible="dataSourcePopupVisible"
-            :position="dataSourcePopupPosition"
-            :popupData="dataSourcePopupData"
-        />
+
       </div>
     </div>
-    <!-- RouterPanel 弹窗 -->
-    <RouterPanel
-        :visible="routerPopupVisible"
-        :position="routerPopupPosition"
-        :popupData="routerPopupData"
-    />
 
     <div class="top-header">
       <div class="system-title">
@@ -276,7 +257,7 @@
     </div>
 
     <div class="logo-left-weather">
-      <div class="company-name">雅安市地震应急信息服务技术支撑平台</div>
+      <div class="company-name">{{useTitleStore().pageTitle}}</div>
       <!-- 以下是实时获取时间的代码 -->
       <div class="logo-left-time">
         <div class="logo-time-hour">
@@ -598,31 +579,7 @@
     <!--      <el-button @click="removeAll">清空所有实体</el-button>-->
     <!--    </div>-->
 
-    <!--    路径规划    -->
-    <!--      <div class="universalPanel" v-if="showTips" style="top: 500px;">-->
-    <!--          <div class="panelTop">-->
-    <!--              <h2 class="panelName">路径规划</h2>-->
-    <!--          </div>-->
 
-    <!--          <div class="panelContent" style="padding-right: 5px;display: initial;">-->
-    <!--              <el-row style="margin: 20px;">-->
-    <!--                  <el-button @click="walkStyle" :style="selectedWalk">步行</el-button>-->
-    <!--                  <el-button @click="driveStyle" :style="selectedDrive">驾驶</el-button>-->
-    <!--              </el-row>-->
-    <!--              <div slot="header" class="clearfix"-->
-    <!--                   style="color: white;height: 100px;margin: 5% 20px 10px 20px;overflow-y: auto;">-->
-    <!--                  <div>-->
-    <!--                      全程约 {{ totalRoute }} 米 {{ RouteWay }} 大概需要 {{ RouteTime }}-->
-    <!--                  </div>-->
-    <!--                  <div v-if="visibleGuilde">-->
-    <!--                      <div v-for="(instruction, index) in RouteGuilde" :key="index">-->
-    <!--                          {{ instruction }}-->
-    <!--                      </div>-->
-    <!--                      <div v-if="loading" class="loading">加载中...</div>-->
-    <!--                  </div>-->
-    <!--              </div>-->
-    <!--          </div>-->
-    <!--      </div>-->
   </div>
 </template>
 
@@ -635,11 +592,10 @@ import {getAllEq, getAllEqList, getEqById, getEqListById} from '@/api/system/eql
 import cesiumPlot from '@/cesium/plot/cesiumPlot'
 import {useCesiumStore} from '@/store/modules/cesium.js'
 import centerstar from "@/assets/icons/TimeLine/震中.png";
-import TimeLinePanel from "@/components/Cesium/TimeLinePanel.vue";
+
 
 import fileUrl from "@/assets/json/TimeLine/2020年6月1日四川雅安芦山县6.1级地震灾害报告.pdf"
-import commonPanel from "@/components/Cesium/CommonPanel";
-import dataSourcePanel from "@/components/Panel/dataSourcePanel.vue";
+
 import eqTable from '@/components/Home/eqtable.vue'
 import eqlistTable from '@/components/Home/eqlistTable.vue'
 import earthquakeTable from "@/components/Home/earthquakeTable.vue";
@@ -650,7 +606,7 @@ import {getFeaturesLayer} from "@/api/system/emergency.js";
 import emergencyRescueEquipmentLogo from '@/assets/images/EmergencyResourceInformation/disasterReliefSuppliesLogo.jpg';
 import rescueTeamsInfoLogo from '@/assets/images/EmergencyResourceInformation/rescueTeamsInfoLogo.png';
 import emergencySheltersLogo from '@/assets/images/emergencySheltersLogo.png';
-import RouterPanel from "@/components/Panel/RouterPanel.vue";
+
 import layeredShowPlot from '@/components/Cesium/layeredShowPlot.vue'
 import {addFaultZones, addHistoryEqPoints, addOvalCircles, handleOutputData} from "../../cesium/plot/eqThemes.js";
 import {MapPicUrl, ReportUrl} from "@/assets/json/thematicMap/PicNameandLocal.js"
@@ -698,6 +654,7 @@ import {gcj02towgs84, wgs84togcj02} from "@/api/tool/wgs_gcj_encrypts.js";
 import arrow from "@/cesium/drawArrow/drawPlot.js";
 import {AmapApiLocal} from "@/utils/server.js";
 import {tianditu} from "@/utils/server.js";
+import {useTitleStore} from "../../store/index.js";
 
 export default {
   computed: {
@@ -711,11 +668,7 @@ export default {
     PlotSearch,
     timeLineCasualtyStatisticthd,
     thematicMapPreview,
-    RouterPanel,
-    TimeLinePanel,
 
-    commonPanel,
-    dataSourcePanel,
     eqTable,
     layeredShowPlot,
     earthquakeTable,
@@ -725,20 +678,7 @@ export default {
   data: function () {
     return {
 // -----------弹窗们的状态变量-------------
-      selectedEntityPosition: '', //存储断裂带div的位置
-      selectedEntityHighDiy: null, // 存储弹窗的位置
-      routerPopupVisible: false, // RouterPanel弹窗的显示与隐藏
-      routerPopupPosition: {x: 0, y: 0}, // RouterPanel弹窗的位置
-      routerPopupData: {}, // RouterPanel弹窗的数据
 
-      timelinePopupVisible: false, // TimeLinePanel弹窗的显示与隐藏
-      timelinePopupPosition: {x: 0, y: 0}, // TimeLinePanel弹窗的位置
-      timelinePopupData: {}, // TimeLinePanel弹窗的数据
-      //----------------------------------
-
-      dataSourcePopupVisible: false, // TimeLinePanel弹窗的显示与隐藏
-      dataSourcePopupPosition: {x: 0, y: 0}, // TimeLinePanel弹窗的位置
-      dataSourcePopupData: [], // TimeLinePanel弹窗的数据
       //----------------------------------
       eqid: '',
       eqqueueId: '',
@@ -1112,7 +1052,7 @@ export default {
       wsdeleteMakers: [],
       viewCenterCoordinate: null,
       showLayerFeatures: false,// 图层要素弹框状态
-      showEqListPanel: false,// 地震列表弹框状态
+
       showModelPanel: false,// 三维模型弹框状态
       props: {
         label: 'name',
@@ -1155,6 +1095,7 @@ export default {
     }
   },
   methods: {
+    useTitleStore,
 
     outputData() {
       handleOutputData(this.eqid, this.eqqueueId, null, 'thematicMap').then((res) => {

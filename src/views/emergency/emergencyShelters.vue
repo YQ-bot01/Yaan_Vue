@@ -32,7 +32,7 @@
         <template #default="{ row }">
           <!-- 特定字段处理：例如 startTime 为 null 或 '1970-01-01' 时为空 -->
           <div v-if="header.prop === 'startTime'">
-            {{ row.startTime && row.startTime !== '1970年01月01日 08:00:00' ? row.startTime : '' }}
+            {{ row.startTime}}
           </div>
 
           <!-- 其他字段直接显示 -->
@@ -445,15 +445,15 @@ export default {
         };
       });
       sheltersList().then(res => {
-        this.sheltersData = res.map(item => {
-          return {
-            ...item,
-            startTime: this.timestampToTime(item.startTime) // 格式化 startTime
-          };
-        });
+        this.sheltersData = res.map(item => ({
+          ...item,
+          startTime: item.startTime ? this.timestampToTime(item.startTime) : ''
+        }));
+
         this.total = res.length;
-        this.tableData = this.getPageArr(); // 更新分页数据
+        this.tableData = this.getPageArr(); // 确保 `sheltersData` 赋值后再更新分页数据
       });
+
 
     },
     handleOpen(feature, row) {
@@ -509,7 +509,7 @@ export default {
             // 遍历返回的数据，将 occurrenceTime 格式化
             for (let i = 0; i < res.length; i++) {
               let item = res[i];
-              item.startTime = this.timestampToTime(item.startTime);
+              item.startTime = item.startTime ? this.timestampToTime(item.startTime) : ''
             }
 
             // 更新 tableData 以显示搜索结果
@@ -528,7 +528,6 @@ export default {
     },
 
 
-    //新增或修改
     // 新增或修改
     commit() {
       this.$refs.form.validate((valid) => {
@@ -547,11 +546,12 @@ export default {
 
         // 处理日期，若没有选择日期则设为 null 或空值
         // 提交时处理 null 值
-        if (this.dialogContent.startTime === null) {
+        if (this.dialogContent.startTime === null||this.dialogContent.startTime === '1970年01月01日 08:00:00'||this.dialogContent.startTime==='') {
           // 如果 startTime 是 null，确保提交空值给后端
           this.dialogContent.startTime = null;
         } else {
           // 格式化时间为 ISO 格式，提交给后端
+          console.log("提交前的 startTime ：", this.dialogContent.startTime);
           this.dialogContent.startTime = this.formatDateToISOString(this.dialogContent.startTime);
         }
 
@@ -610,6 +610,15 @@ export default {
     },
 
     // 处理日期变化
+    // handleStartDateChange(date) {
+    //   if (!date || date === '1970-01-01 08:00:00') {
+    //     // 用户清空日期或默认无效日期
+    //     this.dialogContent.startTime = '';
+    //   } else {
+    //     this.dialogContent.startTime = date;
+    //   }
+    // },
+    // 处理日期变化
     handleStartDateChange(date) {
       if (!date) {
         // 如果选择日期为 null（即用户清空了日期），则设置为 null
@@ -620,18 +629,23 @@ export default {
       }
     },
 
-    // 将时间戳转为 ISO 格式
+
+    // 将时间戳转为 ISO 格式 (yyyy-MM-dd HH:mm:ss)
     formatDateToISOString(timestamp) {
       if (!timestamp) return null; // 如果时间戳为空，返回 null
       const date = new Date(timestamp);
+
       const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // 确保两位数
       const day = String(date.getDate()).padStart(2, '0');
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
       const seconds = String(date.getSeconds()).padStart(2, '0');
-      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`; // 这里修正反引号
     },
+
+
 
 
 
@@ -661,7 +675,6 @@ export default {
       }
       for (; start < end; start++) {
         if (data[start]) {
-          data[start].startUsingDate = this.formatDate(data[start].startUsingDate);
           arr.push(data[start]);
         }
       }
@@ -727,7 +740,7 @@ export default {
       }
     },
     timestampToTime(timestamp) {
-      // console.log("转换前的时间戳:", timestamp);
+      console.log("转换前的时间戳:", timestamp);
       let DateObj = new Date(timestamp)
       if (isNaN(DateObj.getTime())) {
         console.error("无效的时间戳:", timestamp);

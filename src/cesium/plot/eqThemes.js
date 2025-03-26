@@ -11,6 +11,7 @@ import countyCodeMap from "../../assets/json/DamageAssessment/countyCodeMap.json
 import {domainName, zaiSunFuZhuJueCe, zaisunimageipLocal} from "../../utils/server.js";
 import hospitalIcon from "@/assets/icons/svg/hospital.png";
 import villageIcon from "@/assets/icons/svg/village.png";
+import SchoolIcon from "@/assets/xuexiao.png";
 // 雅安行政区加载
 export function addYaanLayer() {
   //雅安行政区加载
@@ -145,97 +146,117 @@ export function addVillageLayer() {
   }
 }
 
+// 绘制学校
+export function addSchoolLayer() {
+  // GeoJSON文件路径
+  const geoJsonUrl = new URL("@/assets/geoJson/school.geojson", import.meta.url).href;
+  if (viewer.dataSources.getByName("school").length === 0) {
+    // 使用fetch加载GeoJSON文件
+    fetch(geoJsonUrl)
+      .then((response) => response.json())
+      .then((geoJsonData) => {
+        // 将GeoJSON数据加载到Cesium
+        viewer.dataSources.add(Cesium.GeoJsonDataSource.load(geoJsonData, {
+          stroke: Cesium.Color.GREEN,
+          fill: Cesium.Color.GREEN.withAlpha(0.5),
+          strokeWidth: 2,
+          clampToGround: true,
+        })).then(function (dataSource) {
+          // 给 dataSource 添加 name 属性
+          dataSource.name = "school";
+
+          // 遍历每个实体，添加图片标记
+          dataSource.entities.values.forEach(function (entity) {
+            entity.properties.sourceName = "school";  // 追加自定义的属性
+            entity.billboard = new Cesium.BillboardGraphics({
+              image: SchoolIcon, // 使用导入的图片
+              width: 32, // 图片宽度
+              height: 32, // 图片高度
+              scale: 1, // 图片缩放
+            });
+          });
+        })
+      })
+      .catch((error) => {
+        console.error("Error loading GeoJSON:", error);
+      });
+  }
+}
+
 
 // 绘制断裂带
 export function addFaultZones(centerPoint) {
-// GeoJSON文件路径
+  // GeoJSON文件路径
   const geoJsonUrl = new URL("@/assets/geoJson/duanliedai.geojson", import.meta.url).href;
 
-  console.log(1234554321)
-  // 使用fetch加载GeoJSON文件
+  console.log(1234554321);
+  // 记录已添加的断裂带名称，避免重复
+  const addedFaultNames = new Set();
+
+  // 使用 fetch 加载 GeoJSON 文件
   fetch(geoJsonUrl)
-    .then((response) => response.json())
-    .then((geoJsonData) => {
-      // 将GeoJSON数据加载到Cesium
-      viewer.dataSources.add(Cesium.GeoJsonDataSource.load(geoJsonData, {
-        stroke: Cesium.Color.RED,
-        fill: Cesium.Color.RED.withAlpha(0.5),
-        strokeWidth: 2,
-        clampToGround: true,
-      })).then(function (dataSource) {
-        // 给 dataSource 添加 name 属性
-        dataSource.name = "faultZone";
+      .then((response) => response.json())
+      .then((geoJsonData) => {
+        // 将 GeoJSON 数据加载到 Cesium
+        viewer.dataSources.add(
+            Cesium.GeoJsonDataSource.load(geoJsonData, {
+              stroke: Cesium.Color.RED,
+              fill: Cesium.Color.RED.withAlpha(0.5),
+              strokeWidth: 3,
+              clampToGround: true,
+            })
+        ).then(function (dataSource) {
+          // 给 dataSource 添加 name 属性
+          dataSource.name = "faultZone";
+
+          // 遍历所有实体，提取断层名称并添加 label
+          dataSource.entities.values.forEach((entity) => {
+            if (entity.properties && entity.properties.O_Com) {
+              // 提取断裂带名称
+              const faultNameMatch = entity.properties.O_Com.getValue().match(/"断层名称":"([^"]+)"/);
+              if (faultNameMatch) {
+                const faultName = faultNameMatch[1];
+
+                // 如果该名称已经添加，则跳过
+                if (addedFaultNames.has(faultName)) {
+                  return;
+                }
+
+                // 获取线条的第一个坐标点作为标签位置
+                if (entity.polyline && entity.polyline.positions) {
+                  const positions = entity.polyline.positions.getValue(Cesium.JulianDate.now());
+                  if (positions && positions.length > 0) {
+                    const labelPosition = positions[Math.floor(positions.length / 2)]; // 取中点
+
+                    // 添加标签
+                    entity.label = new Cesium.LabelGraphics({
+                      text: faultName,
+                      font: "16px sans-serif",
+                      fillColor: Cesium.Color.WHITE,
+                      outlineColor: Cesium.Color.BLACK,
+                      outlineWidth: 2,
+                      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                      pixelOffset: new Cesium.Cartesian2(0, -10), // 轻微上移，避免与线条重叠
+                      showBackground: true,
+                      backgroundColor: new Cesium.Color(0, 0, 0, 0.5),
+                      disableDepthTestDistance: Number.POSITIVE_INFINITY, // 确保不被地形遮挡
+                    });
+
+                    // 设置标签位置
+                    entity.position = labelPosition;
+
+                    // 记录该名称已被添加
+                    addedFaultNames.add(faultName);
+                  }
+                }
+              }
+            }
+          });
+        });
       })
-
-    })
-    .catch((error) => {
-      console.error("Error loading GeoJSON:", error);
-    });
-
-
-  //以下为加载全国断裂带line_fault_zone.json
-  // const faultZoneLines = [];
-  // const lonAndlat = [centerPoint.longitude, centerPoint.latitude];
-  //
-  // // 直接解析经纬度
-  // let lon1 = parseFloat(lonAndlat[0]);
-  // let lat1 = parseFloat(lonAndlat[1]);
-  //
-  // let radlat1 = (lat1 * Math.PI) / 180.0;
-  //
-  // fault_zone.forEach((item) => {
-  //   // 计算距离逻辑应调整为从断裂带的点到中心点的距离
-  //   const itemLon = parseFloat(item.lonlat[0][0][0]);
-  //   const itemLat = parseFloat(item.lonlat[0][0][1]);
-  //   let radlat2 = (itemLat * Math.PI) / 180.0;
-  //   let a = radlat1 - radlat2;
-  //   let b = (lon1 * Math.PI) / 180.0 - (itemLon * Math.PI) / 180.0;
-  //   let s =
-  //     2 *
-  //     Math.asin(
-  //       Math.sqrt(
-  //         Math.pow(Math.sin(a / 2), 2) +
-  //         Math.cos(radlat1) *
-  //         Math.cos(radlat2) *
-  //         Math.pow(Math.sin(b / 2), 2)
-  //       )
-  //     );
-  //   s = s * 6378.137; // 地球半径
-  //
-  //   const num = Math.round(s * 10000) / 10000;
-  //
-  //   if (num < 200) {
-  //     faultZoneLines.push(item);
-  //   }
-  // });
-  //
-  // faultZoneLines.forEach((item) => {
-  //   let positionsArr = [];
-  //   for (var i = 0; i + 1 < item.lonlat[0].length; i++) {
-  //     positionsArr.push(
-  //       parseFloat(item.lonlat[0][i][0]),
-  //       parseFloat(item.lonlat[0][i][1]),
-  //       0
-  //     );
-  //   }
-  //
-  //   viewer.entities.add({
-  //     id: item.line,
-  //     polyline: {
-  //       status: 1,
-  //       positions: Cesium.Cartesian3.fromDegreesArrayHeights(positionsArr),
-  //       width: 5,
-  //       material: Cesium.Color.RED,
-  //       depthFailMaterial: Cesium.Color.YELLOW,
-  //       clampToGround: true,
-  //     },
-  //     properties: {
-  //       type: "faultZone",
-  //       name: item.name,
-  //     },
-  //     layer: "断裂带",
-  //   });
-  // });
+      .catch((error) => {
+        console.error("Error loading GeoJSON:", error);
+      });
 }
 
 // 绘制历史地震点

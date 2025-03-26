@@ -68,7 +68,7 @@
         <div v-if="!showStatus">
           <div class="header-div">
         <span>
-          <span>态势标绘信息</span>
+          <span>信息标注信息</span>
         </span>
           </div>
           <div class="Marking-info-panel">
@@ -285,6 +285,7 @@ export default {
     },
     // 提交修改的标绘信息
     updataPlotInfo(activity) {
+      console.log(activity,"activity")
       let that = this
       // 创建一个新的对象，只保留字段和它们的 value 值
       let typeInfoValues = {};
@@ -523,7 +524,7 @@ export default {
     // 时间戳转换成日期格式，将时间戳转换成 xx年xx月xx日xx时xx分xx秒格式，
     // 形参timestamp必须时整型时间戳，字符串类型时间戳得到的时NaN。
     timestampToTime(timestamp) {
-      return timeTransfer.timestampToTime(timestamp)
+      return timeTransfer.timestampToTimeWithT(timestamp)
     },
     timestampToTimeChinese(timestamp) {
       return timeTransfer.timestampToTimeChina(timestamp)

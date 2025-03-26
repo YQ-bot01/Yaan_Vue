@@ -128,7 +128,16 @@ export default {
       this.getPlotwithStartandEndTime(this.eqid)
       window.viewer.timeline.container.onmouseup = (e) => {
         this.findLastRecordTimeAndContent()
-        this.playEnd()
+        if(this.isMarkingLayer===false){
+          console.log("11111 isMarkingLayer_viewer ")
+          window.viewer.clockViewModel.shouldAnimate = false;
+          this.endflag = true; //设置的flag，避免与自动播放的动效暂停播放冲突
+          this.selectButton("playEnd")
+        }
+        else {
+          console.log("2222 isMarkingLayer_viewer")
+          this.playEnd()
+        }
       }
     },
     stopTimePlay(newVal) {
@@ -203,13 +212,21 @@ export default {
       this.selectedId = id; // 更新选中的按钮ID
     },
     jumpRealTime() {
+      this.findLastRecordTimeAndContent()
       window.viewer.clockViewModel.shouldAnimate = true;
       viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date());
-      this.flyflag = false
-      this.endflag = false;
-      this.$emit('startTimePlay');
-      window.viewer.clock.multiplier = 1.0
       this.findLastRecordTimeAndContent()
+      if(this.isMarkingLayer===false){
+        window.viewer.clockViewModel.shouldAnimate = false;
+        this.endflag = true; //设置的flag，避免与自动播放的动效暂停播放冲突
+        this.selectButton("playEnd")
+      }
+      else{
+        this.flyflag = false
+        this.endflag = false;
+        this.$emit('startTimePlay');
+        window.viewer.clock.multiplier = 1.0
+      }
     },
     backToStart() {
       window.viewer.clockViewModel.shouldAnimate = false;
@@ -243,10 +260,17 @@ export default {
       } else {
         window.viewer.clock.multiplier = this.currentSpeed
       }
-      window.viewer.clockViewModel.shouldAnimate = true;
-      this.endflag = false;
-      this.$emit('startTimePlay');
-      this.flyflag = true
+      if(this.isMarkingLayer===false){
+        window.viewer.clockViewModel.shouldAnimate = false;
+        this.endflag = true; //设置的flag，避免与自动播放的动效暂停播放冲突
+        this.selectButton("playEnd")
+      }
+      else{
+        window.viewer.clockViewModel.shouldAnimate = true;
+        this.endflag = false;
+        this.$emit('startTimePlay');
+        this.flyflag = true
+      }
     },
     selectSpeed(speed) {
       // 直接赋值速度选项
@@ -332,6 +356,9 @@ export default {
       }
     },
     ifstopandflash(currentTime, oldCurrentTime) {
+      if(this.isMarkingLayer==false){
+        return;
+      }
       if (this.flyflag == false) {
         return;
       }
@@ -496,7 +523,7 @@ export default {
   background-color: rgba(32, 99, 150, 0.8);
   border-radius: 20px;
   height: 6%;
-  width: 12%;
+  width: 15%;
   top: 12%;
   position: absolute;
   z-index: 512;

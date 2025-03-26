@@ -35,13 +35,15 @@
           label="模型名称"
           min-width="200"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <el-table-column
           prop="modelSize"
           label="模型大小(平方公里)"
-          min-width="120"
+          min-width="150"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <el-table-column
@@ -49,6 +51,7 @@
           label="模型路径"
           min-width="250"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <el-table-column
@@ -56,6 +59,7 @@
           label="模型中心高度(米)"
           min-width="150"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <el-table-column
@@ -63,6 +67,7 @@
           label="地形模型中心高度(米)"
           min-width="150"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <el-table-column
@@ -70,6 +75,7 @@
           label="添加时间"
           min-width="200"
           align="center"
+          show-overflow-tooltip
       ></el-table-column>
 
       <el-table-column

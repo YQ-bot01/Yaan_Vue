@@ -11,28 +11,8 @@
       <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
       <el-button icon="Refresh" @click="resetQuery">重置</el-button>
       <!--      二三维一体化——地震信息管理-->
-      <!--      <el-button type="primary" plain icon="Plus" @click="handleOpen('新增')">新增</el-button>-->
       <el-button type="primary" icon="Filter" @click="openQueryForm">筛选</el-button>
       <el-button type="primary" plain icon="Plus" @click="handleAddOrUpdate('add')">新增</el-button>
-      <!-- 正式地震按钮 -->
-      <!--      <el-button-->
-      <!--          size="primary"-->
-      <!--          :type="activeMode === 'Z' ? 'danger' : 'default'"-->
-      <!--          style="font-size: 16px;"-->
-      <!--          @click="activeMode = 'Z'"-->
-      <!--      >-->
-      <!--        正式地震-->
-      <!--      </el-button>-->
-
-      <!--      &lt;!&ndash; 测试地震按钮 &ndash;&gt;-->
-      <!--      <el-button-->
-      <!--          size="primary"-->
-      <!--          :type="activeMode === 'Y' || activeMode === 'T' ? 'primary' : 'default'"-->
-      <!--          style="font-size: 16px;"-->
-      <!--          @click="activeMode = 'Y'"-->
-      <!--      >-->
-      <!--        测试地震-->
-      <!--      </el-button>-->
 
     </el-form-item>
 
@@ -124,11 +104,6 @@
     <el-dialog :title="dialogTitle" v-model="dialogShow" width="30%">
       <el-form ref="from" :model="dialogContent" :rules="rules">
         <el-row>
-          <!--          <el-col :span="13">-->
-          <!--            <el-form-item label="震发位置：" prop="earthquakeName">-->
-          <!--              <el-input v-model="dialogContent.earthquakeName" placeholder="请输入内容"></el-input>-->
-          <!--            </el-form-item>-->
-          <!--          </el-col>-->
           <el-col :span="55">
             <el-form-item label="震发位置：" prop="eqAddr">
               <div class="custom-cascader-wrapper">
@@ -239,6 +214,7 @@
       </div>
     </el-dialog>
 
+   <!-- 新增表单-->
     <el-dialog :title="panelTitle" v-model="isPanelShow" width="30%">
       <el-form ref="panel" :model="addOrUpdateDTO" :rules="panelRules">
         <el-row>
@@ -335,14 +311,9 @@
 <script>
 import {
   addEq,
-  getAllEq,
-  deleteeq,
-  updataEq,
-  queryEq,
-  fromEq,
   eqEventTrigger,
   deletedEq,
-  getAllEqList, queryEqList, fromEqList, eqProgress, eqEventReassessment
+  queryEqList, fromEqList, eqProgress, eqEventReassessment
 } from '@/api/system/eqlist'
 import {getEqList} from "@/api/system/damageassessment.js";
 
@@ -352,89 +323,6 @@ export default {
 
     return {
       rules: {
-        earthquakeName: [
-          {required: true, message: '请输入震发位置', trigger: 'blur'},
-        ],
-        occurrenceTime: [
-          {required: true, message: '请选择发震时间', trigger: ['blur', 'change']},
-        ],
-        magnitude: [
-          {required: true, message: '请输入震级(级)', trigger: 'blur'},
-          {
-            validator: (rule, value, callback) => {
-              if (!value) {
-                return callback(new Error('震级不能为空'));
-              }
-              const num = Number(value);
-              if (isNaN(num)) {
-                return callback(new Error('震级必须为数字'));
-              }
-              if (num < 3 || num > 10) {
-                return callback(new Error('震级必须在 3 到 10 之间'));
-              }
-              callback();
-            },
-            trigger: ['blur', 'change'],
-          },
-
-        ],
-        depth: [
-          {required: true, message: '请输入深度(千米)', trigger: 'blur'},
-          {
-            validator: (rule, value, callback) => {
-              if (!value) {
-                return callback(new Error('深度不能为空'));
-              }
-              const num = Number(value);
-              if (isNaN(num)) {
-                return callback(new Error('深度必须为数字'));
-              }
-              if (num < 0) {
-                return callback(new Error('深度不能为负数'));
-              }
-              callback();
-            },
-            trigger: ['blur', 'change'],
-          },
-        ],
-        longitude: [
-          {required: true, message: '请输入经度(度分)', trigger: 'blur'},
-          {
-            validator: (rule, value, callback) => {
-              if (!value) {
-                return callback(new Error('经度不能为空'));
-              }
-              const num = Number(value);
-              if (isNaN(num)) {
-                return callback(new Error('经度必须为数字'));
-              }
-              if (num < -180 || num > 180) {
-                return callback(new Error('经度应在-180到180之间'));
-              }
-              callback();
-            },
-            trigger: ['blur', 'change'],
-          },
-        ],
-        latitude: [
-          {required: true, message: '请输入纬度(度分)', trigger: 'blur'},
-          {
-            validator: (rule, value, callback) => {
-              if (!value) {
-                return callback(new Error('纬度不能为空'));
-              }
-              const num = Number(value);
-              if (isNaN(num)) {
-                return callback(new Error('纬度必须为数字'));
-              }
-              if (num < -90 || num > 90) {
-                return callback(new Error('纬度应在-90到90之间'));
-              }
-              callback();
-            },
-            trigger: ['blur', 'change'],
-          },
-        ],
       },
       formValuerules: {
         magnitude: [
@@ -1002,6 +890,7 @@ export default {
         console.log(this.dialogTitle)
       } else if (title === "修改") {
         this.dialogTitle = title
+        console.log("修改回来的数据",row);
         this.dialogContent = {
           earthquakeName: row.earthquakeName,
           occurrenceTime: this.formatDateToBackend(row.occurrenceTime), // 初始化为当前时间的时间戳
@@ -1011,6 +900,7 @@ export default {
           depth: row.depth,
           eqid: row.eqid,
         }
+        this.customAddress = this.dialogContent.earthquakeName;
       }
       this.dialogShow = !this.dialogShow
     },
@@ -1125,7 +1015,6 @@ export default {
         }
       });
 
-      // this.dialogContent.occurrenceTime = this.formatDateToBackend(this.dialogContent.occurrenceTime); // 调用方法格式化时间
       console.log("formatDateToBackend格式化时间commit：", this.dialogContent.occurrenceTime);
       this.dialogContent.occurrenceTime = this.formatISODateTimeToBackend(this.dialogContent.occurrenceTime); // 调用方法格式化时间
       console.log("formatDateToBackend“T”->' 'commit：", this.dialogContent.occurrenceTime);
@@ -1257,37 +1146,15 @@ export default {
       if (!match) return eqAddr; // 无法匹配返回原始地名
 
       // 提取省、市/州、区/县
-      // const province = match[1] ? match[1].replace("省", "") : ""; // 省份去掉“省”
-      // const county = match[3] ? match[3].replace(/[区县]/, "") : ""; // 区/县去掉后缀
       const province = match[1];
       const cityOrState = match[2]
       const county = match[3];
 
-      // 如果市/州与区/县之间只有一个字，连带区/县返回
-      // if (county.length === 1) {
-      //   return `${province}${match[3]}`;
-      // }
-
-      // 正常返回省、市/州简化结果
       return `${province}${cityOrState}${county}`;
     },
 
 
     createTid() {
-
-      // 构造当前时间的部分
-      // const now = new Date();
-      // const year = now.getFullYear(); // 4位年份
-      // const month = String(now.getMonth() + 1).padStart(2, '0'); // 月份，补齐两位
-      // const day = String(now.getDate()).padStart(2, '0'); // 日期，补齐两位
-      // const hours = String(now.getHours()).padStart(2, '0'); // 小时，补齐两位
-      // const minutes = String(now.getMinutes()).padStart(2, '0'); // 分钟，补齐两位
-      // const seconds = String(now.getSeconds()).padStart(2, '0'); // 秒钟，补齐两位
-      // const randomId = this.guid(8); // 提取 GUID 的最后8位
-      //
-      // // 拼接成完整的 event 值
-      // const Tid = `T${year}${month}${day}${hours}${minutes}${seconds}${randomId}`;
-      // return Tid;
       return this.guid()
     },
 
@@ -1307,18 +1174,6 @@ export default {
      * @param inputDate
      * @returns {string}
      */
-    // formatDateToBackend(inputDate) {
-    //   // 使用正则表达式提取日期和时间部分
-    //   const regex = /(\d{4})年(\d{2})月(\d{2})日 (\d{2}):(\d{2}):(\d{2})/;
-    //   const matches = inputDate.match(regex);
-    //
-    //   if (matches) {
-    //     // 格式化为目标格式 "yyyy-MM-dd HH:mm:ss"
-    //     return `${matches[1]}-${matches[2]}-${matches[3]} ${matches[4]}:${matches[5]}:${matches[6]}`;
-    //   } else {
-    //     throw new Error("Invalid date format");
-    //   }
-    // },
 
     formatDateToBackend(inputDate) {
       // 使用正则表达式提取日期和时间部分

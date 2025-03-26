@@ -2,7 +2,7 @@
   <div class="content-body">
     <div class="header">
       <div class="header-center">
-        <span>地震应急信息服务技术支撑平台</span>
+        <span>{{useTitleStore().pageTitle}}</span>
       </div>
       <div class="header-time">
         <span id="time">{{ nowTime }}</span>
@@ -74,7 +74,7 @@
                   <el-button
                     size="small"
                     :type="activeMode === 'Z' ? 'danger' : 'default'"
-                    style="font-size: 14px;"
+                    style="font-size: 14px;color:greenyellow;"
                     @click="activeMode = 'Z'"
                   >
                     真实
@@ -82,7 +82,7 @@
                   <el-button
                     size="small"
                     :type="activeMode === 'Y' || activeMode === 'T' ? 'primary' : 'default'"
-                    style="font-size: 14px;"
+                    style="font-size: 14px;color:white;"
                     @click="activeMode = 'Y'"
                   >
                     测试
@@ -154,6 +154,7 @@ import Chart2 from '@/components/Home/chart2.vue';
 import Chart3 from '@/components/Home/chart3.vue';
 import {fromEq, fromEqList, getAllEq, queryEq, queryEqList} from '@/api/system/eqlist';
 import {getEqList} from "@/api/system/damageassessment.js";
+import {useTitleStore} from "../store/index.js";
 
 const nowTime = ref(null);
 const tableData = ref([]);

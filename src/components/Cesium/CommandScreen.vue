@@ -11,7 +11,7 @@
       </div>
     </div>
     <!--  态势标绘  -->
-    <div class="thd-listTable-cesium" v-if="activeComponent === 'model'">
+    <div class="thd-listTable-cesium" v-if="activeComponent === 'cartographicStatistics'">
       <div class="pop_right_background" style="width: 100%; height: 100%; z-index: 100;top: 0;">
         <div class="list-dialog__content" style="height: calc(100% - 30);">
           <timeLineCasualtyStatisticthd
@@ -23,6 +23,7 @@
       </div>
       <plotSearch
           :eqid="eqid"
+          :plotArray="plots"
       ></plotSearch>
     </div>
     <div v-if="activeComponent === 'layerChoose'" class="thd-listTablePint">
@@ -719,7 +720,7 @@
     <!--    图层管理弹框-->
     <div class="universalPanel" v-if="showLayerFeatures">
       <div class="panelTop">
-        <h2 class="panelName">图层管理</h2>
+        <h2 class="panelName">多源要素图层</h2>
       </div>
       <el-tree
           default-expand-all="true"
@@ -781,18 +782,34 @@
             >
               <span>{{ data.name }}</span>
             </el-checkbox>
-            <el-radio-group
-                v-if="DamageAssessmentLayers.some(item => item.name === data.name)"
-                v-model="selectedDisasterEstimate"
-                :label="data.name"
-                @click.native.prevent="toggleRadio(data.name)"
-            >
-              <el-radio :label="data.name">
+            <template v-if="DamageAssessmentLayers.some(item => item.name === data.name)">
+              <el-checkbox
+                  v-if="DamageAssessmentLayers.find(item => item.name === data.name)?.type === 'multipleChoice'"
+                  v-model="selectedlayersLocal"
+                  :label="data.name"
+                  @change="updateMapLayers"
+              >
                 <span>{{ data.name }}</span>
-              </el-radio>
-            </el-radio-group>
+              </el-checkbox>
+              <!--              这里需要使用@click.native.prevent才能实现，仅仅是@click.native会被默认行为所覆盖-->
+              <el-radio-group
+                  v-else
+                  v-model="selectedDisasterEstimate"
+                  @click.native.prevent="toggleRadio(data.name)"
+              >
+                <el-radio :label="data.name">
+                  <span>{{ data.name }}</span>
+                </el-radio>
+              </el-radio-group>
+            </template>
+
+
+
           </div>
         </template>
+
+
+
       </el-tree>
     </div>
 
@@ -1004,7 +1021,7 @@ import {
   addHistoryEqPoints,
   addHospitalLayer, handleTownData,
   addOvalCircles, addVillageLayer,
-  handleOutputData, removeDataSourcesLayer, addOCTest
+  handleOutputData, removeDataSourcesLayer, addOCTest, addSchoolLayer
 } from "../../cesium/plot/eqThemes.js";
 import {MapPicUrl, ReportUrl} from "@/assets/json/thematicMap/PicNameandLocal.js"
 import thematicMapPreview from "@/components/ThematicMap/thematicMapPreview.vue";
@@ -1257,8 +1274,6 @@ export default {
         }
       ],
       //-----------------地震列表---------------------
-      // eqListShow: false,
-      //-地震列表---------------------------------
       total: 0,
       pageSize: 6,
       currentPage: 1,
@@ -1267,11 +1282,10 @@ export default {
       //-----------------图层---------------------
       isMarkingLayer: true,
       showlayers: [],
-      //-----------------图层---------------------
+      timeoutlayerActions: null,
       LRDLStatus: false, // 路网
-      // districtLayer: null,
+
       //------------------按钮下拉框------
-      // visible: false,
       selectedDistrict: '', // 用于追踪选中的复选框
       districts: [
         {adcode: 511802, name: "雨城区"},
@@ -1298,9 +1312,9 @@ export default {
         {id: '2', name: '应急物资存储要素图层'},
       ],
       DamageAssessmentLayers: [
-        {id: '0', name: '历史地震要素图层'},
-        {id: '1', name: '断裂带要素图层'},
-        {id: '2', name: '烈度圈要素图层'},
+        {id: '0', name: '历史地震要素图层',type:'multipleChoice'},
+        {id: '1', name: '断裂带要素图层',type:'multipleChoice'},
+        {id: '2', name: '烈度圈要素图层',type:'multipleChoice'},
         {id: '3', name: '灾损预估-人员伤亡要素图层'},
         {id: '4', name: '灾损预估-经济损失要素图层'},
         {id: '5', name: '灾损预估-建筑损毁要素图层'},
@@ -1312,6 +1326,7 @@ export default {
         {id: '3', name: '交通网络要素图层'},
         {id: '4', name: '医院要素图层'},
         {id: '5', name: '村庄要素图层'},
+        {id: '6', name: '学校要素图层'},
       ],
       selectedlayersLocal: ['标绘点图层'],
       // 图层允许单选
@@ -2228,8 +2243,7 @@ export default {
             this.plotShowOnlyPanelVisible = false;
             this.PanelPosition = this.selectedEntityPosition;
             this.routerPanelData = this.extractDataForRouter(entity);
-          }
-          else if (entity._layer === "历史地震") {
+          } else if (entity._layer === "历史地震") {
             this.eqCenterPanelVisible = false;
             this.dataSourcePopupVisible = false
             this.plotShowOnlyPanelVisible = false
@@ -2333,6 +2347,17 @@ export default {
                 "经纬度": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
               }
             }
+            else if (sourceName === "school") {
+              this.tableName = "学校信息";
+              this.eqThemeData = {
+                "名称": properties._UNITNAME._value,
+                "经纬度": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
+                "学校所属区县": properties._FULL_NAME._value,
+                "教育阶段": properties._CLASS._value,
+                "教师人数": properties._teacher._value,
+                "学生人数": properties._student._value,
+              }
+            }
             this.plotShowOnlyPanelVisible = true;
           } else {
             this.eqCenterPanelVisible = false;
@@ -2402,7 +2427,7 @@ export default {
           if (canvasPosition) {
             const pointLabelDiv = document.getElementById('pointLabel');
             pointLabelDiv.style.left = canvasPosition.x + 'px';
-            pointLabelDiv.style.top = canvasPosition.y  + 'px';
+            pointLabelDiv.style.top = canvasPosition.y + 'px';
             pointLabelDiv.innerHTML = `${faultName}`;
             // //console.log(pointLabelDiv)
           }
@@ -3912,39 +3937,10 @@ export default {
         // //console.log("图层已移除");
       }
       this.isShowYaanRegionLegend = false;
-      // 获取图例容器，准备清空其内容
-      // const legend = document.getElementById('legend');
-      // 循环移除图例容器中的所有子元素
-      // while (legend.firstChild) {
-      //     legend.removeChild(legend.firstChild);
-      // }
-      // 遍历标签数组，移除每个标签实体
-      // this.labels.forEach(label => {
-      //   window.viewer.entities.remove(label);
-      // });
-      // 清空标签引用数组，以便垃圾回收
-      // this.labels = [];
-    }
-    ,
-
+    },
 
     updateMapLayers() {
       console.log(this.selectedlayersLocal, "selectedlayersLocal")
-      // 检查选中的图层中是否包含标绘点图层
-      const hasDrawingLayer = this.selectedlayersLocal.includes('标绘点图层');
-      // 如果包含标绘点图层
-      if (hasDrawingLayer) {
-        // 确认标绘图层变更，参数为true表示已选中
-        this.handleMarkingLayerChange(true);
-        // 更新绘图状态
-        timeLine.showAllMakerPoint(this.plots)
-      } else {
-        // 确认标绘图层变更，参数为false表示未选中
-        this.handleMarkingLayerChange(false);
-        // 移除所有已存在的椭圆圈实体，以避免重复添加
-        // 移除标绘图层
-        timeLine.markerLayerHidden(this.plots);
-      }
 
       // 图层映射：添加与移除图层逻辑
       // name: 图层名；add：添加图层；remove：移除图层
@@ -3954,10 +3950,12 @@ export default {
           add: () => {
             this.isMarkingLayerLocal = true;
             timeLine.markerLayerShow(this.plots)
+            clearTimeout(this.timeoutlayerActions)
+            this.timeoutlayerActions=null
           },
           remove: () => {
             this.isMarkingLayerLocal = false;
-            setTimeout(() => {
+            this.timeoutlayerActions=setTimeout(() => {
               timeLine.markerLayerHidden(this.plots);
             }, 1000);
           }
@@ -4037,6 +4035,11 @@ export default {
           name: '村庄要素图层',
           add: addVillageLayer,
           remove: () => this.removeDataSourcesLayer('village')
+        },
+        {
+          name: '学校要素图层',
+          add: addSchoolLayer,
+          remove: () => this.removeDataSourcesLayer('school')
         },
         {
           name: '烈度圈要素图层',
@@ -4566,10 +4569,7 @@ export default {
      */
     removeDataSourcesLayer(layerName) {
       // 通过图层名称获取数据源对象如果存在，则执行移除操作
-
-      console.log(window.viewer.dataSources.getByName(layerName), "removeDataSourcesLayer")
       const dataSource = window.viewer.dataSources.getByName(layerName)[0];
-      console.log(dataSource, "removeDataSourcesLayer")
       if (dataSource) {
         window.viewer.dataSources.remove(dataSource);
       }
@@ -4584,26 +4584,26 @@ export default {
      *
      * @param {boolean} isMarkingLayerLocal - 表示是否为本地标记图层
      */
-    handleMarkingLayerChange(isMarkingLayerLocal) {
-      if (isMarkingLayerLocal) {
-        // 如果视图中不存在名为'drawingLayer'的图层，则创建一个新的自定义图层并添加到视图中
-        if (!window.viewer.dataSources.getByName('drawingLayer')[0]) {
-          let newLayer = new Cesium.CustomDataSource('drawingLayer');
-          window.viewer.dataSources.add(newLayer);
-          newLayer.show = true;
-          this.isMarkingLayerLocal = true;
-        }
-      } else {
-        // 当切换到非本地标记图层时，将isMarkingLayerLocal设置为false
-        this.isMarkingLayerLocal = false;
-        // 如果视图中存在名为'drawingLayer'的图层，则从视图中移除该图层
-        let dataSource = window.viewer.dataSources.getByName('drawingLayer')[0];
-        if (dataSource) {
-          window.viewer.dataSources.remove(dataSource);
-        }
-      }
-    }
-    ,
+    // handleMarkingLayerChange(isMarkingLayerLocal) {
+    //   if (isMarkingLayerLocal) {
+    //     // 如果视图中不存在名为'drawingLayer'的图层，则创建一个新的自定义图层并添加到视图中
+    //     if (!window.viewer.dataSources.getByName('drawingLayer')[0]) {
+    //       let newLayer = new Cesium.CustomDataSource('drawingLayer');
+    //       window.viewer.dataSources.add(newLayer);
+    //       newLayer.show = true;
+    //       this.isMarkingLayerLocal = true;
+    //     }
+    //   } else {
+    //     // 当切换到非本地标记图层时，将isMarkingLayerLocal设置为false
+    //     this.isMarkingLayerLocal = false;
+    //     // 如果视图中存在名为'drawingLayer'的图层，则从视图中移除该图层
+    //     let dataSource = window.viewer.dataSources.getByName('drawingLayer')[0];
+    //     if (dataSource) {
+    //       window.viewer.dataSources.remove(dataSource);
+    //     }
+    //   }
+    // }
+    // ,
 
     /**
      * 根据经纬度获取人口密度信息
@@ -5255,9 +5255,9 @@ export default {
   display: block;
   position: absolute;
   top: 95%;
-  left: 10%;
+  left: 12.5%;
   z-index: 999999 !important;
-  width: 5%;
+  width: 7%;
 }
 
 

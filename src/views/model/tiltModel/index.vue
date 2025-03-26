@@ -35,9 +35,9 @@
         </div>
         <el-table :data="tableData" style="width: 100%; margin-bottom: 5px" :header-cell-style="tableHeaderColor"
                   :cell-style="tableColor" @row-click="">
-          <el-table-column prop="name" label="模型名称" width="140px"></el-table-column>
-          <el-table-column prop="tz" label="模型中心高度(米)" width="160px"></el-table-column>
-          <el-table-column prop="tze" label="模型中心高度(米)" width="160px"></el-table-column>
+          <el-table-column prop="name" label="模型名称" width="180px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="tz" label="模型中心高度(米)" width="140px"></el-table-column>
+          <el-table-column prop="tze" label="模型中心高度(米)" width="140px"></el-table-column>
           <el-table-column label="操作" width="80" align="center">
             <template #default="scope">
               <el-button type="text" :icon="Edit" @click="changeModel(scope.row)">查看</el-button>
@@ -311,8 +311,75 @@ function changeModel(row){
   modelInfo.modelid = row.uuid
   modelInfo.tze = row.tze
   modelInfo.rze = row.rze
-  goModel(row)
+
+  // 模型加载绕点旋转
+  new Promise((resolve,reject)=>{
+    goModel(row)
+    resolve()
+  }).then(()=>{
+    let tileset = window.modelObject
+    tileset.readyPromise.then(()=>{
+      let boundingSphere = tileset.boundingSphere;
+      let center = boundingSphere.center;
+      let cartographic = Cesium.Cartographic.fromCartesian(center);
+      let longitude = Cesium.Math.toDegrees(cartographic.longitude);
+      let latitude = Cesium.Math.toDegrees(cartographic.latitude);
+      rotateCamera({lng:longitude, lat:latitude, pitch: -85, height:1500, time:60})
+    }
+    )
+  })
 }
+
+function rotateCamera(options){
+  let time = options.time
+  let position = Cesium.Cartesian3.fromDegrees(options.lng, options.lat, 0.0);
+  // 相机看点的角度，如果大于0那么则是从地底往上看，所以要为负值，这里取-30度
+  let pitch = Cesium.Math.toRadians(options.pitch);
+  // 飞行720°所需时间，比如30s, 那么每秒转动度数
+  let angle = 720 / time;
+  // 给定相机距离点多少距离飞行
+  let distance = options.height;
+  let startTime = Cesium.JulianDate.fromDate(new Date());
+
+  let stopTime = Cesium.JulianDate.addSeconds(startTime, time, new Cesium.JulianDate());
+
+  viewer.clock.startTime = startTime.clone();  // 开始时间
+  viewer.clock.stopTime = stopTime.clone();     // 结速时间
+  viewer.clock.currentTime = startTime.clone(); // 当前时间
+  viewer.clock.clockRange = Cesium.ClockRange.CLAMPED; // 行为方式
+  viewer.clock.clockStep = Cesium.ClockStep.SYSTEM_CLOCK; // 时钟设置为当前系统时间; 忽略所有其他设置。
+  // 相机的当前heading
+  let initialHeading = viewer.camera.heading;
+
+  let Exection = function TimeExecution() {
+    // 当前已经过去的时间，单位s
+    let delTime = Cesium.JulianDate.secondsDifference(viewer.clock.currentTime, viewer.clock.startTime);
+    // 根据过去的时间，计算偏航角的变化
+    let heading = Cesium.Math.toRadians(delTime * angle) + initialHeading;
+
+    viewer.camera.lookAt(position, new Cesium.HeadingPitchRange(heading, pitch, distance));
+
+    if (Cesium.JulianDate.compare(viewer.clock.currentTime, viewer.clock.stopTime) >= 0) {
+      viewer.clock.onTick.removeEventListener(Exection);
+    }
+  };
+  // 鼠标可以通过左击和滚动滚轮结束旋转
+  let handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+  handler.setInputAction(function (click) {
+    viewer.clock.onTick.removeEventListener(Exection);
+    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+    console.log('LEFT_CLICK')
+    handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)
+  }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+  handler.setInputAction(function (click) {
+    viewer.clock.onTick.removeEventListener(Exection);
+    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+    console.log('WHEEL')
+    handler.removeInputAction(Cesium.ScreenSpaceEventType.WHEEL)
+  }, Cesium.ScreenSpaceEventType.WHEEL)
+  viewer.clock.onTick.addEventListener(Exection);
+}
+
 function showArrowModel() {
   showArrow(showArrowValue)
   if (!showArrowValue) {
@@ -335,6 +402,8 @@ function hideModel() {
     modelStatusContent.value = '隐藏当前模型'
   }
 }
+
+
 
 // 更新模型位置
 function updataPosition() {
