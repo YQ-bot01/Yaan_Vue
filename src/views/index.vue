@@ -74,7 +74,7 @@
                   <el-button
                     size="small"
                     :type="activeMode === 'Z' ? 'danger' : 'default'"
-                    style="font-size: 14px;"
+                    style="font-size: 14px;color:greenyellow;"
                     @click="activeMode = 'Z'"
                   >
                     真实
@@ -82,7 +82,7 @@
                   <el-button
                     size="small"
                     :type="activeMode === 'Y' || activeMode === 'T' ? 'primary' : 'default'"
-                    style="font-size: 14px;"
+                    style="font-size: 14px;color:white;"
                     @click="activeMode = 'Y'"
                   >
                     测试

@@ -428,8 +428,8 @@ export default {
             {name: '路径规划', action: 'route'},
             {name: '添加障碍区域', action: 'addArea'},
             {name: '清空所有实体', action: 'removeAll'},
-            {name: '删除障碍区域', action: 'removePoint'},
-            {name: '删除路径规划', action: 'removePolyline'}
+            // {name: '删除障碍区域', action: 'removePoint'},
+            // {name: '删除路径规划', action: 'removePolyline'}
           ],
           action: '',
           showDropdown: false,

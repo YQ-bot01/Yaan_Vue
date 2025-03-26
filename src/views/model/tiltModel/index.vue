@@ -35,9 +35,9 @@
         </div>
         <el-table :data="tableData" style="width: 100%; margin-bottom: 5px" :header-cell-style="tableHeaderColor"
                   :cell-style="tableColor" @row-click="">
-          <el-table-column prop="name" label="模型名称" width="140px"></el-table-column>
-          <el-table-column prop="tz" label="模型中心高度(米)" width="160px"></el-table-column>
-          <el-table-column prop="tze" label="模型中心高度(米)" width="160px"></el-table-column>
+          <el-table-column prop="name" label="模型名称" width="180px" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="tz" label="模型中心高度(米)" width="140px"></el-table-column>
+          <el-table-column prop="tze" label="模型中心高度(米)" width="140px"></el-table-column>
           <el-table-column label="操作" width="80" align="center">
             <template #default="scope">
               <el-button type="text" :icon="Edit" @click="changeModel(scope.row)">查看</el-button>
