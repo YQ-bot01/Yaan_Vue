@@ -27,7 +27,7 @@ export function findModel() {
     if (checkModelLoad()) {
         console.log("checkModelLoad")
         if (window.modelObject instanceof Cesium.Cesium3DTileset) {
-            window.viewer.zoomTo(window.modelObject)
+            window.viewer.zoomTo(window.modelObject,new Cesium.HeadingPitchRange(0,Cesium.Math.toRadians(-30),300))
         } else if (window.modelObject instanceof Cesium.Model) {
             // 创建一个 Cartesian3 点，初始位置在世界坐标系的 (0, 0, 1000) 位置
             let origin = new Cesium.Cartesian3(0, 0, 1000)
@@ -169,7 +169,7 @@ export function hide(modelStatus) {
 function selectModel(row) {
     remove3dData()
     initModel(row)
-    window.viewer.zoomTo(window.modelObject)
+    // window.viewer.zoomTo(window.modelObject)
 }
 
 function remove3dData() {
