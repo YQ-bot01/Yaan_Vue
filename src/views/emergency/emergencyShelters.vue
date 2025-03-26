@@ -618,9 +618,15 @@ export default {
     //     this.dialogContent.startTime = date;
     //   }
     // },
-    handleStartDateChange() {
-        // 用户清空日期或默认无效日期
-        this.dialogContent.startTime = '';
+    // 处理日期变化
+    handleStartDateChange(date) {
+      if (!date) {
+        // 如果选择日期为 null（即用户清空了日期），则设置为 null
+        this.dialogContent.startTime = null;
+      } else {
+        // 如果有日期选择，正常处理
+        this.dialogContent.startTime = date;
+      }
     },
 
 
