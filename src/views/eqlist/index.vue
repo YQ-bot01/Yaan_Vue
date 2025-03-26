@@ -239,6 +239,7 @@
       </div>
     </el-dialog>
 
+   <!-- 新增表单-->
     <el-dialog :title="panelTitle" v-model="isPanelShow" width="30%">
       <el-form ref="panel" :model="addOrUpdateDTO" :rules="panelRules">
         <el-row>
@@ -347,89 +348,6 @@ export default {
 
     return {
       rules: {
-        earthquakeName: [
-          {required: true, message: '请输入震发位置', trigger: 'blur'},
-        ],
-        occurrenceTime: [
-          {required: true, message: '请选择发震时间', trigger: ['blur', 'change']},
-        ],
-        magnitude: [
-          {required: true, message: '请输入震级(级)', trigger: 'blur'},
-          {
-            validator: (rule, value, callback) => {
-              if (!value) {
-                return callback(new Error('震级不能为空'));
-              }
-              const num = Number(value);
-              if (isNaN(num)) {
-                return callback(new Error('震级必须为数字'));
-              }
-              if (num < 3 || num > 10) {
-                return callback(new Error('震级必须在 3 到 10 之间'));
-              }
-              callback();
-            },
-            trigger: ['blur', 'change'],
-          },
-
-        ],
-        depth: [
-          {required: true, message: '请输入深度(千米)', trigger: 'blur'},
-          {
-            validator: (rule, value, callback) => {
-              if (!value) {
-                return callback(new Error('深度不能为空'));
-              }
-              const num = Number(value);
-              if (isNaN(num)) {
-                return callback(new Error('深度必须为数字'));
-              }
-              if (num < 0) {
-                return callback(new Error('深度不能为负数'));
-              }
-              callback();
-            },
-            trigger: ['blur', 'change'],
-          },
-        ],
-        longitude: [
-          {required: true, message: '请输入经度(度分)', trigger: 'blur'},
-          {
-            validator: (rule, value, callback) => {
-              if (!value) {
-                return callback(new Error('经度不能为空'));
-              }
-              const num = Number(value);
-              if (isNaN(num)) {
-                return callback(new Error('经度必须为数字'));
-              }
-              if (num < -180 || num > 180) {
-                return callback(new Error('经度应在-180到180之间'));
-              }
-              callback();
-            },
-            trigger: ['blur', 'change'],
-          },
-        ],
-        latitude: [
-          {required: true, message: '请输入纬度(度分)', trigger: 'blur'},
-          {
-            validator: (rule, value, callback) => {
-              if (!value) {
-                return callback(new Error('纬度不能为空'));
-              }
-              const num = Number(value);
-              if (isNaN(num)) {
-                return callback(new Error('纬度必须为数字'));
-              }
-              if (num < -90 || num > 90) {
-                return callback(new Error('纬度应在-90到90之间'));
-              }
-              callback();
-            },
-            trigger: ['blur', 'change'],
-          },
-        ],
       },
       formValuerules: {
         magnitude: [
@@ -997,6 +915,7 @@ export default {
         console.log(this.dialogTitle)
       } else if (title === "修改") {
         this.dialogTitle = title
+        console.log("修改回来的数据",row);
         this.dialogContent = {
           earthquakeName: row.earthquakeName,
           occurrenceTime: this.formatDateToBackend(row.occurrenceTime), // 初始化为当前时间的时间戳
@@ -1006,6 +925,7 @@ export default {
           depth: row.depth,
           eqid: row.eqid,
         }
+        this.customAddress = this.dialogContent.earthquakeName;
       }
       this.dialogShow = !this.dialogShow
     },

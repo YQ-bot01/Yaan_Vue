@@ -353,7 +353,7 @@ export default {
           icon: `<svg class="svg-icon" aria-hidden="true" style="width: 32px;height: 32px"><use xlink:href="#icon-dict" fill=""></use></svg>`,
           items: [],
           action: 'exportCesiumTheme',
-          showDropdown: false
+          showDropdown: false,
         },
       ],
       panels: {
@@ -930,8 +930,9 @@ export default {
       this.excelContent = []
       this.selectVisible = false;
       this.selectedNodes = []
-      this.isLoaded = false
-      this.loading = false
+      this.isLoaded = false;
+      this.loading = false;
+
 
       console.log(this.$refs.tree.getCheckedKeys())
       // 逐个取消勾选
@@ -2154,6 +2155,63 @@ export default {
 
     // 切换地震，渲染切换地震的标绘
     plotAdj(row) {
+
+      console.log("所有信息",row)
+      // {
+      //   "eqid": "69b02afc-9aa8-4c32-8272-d5672d845c3c",
+      //     "eqqueueId": "69b02afc-9aa8-4c32-8272-d5672d845c3c01",
+      //     "earthquakeName": "四川省雅安市名山区",
+      //     "earthquakeFullName": "2025年03月14日四川省雅安市名山区前进镇6.5级地震",
+      //     "eqAddr": "四川省雅安市名山区前进镇",
+      //     "magnitude": "6.5",
+      //     "intensity": "",
+      //     "depth": "12.0",
+      //     "occurrenceTime": "2025-03-14T12:55:51",
+      //     "eqType": "T",
+      //     "source": "2",
+      //     "eqAddrCode": "511803",
+      //     "townCode": "51180311800000",
+      //     "pac": "",
+      //     "type": "",
+      //     "longitude": "103.20",
+      //     "latitude": "30.04",
+      //     "geom": null,
+      //     "time": "2025-03-14 12:55:51"
+      // }
+
+      // {
+      //   "eqid": "69b02afc-9aa8-4c32-8272-d5672d845c3c",
+      //     "eqqueueId": "69b02afc-9aa8-4c32-8272-d5672d845c3c01",
+      //     "earthquakeName": "四川省雅安市名山区",
+      //     "earthquakeFullName": "2025年03月14日四川省雅安市名山区前进镇6.5级地震",
+      //     "eqAddr": "四川省雅安市名山区前进镇",
+      //     "geom": {
+      //   "type": "Point",
+      //       "coordinates": [
+      //     103.2,
+      //     30.04
+      //   ]
+      // },
+      //   "intensity": "",
+      //     "magnitude": "6.5",
+      //     "depth": "12.0",
+      //     "occurrenceTime": "2025-03-14T12:55:51",
+      //     "eqType": "T",
+      //     "source": "2",
+      //     "eqAddrCode": "511803",
+      //     "townCode": "51180311800000",
+      //     "pac": "",
+      //     "type": "",
+      //     "isDeleted": 0,
+      //     "district": "名山区",
+      //     "province": "四川省",
+      //     "city": "雅安市",
+      //     "time": "2025-03-14 12:55:51",
+      //     "latitude": "NaN",
+      //     "longitude": "NaN"
+      // }
+
+
       this.eqInfo = row
       // console.log("剩余1：", window.pointDataSource.entities)
       window.viewer.entities.removeAll();
@@ -2175,8 +2233,21 @@ export default {
       this.eqOccurrenceTime = row.occurrenceTime.replace('T', ' ') + ':00';
       console.log("更换地震后的时间",this.eqOccurrenceTime)
       this.title = this.timestampToTimeChina(row.occurrenceTime) + row.earthquakeName + row.magnitude
+
+      // 输入框有无内容调用接口不同返回数据格式不同
+      let latitude = null
+      let longitude = null
+
+      if (!this.queryParams){
+        latitude = row.latitude
+        longitude = row.longitude
+      }else{
+        latitude = row.geom.coordinates[1]
+        longitude = row.geom.coordinates[0]
+      }
+      
       window.viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(parseFloat(row.longitude), parseFloat(row.latitude), 60000),
+        destination: Cesium.Cartesian3.fromDegrees(parseFloat(longitude), parseFloat(latitude), 60000),
         orientation: {
           // 指向
           heading: 6.283185307179581,

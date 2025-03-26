@@ -142,9 +142,7 @@
                 <img
                     class="el-upload-list__item-thumbnail"
                     :src="
-          file.url.startsWith('blob:')
-        ? file.url
-        : '59.213.183.7/prod-api' +'/uploads/PlotsPic/' + file.url + '.png?t=' + new Date().getTime()
+      file.url
       "
                 >
                 <span class="el-upload-list__item-actions">
@@ -265,7 +263,9 @@ export default {
           ]
         }
       ],
-      fileList: [],
+      fileList: [
+
+      ],
       showSearch: true,
       queryParams: {
         menuName: ""
@@ -373,7 +373,9 @@ export default {
         this.dialogContent = {...row}
         // this.fileList.push({name: row.name + '.jpeg', url: this.dialogContent.img})
         if (this.dialogContent.img) {
-          this.fileList.push({name: row.name + '.jpeg', url: this.dialogContent.img})
+          // let string = {name: row.name + '.jpeg', url: this.dialogContent.img};
+          // {name: '中等破坏建筑物.jpeg', url: '中等破坏建筑物'}
+          this.fileList.push({name: row.name + '.jpeg', url: 'http://localhost:8080'+'/uploads/PlotsPic/' +this.dialogContent.img+ '.png?t=' + new Date().getTime()});
         }
         console.log(this.dialogShow, this.dialogTitle, this.dialogContent)
       }
