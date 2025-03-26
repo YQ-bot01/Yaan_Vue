@@ -665,8 +665,22 @@ export default {
       }
 
       this.isPanelShow[type] = !this.isPanelShow[type];
-      if (this.isPanelShow.thematicMap || this.isPanelShow.report|| this.isPanelShow.AssistantDecision) {
+      if( this.isPanelShow.AssistantDecision){
+        handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, type).then((res) => {
 
+          console.log("评估结果",res)
+
+          this.outputData.themeName = res.themeName;
+
+          this.outputData.themeData = res.themeData;
+          this.outputData.type = type;
+
+
+
+          this.isNoData = res.themeData.length === 0;
+        });
+      }
+      else if (this.isPanelShow.thematicMap || this.isPanelShow.report) {
         getEqOutputMaps(this.eqid, this.eqqueueId).then((res) => {
           console.log("专题图", res.data)
         })
