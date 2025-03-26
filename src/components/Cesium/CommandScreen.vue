@@ -1021,7 +1021,7 @@ import {
   addHistoryEqPoints,
   addHospitalLayer, handleTownData,
   addOvalCircles, addVillageLayer,
-  handleOutputData, removeDataSourcesLayer, addOCTest
+  handleOutputData, removeDataSourcesLayer, addOCTest, addSchoolLayer
 } from "../../cesium/plot/eqThemes.js";
 import {MapPicUrl, ReportUrl} from "@/assets/json/thematicMap/PicNameandLocal.js"
 import thematicMapPreview from "@/components/ThematicMap/thematicMapPreview.vue";
@@ -1326,6 +1326,7 @@ export default {
         {id: '3', name: '交通网络要素图层'},
         {id: '4', name: '医院要素图层'},
         {id: '5', name: '村庄要素图层'},
+        {id: '6', name: '学校要素图层'},
       ],
       selectedlayersLocal: ['标绘点图层'],
       // 图层允许单选
@@ -2344,6 +2345,17 @@ export default {
               this.eqThemeData = {
                 "名称": properties._NAME._value,
                 "经纬度": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
+              }
+            }
+            else if (sourceName === "school") {
+              this.tableName = "学校信息";
+              this.eqThemeData = {
+                "名称": properties._UNITNAME._value,
+                "经纬度": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
+                "学校所属区县": properties._FULL_NAME._value,
+                "教育阶段": properties._CLASS._value,
+                "教师人数": properties._teacher._value,
+                "学生人数": properties._student._value,
               }
             }
             this.plotShowOnlyPanelVisible = true;
@@ -4023,6 +4035,11 @@ export default {
           name: '村庄要素图层',
           add: addVillageLayer,
           remove: () => this.removeDataSourcesLayer('village')
+        },
+        {
+          name: '学校要素图层',
+          add: addSchoolLayer,
+          remove: () => this.removeDataSourcesLayer('school')
         },
         {
           name: '烈度圈要素图层',

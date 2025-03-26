@@ -11,6 +11,7 @@ import countyCodeMap from "../../assets/json/DamageAssessment/countyCodeMap.json
 import {domainName, zaiSunFuZhuJueCe, zaisunimageipLocal} from "../../utils/server.js";
 import hospitalIcon from "@/assets/icons/svg/hospital.png";
 import villageIcon from "@/assets/icons/svg/village.png";
+import SchoolIcon from "@/assets/xuexiao.png";
 // 雅安行政区加载
 export function addYaanLayer() {
   //雅安行政区加载
@@ -132,6 +133,43 @@ export function addVillageLayer() {
             entity.properties.sourceName = "village";  // 追加自定义的属性
             entity.billboard = new Cesium.BillboardGraphics({
               image: villageIcon, // 使用导入的图片
+              width: 32, // 图片宽度
+              height: 32, // 图片高度
+              scale: 1, // 图片缩放
+            });
+          });
+        })
+      })
+      .catch((error) => {
+        console.error("Error loading GeoJSON:", error);
+      });
+  }
+}
+
+// 绘制学校
+export function addSchoolLayer() {
+  // GeoJSON文件路径
+  const geoJsonUrl = new URL("@/assets/geoJson/school.geojson", import.meta.url).href;
+  if (viewer.dataSources.getByName("school").length === 0) {
+    // 使用fetch加载GeoJSON文件
+    fetch(geoJsonUrl)
+      .then((response) => response.json())
+      .then((geoJsonData) => {
+        // 将GeoJSON数据加载到Cesium
+        viewer.dataSources.add(Cesium.GeoJsonDataSource.load(geoJsonData, {
+          stroke: Cesium.Color.GREEN,
+          fill: Cesium.Color.GREEN.withAlpha(0.5),
+          strokeWidth: 2,
+          clampToGround: true,
+        })).then(function (dataSource) {
+          // 给 dataSource 添加 name 属性
+          dataSource.name = "school";
+
+          // 遍历每个实体，添加图片标记
+          dataSource.entities.values.forEach(function (entity) {
+            entity.properties.sourceName = "school";  // 追加自定义的属性
+            entity.billboard = new Cesium.BillboardGraphics({
+              image: SchoolIcon, // 使用导入的图片
               width: 32, // 图片宽度
               height: 32, // 图片高度
               scale: 1, // 图片缩放
