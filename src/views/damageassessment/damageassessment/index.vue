@@ -701,7 +701,7 @@ export default {
 
     // 雅安行政区划
     toggleYaanLayer(require) {
-      console.log(111)
+      // console.log(111)
       this.removeLayers(['YaanCounty', 'YaanTown'])
       this.RegionLabels.forEach(label => {
         window.viewer.entities.remove(label);
@@ -1377,6 +1377,8 @@ export default {
     // 10.6 渲染图层
     addThemeLayer(layerData, layerTownData, type) {
 
+      console.log(layerTownData)
+
       this.removeEntitiesByType([type]);
       this.removeLayers([type]);
       this.renderLayer("", true);
@@ -1508,7 +1510,7 @@ export default {
     // 设置填充颜色和边框
     setPolygonColor(entity, colorString) {
       const rgb = this.getRgbFromColorString(colorString);
-      entity.polygon.material = Cesium.Color.fromBytes(rgb[0], rgb[1], rgb[2], 200);
+      entity.polygon.material = Cesium.Color.fromBytes(rgb[0], rgb[1], rgb[2], 150);
       entity.polygon.outline = true;
       entity.polygon.outlineColor = Cesium.Color.WHITE;
     },
