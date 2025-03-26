@@ -211,7 +211,6 @@ import {initCesium} from "@/cesium/tool/initCesium.js";
 import eqMark from '@/assets/images/DamageAssessment/eqMark.png';
 import HistoryEqPanel from "../../../components/DamageAssessment/historyEqPanel.vue";
 import PersonalCasualtyPanel from "../../../components/DamageAssessment/personalCasualtyPanel.vue";
-import TimeLinePanel from "@/components/Cesium/TimeLinePanel.vue";
 import yaanCounty from "@/assets/geoJson/yaan1.json";
 import yaanTown from "@/assets/geoJson/yaan.json";
 // import hospital from "@/assets/geoJson/hospital.geojson";
@@ -239,7 +238,6 @@ export default {
     PersonalCasualtyPanel,
     EconomicLossPanel,
     BuildingDamagePanel,
-    TimeLinePanel,
     HistoryEqPanel,
   },
 
