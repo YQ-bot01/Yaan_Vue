@@ -119,6 +119,12 @@
                  @click="handlePanel(`AssistantDecision`); isPreviewShow = false;">辅助决策产出
             </div>
 
+            <div class="button themes"
+                 :class="{ active: isPanelShow.InstrumentIntensity }"
+                 style="height: 45px;margin-top: 15px;margin-bottom: 10px"
+                 @click="handlePanel(`InstrumentIntensity`); isPreviewShow = false;">仪器烈度数据
+            </div>
+
             <div style="height: 10px;background-color: #054576"></div>
             <el-divider content-position="left">大屏展示</el-divider>
 
@@ -132,7 +138,9 @@
 
       </div>
 
-      <div class="eqPanel" v-if="isPanelShow.thematicMap || isPanelShow.report || isPanelShow.instrument||isPanelShow.AssistantDecision">
+      <div class="eqPanel" v-if="isPanelShow.thematicMap || isPanelShow.report
+      || isPanelShow.instrument||isPanelShow.AssistantDecision
+      || isPanelShow.InstrumentIntensity">
         <h2>{{ this.outputData.themeName }}</h2>
         <div style="width: 100%;height: calc(100% - 120px);text-align: center;color: #fff;font-size: 16px" v-if="isNoData">
           该地震暂无评估图件产出
@@ -155,9 +163,17 @@
             {{ item.theme }}
           </div>
         </div>
+
         <div class="reportItem" v-if="this.outputData.type === `AssistantDecision`">
           <div v-for="(item, index) in outputData.themeData" :key="index" class="report-item" @click="handleJueCeReport(item.docxUrl)">
             <img src="../../assets/images/DamageAssessment/wordIcon.png" style="margin-right: 20px">
+            {{ item.theme }}
+          </div>
+        </div>
+
+        <div class="reportItem" v-if="this.outputData.type === `InstrumentIntensity`">
+          <div v-for="(item, index) in outputData.themeData" :key="index" class="report-item" @click="handleInstrumentIntensity(item.xlsUrl)">
+            <img src="../../assets/images/DamageAssessment/wordIcon.png" style="margin-right: 50px">
             {{ item.theme }}
           </div>
         </div>
@@ -173,6 +189,7 @@
             <p style="margin: 10px; ">{{ item.theme }}</p>
           </div>
         </div>
+
       </div>
 
       <div class="thematicMapPreview" v-if="isPreviewShow">
@@ -232,7 +249,8 @@ export default {
         thematicMap: false,
         report: false,
         instrument: false,
-        AssistantDecision:false
+        AssistantDecision:false,
+        InstrumentIntensity:false
       },
       isPreviewShow: false,
       // 记录当前显示的 panelButtons 索引，默认为 null
@@ -784,8 +802,6 @@ export default {
           this.outputData.themeData = res.themeData;
           this.outputData.type = type;
 
-
-
           this.isNoData = res.themeData.length === 0;
         });
       }
@@ -802,7 +818,6 @@ export default {
         //   console.log("决策报告",res.data)
         // })
 
-
         console.log("开始进行评估------------------------")
 
         handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, type).then((res) => {
@@ -818,7 +833,8 @@ export default {
 
           this.isNoData = res.themeData.length === 0;
         });
-      } else if(this.isPanelShow.instrument) {
+      }
+      else if(this.isPanelShow.instrument) {
         this.isNoData = false
         this.outputData.themeData = [
           {
@@ -856,7 +872,23 @@ export default {
         ]
         this.outputData.type = 'instrument';
         this.outputData.themeName = '2022年06月01日四川雅安市芦山县6.1级地震-台网数据';
-      }else{
+      }
+      else if(this.isPanelShow.InstrumentIntensity){
+        this.isNoData = false
+        this.outputData.themeData = [
+          {
+            xlsUrl:"http://10.16.7.69/image/instrument/20220601170008_乡镇仪器烈度报告_IEM.xls",
+            theme:"乡镇仪器烈度报告"
+          },
+          {
+            xlsUrl:"http://10.16.7.69/image/instrument/20220601170008_县市仪器烈度报告_IEM.xls",
+            theme:"县市仪器烈度报告"
+          },
+        ];
+        this.outputData.type = 'InstrumentIntensity';
+        this.outputData.themeName = '2022年06月01日四川雅安市芦山县6.1级地震-仪器烈度数据';
+      }
+      else{
         console.log("无图片数据")
       }
     },
@@ -978,8 +1010,20 @@ export default {
             });
           });
     },
+    handleInstrumentIntensity(xlsUrl){
+      this.$notify({
+        title: '仪器烈度报告下载',
+        message: '数据正在解析中...',
+        duration: 7000,
+        zIndex: 9999
+      });
 
-
+      const a = document.createElement('a');
+      a.href = xlsUrl;
+      a.download = xlsUrl.split('/').pop();
+      a.click();
+      document.body.removeChild(a);
+    },
 
 
     // -----------------------------------------------------------------------------------------------------------------
