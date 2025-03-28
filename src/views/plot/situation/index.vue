@@ -259,6 +259,9 @@
     <div v-if="loading" class="loading-container">
       <p>正在导出，请稍候...</p>
     </div>
+    <div v-if="loadingupdate" class="loading-container">
+      <p>正在导入，请稍候...</p>
+    </div>
     <!-- 用于显示统计信息的 div -->
 
 
@@ -507,6 +510,7 @@ export default {
 
       //-----------导出图片----------------
       loading: false, // 控制加载状态
+      loadingupdate:false,//上传
       //向预览组件传递数据
       imgshowURL: null,// 保存预览图片的 URL
       imgurlFromDate: "",
@@ -707,7 +711,7 @@ export default {
         this.isLoaded = false
         this.downloadConfirmed = false
         this.loading = false
-        console.log("this.loading吗，模板下载结束",this.loading)
+        console.log("this.loading，模板下载结束",this.loading)
       })
     },
 
@@ -1074,18 +1078,17 @@ export default {
               "开始时间": item["开始时间"],
               "结束时间": item["结束时间"],
 
-              "标注所在省": item["标注所在省"],
-              "标注所在市": item["标注所在市"],
-              "标注所在区县": item["标注所在区县"],
-              "标注所在城镇": item["标注所在城镇"],
-              "标注附近具体地址": item["标注附近具体地址"],
-              "标注附近具体地址所在方向": item["标注附近具体地址所在方向"],
-              "标注附近具体的地址距离(米)": item["标注附近具体的地址距离(米)"],
-              "标注附近poi名称": item["标注附近poi名称"],
-
-              "标注附近poi距离(米)": item["标注附近poi距离(米)"],
-              "标注附近道路": item["标注附近道路"],
-              "标注附近道路距离(米)": item["标注附近道路距离(米)"],
+              // "标注所在省": item["标注所在省"],
+              // "标注所在市": item["标注所在市"],
+              // "标注所在区县": item["标注所在区县"],
+              // "标注所在城镇": item["标注所在城镇"],
+              // "标注附近具体地址": item["标注附近具体地址"],
+              // "标注附近具体地址所在方向": item["标注附近具体地址所在方向"],
+              // "标注附近具体的地址距离(米)": item["标注附近具体的地址距离(米)"],
+              // "标注附近poi名称": item["标注附近poi名称"],
+              // "标注附近poi距离(米)": item["标注附近poi距离(米)"],
+              // "标注附近道路": item["标注附近道路"],
+              // "标注附近道路距离(米)": item["标注附近道路距离(米)"],
 
               // 将 plotTypeInfo 中的其他字段加入
               ...Object.fromEntries(
@@ -1137,6 +1140,7 @@ export default {
     },
 
     beforeUpload(file) {
+      this.loadingupdate=true
       const type = file.name.split('.').pop();
       // 获取不带扩展名的文件名
       const filename = file.name.slice(0, file.name.lastIndexOf('.'));
@@ -1252,6 +1256,7 @@ export default {
           endTime,
           severity,
           isDeleted,
+
           ...dynamicFields // 剩下的是动态字段
         } = item;
 
@@ -2742,6 +2747,9 @@ export default {
         markData.plot.latitude = Number(markData.plot.geom.coordinates[1])
         this.plots.push(markData.plot)
         console.log(this.plots,"this.plots wsSendPoint existingPlot")
+        if(this.loadingupdate===true){
+          this.loadingupdate=false
+        }
       }
       console.log(this.websock, "websock:")
       console.log(data, "wsSendPoint(data)")
@@ -3154,8 +3162,10 @@ export default {
 
     // 触发文件选择
     triggerUpload() {
+      // this.loading=true
       if (this.$refs.upload) {
         this.$refs.upload.$el.querySelector('input[type="file"]').click();
+        // this.loadingupdate=true
       } else {
         console.error("el-upload 未找到");
       }

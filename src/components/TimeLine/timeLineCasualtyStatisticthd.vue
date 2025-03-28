@@ -66,11 +66,10 @@
       </div>
     </div>
   </div>
-
 </template>
 <script>
 import * as Cesium from "cesium";
-import {getPlotInfos} from "@/api/system/plot.js";
+import {getExcelPlotInfo, getPlotInfos} from "@/api/system/plot.js";
 import axios from "axios";
 import {ref, watch, onMounted} from "vue";
 import {tianDitulocalApi} from "@/utils/server.js";
@@ -155,65 +154,28 @@ export default {
       return value + '人';
     }
 
-// 实现 Cesium 实体的切换显示
-//     function toggleEntities(entityName, show) {
-//       if (entityGroups.value[entityName] !== undefined) {
-//         entityGroups.value[entityName].forEach(entity => {
-//           entity.show = show;
-//         });
-//       } else {
-//         console.error(`Entity ${entityName} is undefined.`);
-//       }
-//     }
-
     async function getRescueActionCasualtiesPlotAndInfo(pointsLayer) {
-
       const filteredPoints = pointsLayer
           .filter(data => ["死亡人员", "危重伤人员", "重伤人员", "轻伤人员"].includes(data.plotType))
       ;
-      // console.log(filteredPoints, 'filteredPoints')
-      const locationDataArray = await Promise.all(filteredPoints.map(async data => {
-        const {plotId, plotType, longitude, latitude, startTime, endTime} = data;
-
-        try {
-          const locationInfo = await getReverseGeocode(longitude, latitude);
-          return {longitude, latitude, plotId, plotType, locationInfo, startTime, endTime};
-        } catch (error) {
-          console.error(`Failed to get location info for plotId ${plotId}:`, error);
-          return null;
-        }
-      }));
-      // console.log(locationDataArray, 'locationDataArray')
-      const validLocationData = locationDataArray.filter(item => item !== null);
+      const batchPlotIds = filteredPoints.map((plot) => plot.plotId);
+      const batchPlotTypes = filteredPoints.map((plot) => plot.plotType);
       resInfo.value = []
-      // console.log("resInfo.value000", resInfo.value)
-      await Promise.all(validLocationData.map(async data => {
-
-        const {locationInfo, plotId, plotType, longitude, latitude, startTime, endTime} = data;
-
-        resInfo.value.push({...await getPlotInfos({plotId, plotType}), locationInfo: locationInfo});
-      }));
-
+      resInfo.value  = await getExcelPlotInfo(batchPlotIds, batchPlotTypes);
       // console.log("resInfo.value111", resInfo.value)
       isDataReady.value = true;
       updateTime(props.currentTime)
     }
 
     function updateTime(currentTime) {
-
       groupedEntities.cityEntities = []
       groupedEntities.districtOrCountyEntities = []
-      groupedEntities.townshipEntities = []
-      groupedEntities.villageEntities = []
       const levels = [
-        {group: groupedEntities.cityEntities, key: 'city'},
-        {group: groupedEntities.districtOrCountyEntities, key: 'county'},
-        {group: groupedEntities.townshipEntities, key: 'town'},
-        {group: groupedEntities.villageEntities, key: 'address'}
+        {group: groupedEntities.cityEntities, key: 'belongCity'},
+        {group: groupedEntities.districtOrCountyEntities, key: 'belongCounty'},
       ];
 
       let shifdata = []
-      // console.log(resInfo.value,"resInfo.value222"); // 查看筛选结果
       resInfo.value.forEach(item => {
         let startTime = new Date(item.plotInfo.startTime);
         let current = new Date(currentTime);
@@ -221,33 +183,27 @@ export default {
           shifdata.push(item)
         }
       })
-      // console.log(shifdata, "shifdata"); // 查看筛选结果
 
       shifdata.forEach(pointdata => {
         let plotId = pointdata.plotInfo.plotId
         let plotType = pointdata.plotInfo.plotType
-        let longitude = pointdata.plotInfo.longitude
-        let latitude = pointdata.plotInfo.latitude
         let plotTypeInfo = pointdata.plotTypeInfo
         levels.forEach(({group, key}) => {
-          let entityGroup = group.find(g => g[key] === pointdata.locationInfo[key]);
+          let entityGroup = group.find(g => g[key] === pointdata.plotInfo[key]);
           if (!entityGroup) {
-            entityGroup = {[key]: pointdata.locationInfo[key], data: []};
+            entityGroup = {[key]: pointdata.plotInfo[key], data: []};
             group.push(entityGroup);
           }
           entityGroup.data.push({
             plotId,
             plotType,
-            longitude,
-            latitude,
             plotTypeInfo
           });
         });
       })
-      // console.log("groupedEntities", groupedEntities)
+      console.log("groupedEntities", groupedEntities)
       const processStats = (entities) => {
         entities.forEach(group => {
-          // console.log(group,"group")
           const casualtyStats = {};
           let totalNewCount = 0;
           group.data.forEach(entry => {
@@ -264,8 +220,6 @@ export default {
       };
       processStats(groupedEntities.cityEntities);
       processStats(groupedEntities.districtOrCountyEntities);
-      processStats(groupedEntities.townshipEntities);
-      processStats(groupedEntities.villageEntities);
       showStatisticInfo(props.zoomLevel)
     }
 
@@ -273,26 +227,19 @@ export default {
       // console.log("showStatisticInfo", zoomLevel)
       switch (zoomLevel) {
         case '市':
-          pushStatisticInfo(groupedEntities.cityEntities, 200000)
+          pushStatisticInfo(groupedEntities.cityEntities)
           break;
         case '区/县':
-          pushStatisticInfo(groupedEntities.districtOrCountyEntities, 40000)
-          break;
-        case '乡/镇':
-          pushStatisticInfo(groupedEntities.townshipEntities, 4000)
-          break;
-        case '村':
-          pushStatisticInfo(groupedEntities.villageEntities, 2000)
+          pushStatisticInfo(groupedEntities.districtOrCountyEntities)
           break;
         default:
-          pushStatisticInfo(groupedEntities.cityEntities, 200000)
+          pushStatisticInfo(groupedEntities.cityEntities)
           break;
       }
     }
 
-
-    function pushStatisticInfo(entitys, height) {
-      // console.log("pushStatisticInfo", entitys, height)
+    function pushStatisticInfo(entitys) {
+      // console.log(" pushStatisticInfo entitys:",entitys)
       statisticInfo.value = []
       entitys.forEach(entity => {
         let casualtyStatsTemplate = {
@@ -304,12 +251,10 @@ export default {
           address: '',
           latitude: '',
           longitude: '',
-          height: '',
           plotId: '',
         };
         let casualtyStats = entity.casualtyStats;
-        let address = entity.city || entity.county || entity.town || entity.address || "地址未知";
-        // let position = Cesium.Cartesian3.fromDegrees(entity.data[0].longitude, entity.data[0].latitude);
+        let address = entity.belongCity || entity.belongCounty || "地址未知";
         // 给定的对象
         let givenCasualtyStats = {
           ...casualtyStats,
@@ -317,7 +262,7 @@ export default {
           latitude: entity.data[0].latitude,
           longitude: entity.data[0].longitude,
           // position: position,
-          height: height,
+          // height: height,
           plotId: entity.data[0].plotId,
         };
         // 将给定的对象转换为与 casualtyStatsTemplate 相同的属性名称
@@ -329,24 +274,6 @@ export default {
         // console.log(statisticInfo, "statisticInfo")
       })
     }
-
-
-    async function getReverseGeocode(lon, lat) {
-      try {
-        const response = await axios.get(`${tianDitulocalApi}/geocoder`, {
-          params: {
-            postStr: JSON.stringify({lon, lat, ver: 1}),
-            type: 'geocode',
-            tk: '80eb284748e84ca6c70468c906f0c889'
-          }
-        });
-        return response.data.result.addressComponent;
-      } catch (error) {
-        console.error("逆地理编码失败:", error);
-        return null;
-      }
-    }
-
 
     const tableHeaderColor = () => ({
       'background': 'linear-gradient(180deg, rgba(27,60,108,0.09) 0%, rgba(20,83,174,1) 100%)',
@@ -390,7 +317,6 @@ export default {
 
     return {
       entityGroups,
-      // toggleEntities,
       getRescueActionCasualtiesPlotAndInfo,
       statisticInfo,
       formatPeople,
