@@ -933,7 +933,7 @@ export default {
           console.log("typeData:",typeData)
           for (const [key, value] of Object.entries(typeData)) {
             if (value.name !== undefined && value.type !== undefined) {
-              // 仅处理有 content 的字段或 type 为 text 的字段
+              // 仅处理有 content 的字段或 type 为 text 的 字段
               const field = {
                 name: value.name,
                 type: value.type,
