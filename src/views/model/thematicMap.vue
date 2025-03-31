@@ -8,15 +8,6 @@
           @selectEq="selectEq"
 
       ></EarthquakeList>
-
-      <!--            <div class="fold" :style="{ width: isFoldUnfolding ? '30px' : '10px' }" @mouseenter="isFoldUnfolding = true"-->
-      <!--                 @mouseleave="isFoldUnfolding = false" v-show="isFoldShow" @click="isLeftShow = false,isFoldShow = false">-->
-      <!--                <img src="../../assets/icons/TimeLine/收起展开箭头右.png" v-if="isFoldUnfolding"-->
-      <!--                     style="height: 60%;width: 60%;">-->
-      <!--            </div>-->
-      <!--            <div class="button unfold" v-show="isLeftShow === false" @click="isLeftShow=true,isFoldShow=true">-->
-      <!--                <img src="../../assets/icons/TimeLine/收起展开箭头左.png" style="height: 60%;width: 60%;cursor: pointer">-->
-      <!--            </div>-->
     </div>
     <!-- 加载中的提示 -->
     <div v-if="loading" class="loading-container">
@@ -996,7 +987,7 @@ export default {
 
 <style scoped lang="less">
 .situation_cesiumContainer {
-  height: calc(100vh - 84px) !important;
+  height: calc(100vh - 50px) !important;
   width: 100%;
   margin: 0;
   padding: 0;

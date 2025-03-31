@@ -273,7 +273,7 @@ export default {
 }
 
 .panelEqInfo {
-  width: 333px;
+  width: 300px;
   height: 250px;
   z-index: 2;
   background-color: rgba(45, 61, 81, 0.8);
@@ -281,11 +281,11 @@ export default {
 }
 
 .panelTable {
-  width: 712px;
+  width: 540px;
 }
 
 .panelLegend {
-  width: 150px;
+  width: 180px;
   height: 100%;
   padding: 5px 0 0 10px;
 }

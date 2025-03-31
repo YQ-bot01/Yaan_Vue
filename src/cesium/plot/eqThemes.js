@@ -693,10 +693,10 @@ export function addOCTest(eqid, eqqueueId, centerPosition) {
    * 烈度圈部分
    */
   // 本地测试请解开↓↓↓
-  fetch(`/ThematicMap/be3a5ea4-8dfd-a0a2-2510-21845f17960b01_intensity.geojson`)
+  // fetch(`/ThematicMap/be3a5ea4-8dfd-a0a2-2510-21845f17960b01_intensity.geojson`)
   // fetch(`/ThematicMap/5a72f3d7-0546-4fee-a686-627d45e5965f02_intensity.geojson`)
     // 真实数据请解开↓↓↓
-    // fetch(`${zaisunimageipLocal}/profile/upload/yxcdown/${eqqueueId}/${eqqueueId}_intensity.geojson`)
+    fetch(`${zaisunimageipLocal}/profile/upload/yxcdown/${eqqueueId}/${eqqueueId}_intensity.geojson`)
     .then((response) => response.json())
     .then((geojsonData) => {
       let ovalCirclePromise = Cesium.GeoJsonDataSource.load(geojsonData, {
