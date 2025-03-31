@@ -884,6 +884,10 @@ export default {
             xlsUrl:"http://10.16.7.69/image/instrument/20220601170008_县市仪器烈度报告_IEM.xls",
             theme:"县市仪器烈度报告"
           },
+          {
+            xlsUrl:"http://10.16.7.69/image/instrument/FJ20220601170008_1_烈度速报产品.docx",
+            theme:"仪器烈度速报产品"
+          },
         ];
         this.outputData.type = 'InstrumentIntensity';
         this.outputData.themeName = '2022年06月01日四川雅安市芦山县6.1级地震-仪器烈度数据';
