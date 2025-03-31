@@ -29,7 +29,7 @@
           />
           <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
           <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-          <el-button  @click="showEqList = false">隐藏地震列表</el-button>
+          <el-button @click="showEqList = false">隐藏地震列表</el-button>
         </div>
         <el-table :data="tableData" style="width: 100%;margin-bottom: 5px" :stripe="true"
                   :header-cell-style="tableHeaderColor" :cell-style="tableColor">
@@ -259,6 +259,9 @@
     <div v-if="loading" class="loading-container">
       <p>正在导出，请稍候...</p>
     </div>
+    <div v-if="loadingupdate" class="loading-container">
+      <p>正在导入，请稍候...</p>
+    </div>
     <!-- 用于显示统计信息的 div -->
 
 
@@ -289,7 +292,7 @@
     <plotSearch
         :eqid="eqid"
 
-        :plotArray="plotList"
+        :plotArray="plots"
     ></plotSearch>
 <!--    :plotArray="plotArray"-->
 
@@ -325,6 +328,7 @@ import ThematicMapPreview from "@/components/ThematicMap/thematicMapPreview.vue"
 import {Position} from "@element-plus/icons-vue";
 import {TianDiTuToken} from "@/cesium/tool/config.js";
 import {tianditu} from "@/utils/server.js";
+import timeLine from "@/cesium/timeLine.js";
 
 export default {
   components: {
@@ -490,6 +494,7 @@ export default {
       pointsLayer: [], //传到子组件
       //----------------------------------
       plotList: [], // 用于指定地震标绘点导出
+      plots: [],
       selectVisible: false,
       selectedNodes: [], // 用于存储选中的节点信息
 
@@ -505,6 +510,7 @@ export default {
 
       //-----------导出图片----------------
       loading: false, // 控制加载状态
+      loadingupdate:false,//上传
       //向预览组件传递数据
       imgshowURL: null,// 保存预览图片的 URL
       imgurlFromDate: "",
@@ -546,7 +552,7 @@ export default {
       showEqList: true,
       showToolbar: true,
 
-      eqOccurrenceTime:'',
+      eqOccurrenceTime: '',
     };
   },
 
@@ -662,6 +668,7 @@ export default {
         sheets: this.sheet,
         excelContent: this.excelContent
       };
+      console.log(plotBTO,"plotBTO downloadExcel")
 
       // console.log("sheet:",sheet)
 
@@ -700,10 +707,12 @@ export default {
         checkedNodes.forEach(node => {
           this.$refs.tree.setChecked(node, false);
         });
+
+        this.isLoaded = false
+        this.downloadConfirmed = false
+        this.loading = false
+        console.log("this.loading，模板下载结束",this.loading)
       })
-      this.isLoaded = false
-      this.downloadConfirmed = false
-      this.loading = false
     },
 
     // 初始化控件等
@@ -753,6 +762,7 @@ export default {
         let data = res
 
         that.plotList = data
+        that.plots = data
         console.log("数据：", data)
 
         let pointArr = data.filter(e => e.drawtype === 'point')
@@ -855,11 +865,12 @@ export default {
 
     confirmDownload() {
       this.loading = true
+      console.log(this.loading,"this.loading 导出")
       this.sheet = this.selectedNodes.map(node => {
         const typeKey = Object.keys(plotType).find(key => plotType[key].name === node);
         const fields = [];
 
-        console.log(typeKey)
+        console.log("typeKey",typeKey)
         console.log(fields)
 
         // 指定类型列表
@@ -870,7 +881,6 @@ export default {
           "restrictedHighway", "impassableHighway", "impassableRailways",
           "unavailableTransmissionAndDistributionLines", "unusableGasPipeline", "unavailableWaterSupplyNetwork"
         ];
-
         // 根据 typeKey 动态设置 fields.unshift
         if (specialTypes.includes(typeKey)) {
           fields.unshift(
@@ -879,9 +889,24 @@ export default {
               {name: "高程", type: "text"},
               {name: "角度", type: "text"},
               {name: "开始时间", type: "text"},
-              {name: "结束时间", type: "text"}
+              {name: "结束时间", type: "text"},
+
+              {name: "标注所在省", type: "text"},
+              {name: "标注所在市", type: "text"},
+              {name: "标注所在区县", type: "text"},
+              {name: "标注所在城镇", type: "text"},
+
+              {name: "标注附近具体地址", type: "text"},
+              {name: "标注附近具体地址所在方向", type: "text"},
+              {name: "标注附近具体的地址距离(米)", type: "text"},
+
+              {name: "标注附近poi名称", type: "text"},
+              {name: "标注附近poi距离(米)", type: "text"},
+              {name: "标注附近道路", type: "text"},
+              {name: "标注附近道路距离(米)", type: "text"},
           );
-        } else {
+        }
+        else {
           fields.unshift(
               {name: "绘制类型", type: "text"},
               {name: "经度", type: "text"},
@@ -889,26 +914,45 @@ export default {
               {name: "高程", type: "text"},
               {name: "角度", type: "text"},
               {name: "开始时间", type: "text"},
-              {name: "结束时间", type: "text"}
+              {name: "结束时间", type: "text"},
+
+              {name: "标注所在省", type: "text"},
+              {name: "标注所在市", type: "text"},
+              {name: "标注所在区县", type: "text"},
+              {name: "标注所在城镇", type: "text"},
+
+              {name: "标注附近具体地址", type: "text"},
+              {name: "标注附近具体地址所在方向", type: "text"},
+              {name: "标注附近具体的地址距离(米)", type: "text"},
+
+              {name: "标注附近poi名称", type: "text"},
+              {name: "标注附近poi距离(米)", type: "text"},
+              {name: "标注附近道路", type: "text"},
+              {name: "标注附近道路距离(米)", type: "text"},
           );
         }
 
         if (typeKey) {
           const typeData = plotType[typeKey];
+          console.log("typeData:",typeData)
           for (const [key, value] of Object.entries(typeData)) {
-            // 仅处理有 content 的字段或 type 为 text 的字段
-            const field = {
-              name: value.name,
-              type: value.type,
-            };
-            if (value.type !== 'text' && value.content) {
-              field.content = value.content;
+            if (value.name !== undefined && value.type !== undefined) {
+              // 仅处理有 content 的字段或 type 为 text 的 字段
+              const field = {
+                name: value.name,
+                type: value.type,
+              };
+              // console.log("field", field)
+              if (value.type !== 'text' && value.content) {
+                field.content = value.content;
+              }
+              fields.push(field);
+              // console.log(fields, "fields")
             }
-            fields.push(field);
           }
         }
 
-        const endTimeIndex = fields.findIndex(field => field.name === "结束时间");
+        const endTimeIndex = fields.findIndex(field => field.name === "标注附近道路距离");
         if (endTimeIndex !== -1 && endTimeIndex + 1 < fields.length) {
           fields.splice(endTimeIndex + 1, 1);
         }
@@ -971,7 +1015,7 @@ export default {
             const plotTypeFields = plotInfo.plotType ? Object.values(plotType).find(team => team.name === plotInfo.plotType) : null;
             const filteredPlotTypeInfo = Object.keys(plotTypeFields).filter(key => key !== 'name')
                 .reduce((obj, key) => {
-                  if (plotTypeInfo[key] !== undefined) {
+                  if (plotTypeInfo&&plotTypeInfo[key] !== undefined) {
                     obj[plotTypeFields[key].name] = plotTypeInfo[key];
                   }
                   return obj;
@@ -1005,6 +1049,17 @@ export default {
               "角度": plotInfo.angle,
               "开始时间": plotInfo.startTime ? plotInfo.startTime.replace("T", " ") : "", // 检查是否为 null 或 undefined
               "结束时间": plotInfo.endTime ? plotInfo.endTime.replace("T", " ") : "", // 同样检查
+              "标注所在省":plotInfo.belongProvince,
+              "标注所在市": plotInfo.belongCity,
+              "标注所在区县": plotInfo.belongCounty,
+              "标注所在城镇": plotInfo.belongTown,
+              "标注附近具体地址": plotInfo.locationAddress,
+              "标注附近具体地址所在方向": plotInfo.locationAddressPosition,
+              "标注附近具体的地址距离(米)": plotInfo.locationAddressDistance,
+              "标注附近poi名称": plotInfo.loocationPoi,
+              "标注附近poi距离(米)": plotInfo.locationPoiDistance,
+              "标注附近道路": plotInfo.locationRoad,
+              "标注附近道路距离(米)": plotInfo.locationRoadDistance,
               ...filteredPlotTypeInfo, // 保留 plotTypeInfo 中的字段
             };
           });
@@ -1022,6 +1077,19 @@ export default {
               "角度": item["角度"],
               "开始时间": item["开始时间"],
               "结束时间": item["结束时间"],
+
+              // "标注所在省": item["标注所在省"],
+              // "标注所在市": item["标注所在市"],
+              // "标注所在区县": item["标注所在区县"],
+              // "标注所在城镇": item["标注所在城镇"],
+              // "标注附近具体地址": item["标注附近具体地址"],
+              // "标注附近具体地址所在方向": item["标注附近具体地址所在方向"],
+              // "标注附近具体的地址距离(米)": item["标注附近具体的地址距离(米)"],
+              // "标注附近poi名称": item["标注附近poi名称"],
+              // "标注附近poi距离(米)": item["标注附近poi距离(米)"],
+              // "标注附近道路": item["标注附近道路"],
+              // "标注附近道路距离(米)": item["标注附近道路距离(米)"],
+
               // 将 plotTypeInfo 中的其他字段加入
               ...Object.fromEntries(
                   Object.entries(item).filter(([key]) => !["绘制类型", "标绘类型", "经度", "纬度", "经纬度集合", "高程", "角度", "开始时间", "结束时间"].includes(key))
@@ -1044,11 +1112,12 @@ export default {
             return acc;
           }, []);
 
-          // console.log("调整后的数据格式:", this.excelContent);
-          // console.log(888)
+          console.log("调整后的数据格式:", this.excelContent);
+          console.log(888)
           this.isLoaded = true;
         });
-      } else {
+      }
+      else {
         this.excelPanel = "下载导入标绘模板"
         this.isLoaded = true;
       }
@@ -1071,6 +1140,7 @@ export default {
     },
 
     beforeUpload(file) {
+      this.loadingupdate=true
       const type = file.name.split('.').pop();
       // 获取不带扩展名的文件名
       const filename = file.name.slice(0, file.name.lastIndexOf('.'));
@@ -1122,7 +1192,7 @@ export default {
     handleSuccess(response) {
       this.plotArray = []
       const startTime = performance.now();
-      console.log(response)
+      console.log(response,"response handleSuccess")
       // 解构 response 中的 plotDataList 和 updatedPlotProperty
       const {plotDataList, updatedPlotProperty} = response.data;
       // 记录开始时间
@@ -1186,6 +1256,7 @@ export default {
           endTime,
           severity,
           isDeleted,
+
           ...dynamicFields // 剩下的是动态字段
         } = item;
 
@@ -1555,9 +1626,8 @@ export default {
 
       this.showLegend = true;
 
-      const plotList = this.plotList;
 
-      plotList.forEach(item => {
+      this.plotList.forEach(item => {
         const {plotType, icon} = item;
 
         if (plotType) {
@@ -2667,11 +2737,24 @@ export default {
     },
     // ws发送数据（只有点的是在这里）
     wsSendPoint(data) {
-      console.log(this.websock,"websock:")
-      console.log(data,"wsSendPoint(data)")
+      if (JSON.parse(data).operate === "delete") {
+        this.plots = this.plots.filter(plot => plot.plotId !== JSON.parse(data).id);
+        console.log(this.plots,"this.plots wsSendPoint")
+      }
+      else if (JSON.parse(data).operate === "add") {
+        let markData = JSON.parse(data).data
+        markData.plot.longitude = Number(markData.plot.geom.coordinates[0])
+        markData.plot.latitude = Number(markData.plot.geom.coordinates[1])
+        this.plots.push(markData.plot)
+        console.log(this.plots,"this.plots wsSendPoint existingPlot")
+        if(this.loadingupdate===true){
+          this.loadingupdate=false
+        }
+      }
+      console.log(this.websock, "websock:")
+      console.log(data, "wsSendPoint(data)")
       // this.websock.onopen = () => {
-        this.websock.send(data)
-      // }
+      this.websock.send(data)
     },
 
     //------------线------------
@@ -3079,8 +3162,10 @@ export default {
 
     // 触发文件选择
     triggerUpload() {
+      // this.loading=true
       if (this.$refs.upload) {
         this.$refs.upload.$el.querySelector('input[type="file"]').click();
+        // this.loadingupdate=true
       } else {
         console.error("el-upload 未找到");
       }
