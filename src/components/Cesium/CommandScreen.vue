@@ -802,14 +802,8 @@
                 </el-radio>
               </el-radio-group>
             </template>
-
-
-
           </div>
         </template>
-
-
-
       </el-tree>
     </div>
 
@@ -1094,7 +1088,8 @@ import yaAnVillage from "@/assets/geoJson/yaan.json"
 import CommandScreenEqList from "@/components/Cesium/CommandScreenEqList.vue"
 import {getModelData} from "@/api/system/tiltPhotography.js";
 import layer from "@/cesium/layer.js";
-import modelicon from '@/assets/icons/svg/3dmodel04.svg';
+// import modelicon from '@/assets/icons/svg/3dmodel04.svg';
+import modelicon from '@/assets/icons/png/3D.png';
 
 export default {
   computed: {
@@ -1342,7 +1337,6 @@ export default {
       //专题图下载
       thematicMapitems: [],
       selectthematicMap: '',
-      isshowThematicMapPreview: '',
       imgshowURL: '',
       imgurlFromDate: '',
       imgName: '',
@@ -3543,13 +3537,6 @@ export default {
      * @param {String} component - 要切换的组件名称
      */
     toggleComponent(component) {
-      // 收起图层要素
-      // this.isExpanded = false;
-      // 清除主题地图预览的显示状态
-      // this.isshowThematicMapPreview = null;
-      // 清除选择的主题地图
-      // this.selectthematicMap = null;
-
       if (component === 'dataStats') {
         // 切换 showSidebarComponents 以显示/隐藏两侧组件
         this.showSidebarComponents = !this.showSidebarComponents;
@@ -3581,18 +3568,7 @@ export default {
         // this.removeAllEmergencySites();
         this.showTips = false;
       }
-    }
-    ,
-
-    showThematicMapPreview(item) {
-      // item 中包含 name, path
-      this.ifShowMapPreview = true
-      this.imgurlFromDate = item.imgUrl
-      this.imgName = item.theme
-      this.showTypes = 1
-      this.imgshowURL = new URL(this.imgurlFromDate, import.meta.url).href
-    }
-    ,
+    },
 
     downloadReport(item) {
 
@@ -3962,8 +3938,12 @@ export default {
         },
         {
           name: '行政区划要素图层',
-          add: this.addYaanRegion,
+          add:  () => {
+            console.log("add 行政区划要素图层 ")
+            this.addYaanRegion
+          },
           remove: () => {
+            console.log("remove 行政区划要素图层 ")
             this.removeDataSourcesLayer('siChuanCityRegionLayer');
             this.removeDataSourcesLayer('sichuanCountyRegionLayer');
             this.removeDataSourcesLayer('yaAnVillageRegionLayer');
@@ -4856,12 +4836,7 @@ export default {
         this.updateMapLayers(); // 更新地图图层
       }
 
-    }
-    ,
-    handleNodeClick(data) {
-      console.log('hhhhhhhhhhhhhh', data);
-    }
-    ,
+    },
     loadNode(node, resolve) {
       // 根节点层
       if (node.level === 0) {
