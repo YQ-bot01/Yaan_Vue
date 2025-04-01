@@ -970,7 +970,7 @@
 import * as Cesium from 'cesium'
 import CesiumNavigation from "cesium-navigation-es6";
 import {getTerrainProviderViewModelsArr, initCesium} from '@/cesium/tool/initCesium.js'
-
+import * as Papa from 'papaparse';
 //组件
 import commandScreenTitle from "@/components/commandScreenComponent/commandScreenTitle.vue";
 //时间轴组件
@@ -1095,6 +1095,7 @@ import CommandScreenEqList from "@/components/Cesium/CommandScreenEqList.vue"
 import {getModelData} from "@/api/system/tiltPhotography.js";
 import layer from "@/cesium/layer.js";
 import modelicon from '@/assets/icons/svg/3dmodel04.svg';
+
 
 export default {
   computed: {
@@ -1972,9 +1973,83 @@ export default {
             }
           }
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+        this.drawPredict()
       })
 
     },
+    drawPredict() {
+      // 中心点经纬度
+      const centerLon = 102.8333; // 102°50'00"
+      const centerLat = 30.4167;  // 20°25'00"
+
+      // 计算纬度偏移量
+      const latPerKm = 1 / 111.32; // 每公里纬度变化量
+      const northLat = centerLat + 30 * latPerKm; // 向北30公里
+      // const southLat = centerLat - 40 * latPerKm; // 向南40公里
+
+      // 计算经度偏移量
+      const lonPerKm = 1 / (111.32 * Math.cos(centerLat * Math.PI / 180)); // 每公里经度变化量
+      const westLon = centerLon - 30 * lonPerKm; // 向西30公里
+      // const eastLon = centerLon + 40 * lonPerKm; // 向东40公里
+
+      // 读取 CSV 文件
+      const csvFile = 'src/assets/LuShan.csv';
+      Papa.parse(csvFile, {
+        download: true,
+        header: false,
+        complete: (results) => {
+          // console.log(results,"results Papa")
+          // 解析 CSV 数据
+          const data = results.data;
+
+          for (let y=0;y<data.length;y++){
+            for(let x=0;x<data[y].length;x++){
+
+              // 遍历数据并绘制网格
+              // data.forEach((row) => {
+              //   console.log(row,"row Papa")
+              //   row.forEach((item)=>{
+              //     console.log(item)
+              //   })
+              // const x = parseInt(row.x, 10); // 网格的 x 坐标
+              // const y = parseInt(row.y, 10); // 网格的 y 坐标
+              const value = parseInt(data[y][x], 10); // 网格的值
+
+
+              // 计算网格的实际经纬度
+              const gridLon = westLon + x * lonPerKm;
+              const gridLat = northLat - y * latPerKm;
+
+              if(value==1){
+                console.log(value,x,y,"value,x,y")
+                console.log(gridLon,gridLat, gridLon + lonPerKm, gridLat, gridLon + lonPerKm, gridLat + latPerKm, gridLon, gridLat + latPerKm,"positions gridLon")
+              }
+
+              const positions = Cesium.Cartesian3.fromDegreesArray([
+                gridLon, gridLat, // 左下角
+                gridLon + lonPerKm, gridLat, // 右下角
+                gridLon + lonPerKm, gridLat - latPerKm, // 右上角
+                gridLon, gridLat - latPerKm // 左上角
+              ]);
+
+              // 根据值选择颜色
+              const color = value === 1 ? Cesium.Color.RED : Cesium.Color.WHITE;
+
+              // 绘制网格
+              this.viewer.entities.add({
+                polygon: {
+                  hierarchy: new Cesium.PolygonHierarchy(positions), // 正确创建 PolygonHierarchy
+                  material: color.withAlpha(0.3), // 设置透明度
+                  outline: true,
+                  outlineColor: Cesium.Color.BLACK
+                }
+              });
+            }
+          }
+        }
+      });
+    },
+
     init_cesium_navigation(longitude, latitude, viewer) {
       let options = {}
       // 用于启用或禁用罗盘。true是启用罗盘，false是禁用罗盘。默认值为true。如果将选项设置为false，则罗盘将不会添加到地图中。

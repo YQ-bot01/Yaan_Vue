@@ -4,6 +4,7 @@
         :centerPoint="centerPoint"
     />
       <div id="cesiumContainer">
+
         <!--中心标绘信息-->
         <eqCenterPanel
             v-show="eqCenterPanelVisible"
@@ -35,50 +36,50 @@
         @updatePlots="updatePlots"
     />
     <!--   -->
-    <div>
-      <div class="pop_left_background">
-        <timeLineEmergencyResponse
-            :edit="true"
-            :eqid="eqid"
-            :centerPoint="centerPoint"
-            :currentTime="currentTimeString"
-        />
-        <!--   人员伤亡-左中   -->
-        <timeLinePersonnelCasualties
-            :eqid="eqid"
-            :currentTime="currentTimeString"
-        />
-        <!--        震中信息组件-->
-        <timeLineBaseInfo
-            :centerPoint="centerPoint"
-        />
-      </div>
-      <timeLineLegend
-          :activeComponent="activeComponent"
-          @toggleComponent="toggleComponent"
-      />
-      <div class="pop_right_background">
-        <!--生命线情况-->
-        <timeLineLifeLine
-            :eqid="eqid"
-            :currentTime="currentTimeString"
-        />
-        <timeLinePlotStatistics
-            :plots="plots"
-            :currentTime="currentTimeString"
-            :startTime="centerPoint.startTime"
-            :zoomLevel="zoomLevel"
-            :isTimeRunning="isTimeRunning"
-            :viewCenterCoordinate="viewCenterCoordinate"
-            :earthquakeName="centerPoint.earthquakeName"
-            :selectedDistrict="selectedDistrict"
-        />
-        <timeLineMiniMap
-            :viewer="viewer"
-            :centerPoint="centerPoint"
-        />
-      </div>
-    </div>
+<!--    <div>-->
+<!--      <div class="pop_left_background">-->
+<!--        <timeLineEmergencyResponse-->
+<!--            :edit="true"-->
+<!--            :eqid="eqid"-->
+<!--            :centerPoint="centerPoint"-->
+<!--            :currentTime="currentTimeString"-->
+<!--        />-->
+<!--        &lt;!&ndash;   人员伤亡-左中   &ndash;&gt;-->
+<!--        <timeLinePersonnelCasualties-->
+<!--            :eqid="eqid"-->
+<!--            :currentTime="currentTimeString"-->
+<!--        />-->
+<!--        &lt;!&ndash;        震中信息组件&ndash;&gt;-->
+<!--        <timeLineBaseInfo-->
+<!--            :centerPoint="centerPoint"-->
+<!--        />-->
+<!--      </div>-->
+<!--      <timeLineLegend-->
+<!--          :activeComponent="activeComponent"-->
+<!--          @toggleComponent="toggleComponent"-->
+<!--      />-->
+<!--      <div class="pop_right_background">-->
+<!--        &lt;!&ndash;生命线情况&ndash;&gt;-->
+<!--        <timeLineLifeLine-->
+<!--            :eqid="eqid"-->
+<!--            :currentTime="currentTimeString"-->
+<!--        />-->
+<!--        <timeLinePlotStatistics-->
+<!--            :plots="plots"-->
+<!--            :currentTime="currentTimeString"-->
+<!--            :startTime="centerPoint.startTime"-->
+<!--            :zoomLevel="zoomLevel"-->
+<!--            :isTimeRunning="isTimeRunning"-->
+<!--            :viewCenterCoordinate="viewCenterCoordinate"-->
+<!--            :earthquakeName="centerPoint.earthquakeName"-->
+<!--            :selectedDistrict="selectedDistrict"-->
+<!--        />-->
+<!--        <timeLineMiniMap-->
+<!--            :viewer="viewer"-->
+<!--            :centerPoint="centerPoint"-->
+<!--        />-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 </template>
 <script>
@@ -108,7 +109,7 @@ import timeTransfer from "@/cesium/tool/timeTransfer.js";
 import timeLine from "@/cesium/timeLine.js";
 import {Edit} from "@element-plus/icons-vue";
 import {goModel, isTerrainLoaded} from "@/cesium/model.js";
-
+import Papa from 'papaparse';
 
 export default {
   name: "TimeLine",
@@ -315,9 +316,54 @@ export default {
         viewer.clock.shouldAnimate = false;
         this.entitiesClickPonpHandler()
         this.updateMapAndVariableBeforeInit()
+        // this.drawPredict()
       })
+
     },
 
+    // drawPredict() {
+    //   // 中心点经纬度
+    //   const centerLon = 102.5;
+    //   const centerLat = 30.25;
+    //
+    //   // 计算纬度偏移量
+    //   const latPerKm = 1 / 111.32; // 每公里纬度变化量
+    //   const northLat = centerLat + 30 * latPerKm; // 向北30公里
+    //   const southLat = centerLat - 40 * latPerKm; // 向南40公里
+    //
+    //   // 计算经度偏移量
+    //   const lonPerKm = 1 / (111.32 * Math.cos(centerLat * Math.PI / 180)); // 每公里经度变化量
+    //   const westLon = centerLon - 30 * lonPerKm; // 向西30公里
+    //   const eastLon = centerLon + 40 * lonPerKm; // 向东40公里
+    //
+    //   // 绘制经度网格线
+    //   for (let lon = westLon; lon <= eastLon; lon += lonPerKm) {
+    //     window.viewer.entities.add({
+    //       polyline: {
+    //         positions: Cesium.Cartesian3.fromDegreesArray([
+    //           lon, northLat,
+    //           lon, southLat
+    //         ]),
+    //         material: Cesium.Color.RED.withAlpha(0.7),
+    //         width: 2
+    //       }
+    //     });
+    //   }
+    //
+    //   // 绘制纬度网格线
+    //   for (let lat = southLat; lat <= northLat; lat += latPerKm) {
+    //     window.viewer.entities.add({
+    //       polyline: {
+    //         positions: Cesium.Cartesian3.fromDegreesArray([
+    //           westLon, lat,
+    //           eastLon, lat
+    //         ]),
+    //         material: Cesium.Color.RED.withAlpha(0.7),
+    //         width: 2
+    //       }
+    //     });
+    //   }
+    // },
     updateZoomLevel(cameraHeight) {
       // console.log("层级", cameraHeight)
       // 根据相机高度设置 zoomLevel
