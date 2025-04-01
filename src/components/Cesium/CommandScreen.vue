@@ -1321,7 +1321,7 @@ export default {
         {id: '4', name: '医院要素图层'},
         {id: '5', name: '村庄要素图层'},
         {id: '6', name: '学校要素图层'},
-        {id: '7', name: '三维倾斜图层'},
+        {id: '7', name: '三维倾斜模型图层'},
       ],
       selectedlayersLocal: ['标绘点图层'],
       // 图层允许单选
@@ -2147,8 +2147,8 @@ export default {
             this.PanelData = {}
             this.PanelData = this.extractDataForRouter(entity)
             console.log("PanelData 震中", this.PanelData)
-          } else if (entity._layer === "倾斜模型") {
-
+          }
+          else if (entity._layer === "倾斜模型") {
             const terrainProviderViewModels = getTerrainProviderViewModelsArr()
             window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand();
             window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[1];
@@ -2167,10 +2167,10 @@ export default {
             this.modelInfo.modelid = row.modelid
             this.modelInfo.tze = row.tze
             this.modelInfo.rze = row.rze
-
             this.tiltphotographymodel(row);
             goModel(row)
-          } else if (entity._layer === "标绘点") {
+          }
+          else if (entity._layer === "标绘点") {
             this.eqCenterPanelVisible = false;
             pointLabelDiv.style.display = 'none';
             this.plotShowOnlyPanelVisible = true;
@@ -3903,11 +3903,18 @@ export default {
           }
         },
         {
-          name: '三维倾斜图层',
+          name: '三维倾斜模型图层',
           add: () => {
             layer.addModelLayer()
           },
           remove: () => {
+            const terrainProviderViewModels = getTerrainProviderViewModelsArr()
+            window.viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand();
+            window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[0];
+            const currentLayer = document.querySelector(`[title="${true ? '仅底图' : 'WGS84标准球体'}"]`);
+            if (currentLayer) {
+              currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
+            }
             layer.removeModelLayer()
           }
         },
@@ -4931,7 +4938,7 @@ export default {
         toggleSlopeAnalysis(websock);
         window.addEventListener('slopeStatisticsUpdated', (e) => {
           const slopeStatistics = e.detail;
-          // console.log('接收：:', slopeStatistics);
+          console.log('接收：:', slopeStatistics);
           this.slopeStatistics = slopeStatistics;
         });
       } else {

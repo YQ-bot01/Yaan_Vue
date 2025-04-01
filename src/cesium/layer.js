@@ -154,6 +154,9 @@ let layer = {
         })
     },
     removeModelLayer(){
+        if(window.modelObject){
+            window.modelObject.show = false
+        }
         modelEntities.forEach((item)=>{
             window.viewer.entities.remove(item)
         })
