@@ -3911,10 +3911,6 @@ export default {
             const terrainProviderViewModels = getTerrainProviderViewModelsArr()
             window.viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand();
             window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[0];
-            const currentLayer = document.querySelector(`[title="${true ? '仅底图' : 'WGS84标准球体'}"]`);
-            if (currentLayer) {
-              currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
-            }
             layer.removeModelLayer()
           }
         },
