@@ -1088,8 +1088,7 @@ import yaAnVillage from "@/assets/geoJson/yaan.json"
 import CommandScreenEqList from "@/components/Cesium/CommandScreenEqList.vue"
 import {getModelData} from "@/api/system/tiltPhotography.js";
 import layer from "@/cesium/layer.js";
-// import modelicon from '@/assets/icons/svg/3dmodel04.svg';
-import modelicon from '@/assets/icons/png/3D.png';
+
 
 export default {
   computed: {
@@ -1322,6 +1321,7 @@ export default {
         {id: '4', name: '医院要素图层'},
         {id: '5', name: '村庄要素图层'},
         {id: '6', name: '学校要素图层'},
+        {id: '7', name: '三维倾斜图层'},
       ],
       selectedlayersLocal: ['标绘点图层'],
       // 图层允许单选
@@ -1772,40 +1772,6 @@ export default {
         const terrainProviderViewModels = getTerrainProviderViewModelsArr();
         let isThirdParty = true; // 标记当前是否为第三方地形
 
-        // 倾斜模型加载
-        getModelData().then(res => {
-          console.log("倾斜模型数据，新加的点，", res)
-          // 创建一个数组来保存实体和对应的数据
-          const entities = [];
-
-          for (let i = 0; i < res.length; i++) {
-            let alltiltPhotography = viewer.entities.add({
-              position: Cesium.Cartesian3.fromDegrees(res[i].geom.coordinates[0], res[i].geom.coordinates[1]),
-              layer: "倾斜模型",
-              // point: {
-              //   pixelSize: 20,
-              //   color: Cesium.Color.fromCssColorString("#e0c79b"),
-              //   clampToGround: true,
-              // },
-              billboard: {
-                image: modelicon,
-                width: 40,
-                height: 40,
-                // eyeOffset: new Cesium.Cartesian3(0, 0, 0),
-                // color: Cesium.Color.WHITE.withAlpha(1),
-                // scale: 0.8,
-                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 禁用，导致图标在高度计算或与地形交互时出现闪烁。 原作用：绑定到地形高度,让billboard贴地
-                disableDepthTestDistance: Number.POSITIVE_INFINITY
-              },
-              // 自定义属性，保存对应的数据
-              data: res[i],
-              // 添加名称属性
-              name: res[i].name + "倾斜模型"
-            });
-            // 将实体保存到数组中
-            entities.push(alltiltPhotography);
-          }
-        })
 
         // 设置cesium的指南针、比例尺、放大缩小重置
         this.init_cesium_navigation(this.centerPoint.longitude, this.centerPoint.latitude, viewer)
@@ -3937,6 +3903,16 @@ export default {
           }
         },
         {
+          name: '三维倾斜图层',
+          add: () => {
+            layer.addModelLayer()
+          },
+          remove: () => {
+            layer.removeModelLayer()
+          }
+        },
+
+        {
           name: '行政区划要素图层',
           add:  () => {
             console.log("add 行政区划要素图层 ")
@@ -4815,11 +4791,8 @@ export default {
       this.modelTableData = this.getPageArr(this.modelList)
       this.currentPage = val;
       this.showSuppliesList = this.getPageArr(this.selectedSuppliesList);
-    }
-    ,
+    },
 
-
-    // ------------------------------图层要素---------------------------------------------------
     handleCheckChange(data, checked, indeterminate) {
       console.log('handleCheckChange triggered', {data, checked, indeterminate});
 
