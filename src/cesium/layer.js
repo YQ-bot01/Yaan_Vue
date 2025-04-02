@@ -1,9 +1,11 @@
 import sichuanCounty from "@/assets/geoJson/sichuanCounty.json";
 import * as Cesium from 'cesium'
 import yaAn from "@/assets/geoJson/yaan1.json";
-
+import {getModelData} from "@/api/system/tiltPhotography.js";
+import modelicon from "@/assets/icons/png/3D.png";
+const modelEntities = [];
 let layer = {
-    //视角跳转
+    //视角跳转-加载雅安市
     addYaanCityDistrict() {
         let geoPromise = Cesium.GeoJsonDataSource.load(yaAn, {
             clampToGround: true, //贴地显示
@@ -40,6 +42,7 @@ let layer = {
             })
         }));
     },
+    //视角跳转-加载雅安区县
     addCountyLayerJump(district) {
         // 根据区县代码过滤GeoJSON数据
         let filteredFeatures = sichuanCounty.features.filter(feature => {
@@ -102,6 +105,7 @@ let layer = {
             // console.error("未找到对应的区县:", adcode);
         }
     },
+    //视角跳转-取消视角跳转图层
     removeRegionLayerJump() {
         if (window.regionLayerJump) {
             // 从viewer的数据源中移除图层，第二个参数为true表示强制移除
@@ -115,6 +119,48 @@ let layer = {
             window.viewer.entities.remove(labelEntity)
         }
     },
-    //视角跳转 end
+    //多源要素图层-加载三维模型图层
+    addModelLayer(){
+        getModelData().then(res => {
+            console.log("倾斜模型数据，新加的点，", res)
+            // 创建一个数组来保存实体和对应的数据
+            for (let i = 0; i < res.length; i++) {
+                let alltiltPhotography=window.viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(res[i].geom.coordinates[0], res[i].geom.coordinates[1]),
+                    layer: "倾斜模型",
+                    // point: {
+                    //   pixelSize: 20,
+                    //   color: Cesium.Color.fromCssColorString("#e0c79b"),
+                    //   clampToGround: true,
+                    // },
+                    billboard: {
+                        image: modelicon,
+                        width: 30,
+                        height: 30,
+                        // eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                        // color: Cesium.Color.WHITE.withAlpha(1),
+                        // scale: 0.8,
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 禁用，导致图标在高度计算或与地形交互时出现闪烁。 原作用：绑定到地形高度,让billboard贴地
+                        disableDepthTestDistance: Number.POSITIVE_INFINITY
+                    },
+                    // 自定义属性，保存对应的数据
+                    data: res[i],
+                    // 添加名称属性
+                    name: res[i].name + "倾斜模型"
+                });
+                // 将实体保存到数组中
+                modelEntities.push(alltiltPhotography);
+            }
+        })
+    },
+    removeModelLayer(){
+        if(window.modelObject){
+            window.modelObject.show = false
+        }
+        modelEntities.forEach((item)=>{
+            window.viewer.entities.remove(item)
+        })
+    },
+
 }
 export default layer;
