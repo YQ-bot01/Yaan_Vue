@@ -185,7 +185,7 @@ export default {
         latestEqData.value = [props.eqData[0]]; // 只取最新的一个
         historyEqData.value = props.eqData.slice(1); // 剩下的为历史数据
 
-        console.log("你好：", props.eqData)
+        // console.log("你好：", props.eqData)
 
         // 处理数据分组
         processData();

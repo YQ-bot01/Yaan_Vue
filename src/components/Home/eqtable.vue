@@ -83,7 +83,8 @@ const router = useRouter();
 
 watch(() => props.eqData, () => {
   // console.log("data：",props.eqData)
-  let list = props.eqData.filter(item => item.magnitude >= 3)
+
+  let list = props.eqData.filter(item => item.earthquakeName.includes("雅安") ||item.magnitude >= 3)
   getEqData.value = list;
   total.value = list.length;
   tableData.value = getPageArr();

@@ -168,11 +168,9 @@ const getEq = () => {
   getEqList().then((res) => {
     console.log("地震数据", res.data)
     EqAll.value = res.data;
-    console.log("EqAll.value", EqAll.value)
+    // console.log("EqAll.value", EqAll.value)
     tableData.value = res.data;
-
     lastEqData.value = tableData.value[0];
-
   });
 };
 
@@ -183,12 +181,16 @@ const requestParams = ref('');
 const activeMode = ref('Z');
 const CeShiTableData = computed(() => {
   if (activeMode.value === 'Z') {
+    console.log(tableData.value.filter(item => item.eqType === 'Z'),"tableData.valueZ")
     return tableData.value.filter(item => item.eqType === 'Z');
   } else if (activeMode.value === 'Y' || activeMode.value === 'T') {
+    console.log(tableData.value.filter(item => item.eqType === 'Y' || item.eqType === 'T'),"tableData.valueYT")
     return tableData.value.filter(item => item.eqType === 'Y' || item.eqType === 'T');
   }
+  console.log(tableData.value,"tableData.value")
   return tableData.value;
 });
+
 const MapData = computed(() => {
   let filteredData = tableData.value;
 
@@ -198,7 +200,8 @@ const MapData = computed(() => {
     filteredData = filteredData.filter(item => item.eqType === 'Y' || item.eqType === 'T');
   }
   // 过滤出年份大于等于2000的地震数据
-  filteredData = filteredData.filter(item => item.occurrenceTime && new Date(item.occurrenceTime).getFullYear() >= 2000 && item.magnitude >= 3);
+
+  filteredData = filteredData.filter(item => item.occurrenceTime && new Date(item.occurrenceTime).getFullYear() >= 2000 && (item.earthquakeName.includes("雅安") || Number(item.magnitude) >= 3));
   console.log("filterDate2000", filteredData)
   return filteredData;
 });
@@ -206,24 +209,25 @@ const MapData = computed(() => {
 
 // 监听 MapData 变化，更新 lastEqData
 watch(MapData, (newVal) => {
-  if (newVal.length > 0 && newVal[0].magnitude >= 3) {
+  if (newVal.length > 0 && (newVal[0].earthquakeName.includes("雅安") || Number( newVal[0].magnitude) >= 3)) {
     lastValidEqData.value = newVal[0]; // 存储上一次有值的第一条数据
     lastEqData.value = newVal[0];
   } else {
     lastEqData.value = lastValidEqData.value; // 为空时回退到存储值
   }
+  console.log(lastEqData.value,"lastEqData.value11")
 }, {deep: true, immediate: true});
 
 
 // 监听 CeShiTableData 变化，更新 lastEqData
 watch(CeShiTableData, (newVal) => {
-  // console.log(CeShiTableData,"CeShiTableData")
-  if (newVal.length > 0 && newVal[0].magnitude >= 3) {
+  if (newVal.length > 0 && (newVal[0].earthquakeName.includes("雅安") || Number( newVal[0].magnitude) >= 3)) {
     lastValidEqData.value = newVal[0]; // 存储上一次有值的第一条数据
     lastEqData.value = newVal[0];
   } else {
     lastEqData.value = lastValidEqData.value; // 为空时回退到存储值
   }
+  console.log(lastEqData.value,"lastEqData.value22")
 }, {deep: true, immediate: true});
 
 const queryFormVisible = ref(false);
@@ -428,7 +432,6 @@ onMounted(() => {
     if (rightTop.value) resizeObserver.observe(rightTop.value);
     if (rightBottom.value) resizeObserver.observe(rightBottom.value);
   });
-
   setInterval(updateTime, 500);
   getEq();
 });
