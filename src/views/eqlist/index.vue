@@ -838,7 +838,9 @@ export default {
       let that = this
       getEqList().then(res => {
         console.log("返回的数据", res.data)
-        let resData = res.data.filter(item => Number(item.magnitude) >= 3)
+        let resData = res.data.filter(item =>
+            item.earthquakeName.includes("雅安") || Number(item.magnitude) >= 3
+        )
         that.getEqData = resData
         console.log("过滤后", resData)
         that.total = resData.length

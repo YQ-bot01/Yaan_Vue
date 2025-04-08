@@ -226,7 +226,9 @@ export default {
       let that = this
       getEqList().then(res => {
         console.log("返回的数据1", res.data)
-        let resData = res.data.filter(item => item.magnitude >= 4.0)
+        let resData = res.data.filter(item =>
+            item.earthquakeName.includes("雅安") || Number(item.magnitude) >= 4
+        )
         console.log("过滤后", resData)
         that.getEqData = resData
         that.total = resData.length

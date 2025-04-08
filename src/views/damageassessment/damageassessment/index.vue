@@ -21,7 +21,7 @@
               <!-- 圆圈震级 -->
               <div style="width: 55px">
                 <div class="eqMagnitude"
-                     :style="{ backgroundColor: eq.magnitude >= 4.0 && eq.magnitude < 6.0 ? '#f0aa2e' : 'red' }">
+                     :style="{ backgroundColor: eq.magnitude >= 2.0 && eq.magnitude < 6.0 ? '#f0aa2e' : 'red' }">
                   {{ eq.magnitude }}
                 </div>
               </div>
@@ -486,7 +486,9 @@ export default {
       }
       getEqList(eqListDTO).then((res) => {
         // console.log(res)
-        let resData = res.data.filter((item) => item.magnitude >= 4.0);
+        let resData = res.data.filter(item =>
+            item.earthquakeName.includes("雅安") || Number(item.magnitude) >= 4
+        )
         console.log("灾损过滤后4.0", resData)
         let data = resData.map((item) => ({
           ...item,
@@ -846,7 +848,6 @@ export default {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = this.currentPage * this.pageSize;
       this.pagedEqData = this.filteredEqData.slice(start, end);
-      // console.log("pagedEqData:", this.pagedEqData)
 
       // 清除之前的点并重新添加
       // viewer.entities.removeAll();

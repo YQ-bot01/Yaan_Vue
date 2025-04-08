@@ -2315,7 +2315,7 @@ export default {
         latitude = row.geom.coordinates[1]
         longitude = row.geom.coordinates[0]
       }
-      
+
       window.viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(parseFloat(longitude), parseFloat(latitude), 60000),
         orientation: {

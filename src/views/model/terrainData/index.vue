@@ -154,14 +154,13 @@
 
 <script>
 import {
-  insert,
-  update,
-  removeById,
-  queryRemoteSensingData,
-  RemoteSensingFilterContent,
-  list
-} from '@/api/system/remotesensingimage.js';
+  terrainInsert,
+  terrainDataFilter,
+  terrainRemoveById,
+  terrainList
+} from '@/api/system/terrainData.js';
 import { ElMessage, ElMessageBox } from "element-plus";
+import {queryTerrainData, terrainUpdate} from "@/api/system/terrainData.js";
 export default {
   name: "index",
   data() {
@@ -199,7 +198,7 @@ export default {
 
   methods: {
     fetchData() {
-      list().then(res => {
+      terrainList().then(res => {
         console.log("获取的数据:", res); // 打印获取的数据
         this.tableData = res.data.map((item) => {
           let formattedCreateTime = '';
@@ -281,7 +280,7 @@ export default {
       };
       console.log("filterContent", this.filterContent);
       // 发送请求
-      RemoteSensingFilterContent(this.filterContent).then(res => {
+      terrainDataFilter(this.filterContent).then(res => {
         console.log("RemoteSensingFilterContent", res); // 打印返回的响应
         // 假设 res.data 包含查询结果
         const data = res.data || [];
@@ -361,7 +360,7 @@ export default {
       let result = searchKey.replace(/年|月/g, "-").replace(/日/g, "");
 
       // 调用同一个方法进行查询
-      queryRemoteSensingData(result || '')
+      queryTerrainData(result || '')
           .then(res => {
 
             // 假设 res.data.records 是查询的结果数据，res.data.total 是总记录数
@@ -490,7 +489,7 @@ export default {
         type: 'warning',
       })
           .then(() => {
-            removeById({ uuid: row.uuid })
+            terrainRemoveById({ uuid: row.uuid })
                 .then(() => {
                   this.fetchData();
                   ElMessage.success('删除成功');
@@ -532,7 +531,7 @@ export default {
             shootingTime: this.formatDate(this.dialogContent.shootingTime),
             uuid: this.dialogContent.uuid,
           };
-          const action = this.dialogTitle === '新增' ? insert : update;
+          const action = this.dialogTitle === '新增' ? terrainInsert : terrainUpdate;
           action(modelData).then(() => {
             this.fetchData();
             this.dialogShow = false;
