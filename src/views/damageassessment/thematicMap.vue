@@ -16,7 +16,7 @@
           </div>
           <!-- 地震列表 -->
           <div class="eqList">
-            <div v-for="eq in pagedEqData" :key="eq.eqid" class="eqCard" @click="locateEq(eq)">
+            <div v-for="eq in pagedEqData" :key="eq.eqid" class="eqCard" @click="toTab(eq)">
               <!-- 圆圈震级 -->
               <div style="width: 55px">
                 <div class="eqMagnitude"
@@ -136,6 +136,7 @@
           </div>
         </div>
 
+
       </div>
 
       <div class="eqPanel" v-if="isPanelShow.thematicMap || isPanelShow.report
@@ -220,6 +221,7 @@ import {handleOutputData, timestampToTime} from "../../cesium/plot/eqThemes.js";
 import eqMark from "@/assets/images/DamageAssessment/eqMark.png";
 import yaAnVillage from "@/assets/geoJson/yaan.json";
 import yaAnTown from "@/assets/geoJson/yaan1.json";
+import timeLine from "@/cesium/timeLine.js";
 
 export default {
   components: {},
@@ -753,28 +755,12 @@ export default {
           },
           id: this.selectedTabData.id
         });
+        timeLine.fly(Number(this.selectedTabData.longitude), Number(this.selectedTabData.latitude), 200000)
+
       }
     },
 
-    // Cesium定位
-    locateEq(eq) {
-      this.pickEqPoint(eq);
-      this.renderQueryEqPoints();
 
-      // 提取地震的经纬度
-      const longitude = parseFloat(eq.longitude);
-      const latitude = parseFloat(eq.latitude);
-
-      // 设置相机的飞行动作
-      window.viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 200000),
-        orientation: {
-          heading: Cesium.Math.toRadians(0.0),
-          pitch: Cesium.Math.toRadians(-90.0),
-          roll: Cesium.Math.toRadians(0.0)
-        },
-      });
-    },
 
     pickEqPoint(eq) {
       this.listEqPoints.forEach(entity => {
@@ -1047,7 +1033,7 @@ export default {
       this.thisTab = '震害事件';
       this.selectedTabData = null;
       this.outputData = {}
-
+      this.renderQueryEqPoints();
       //视角回雅安
       const position = Cesium.Cartesian3.fromDegrees(
         103.0,

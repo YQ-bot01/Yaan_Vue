@@ -17,7 +17,7 @@
           </div>
           <!-- 地震列表 -->
           <div class="eqList">
-            <div v-for="eq in pagedEqData" :key="eq.eqid" class="eqCard" @click="locateEq(eq)">
+            <div v-for="eq in pagedEqData" :key="eq.eqid" class="eqCard" @click="toTab(eq)">
               <!-- 圆圈震级 -->
               <div style="width: 55px">
                 <div class="eqMagnitude"
@@ -231,7 +231,7 @@ import {
 import EconomicLossPanel from "../../../components/DamageAssessment/economicLossPanel.vue";
 import plotInfoOnlyShowPanel from "@/components/Panel/plotInfoOnlyShowPanel.vue";
 
-
+import timeLine from "@/cesium/timeLine.js";
 export default {
   components: {
     plotInfoOnlyShowPanel,
@@ -667,7 +667,6 @@ export default {
 
     // 地图渲染查询地震点(根据页码、根据搜索框)
     renderQueryEqPoints() {
-
       this.listEqPoints.forEach(entity => window.viewer.entities.remove(entity));
       this.listEqPoints = [];
       this.pagedEqData.forEach(eq => {
@@ -936,7 +935,6 @@ export default {
         // 如果找到对应数据，调用定位函数
         if (this.selectedTabData) {
           this.selectEqPoint();
-          // console.log(this.selectedTabData)
         }
       }
     },
@@ -976,28 +974,10 @@ export default {
           },
           id: this.selectedTabData.id
         });
+        timeLine.fly(Number(this.selectedTabData.longitude), Number(this.selectedTabData.latitude), 200000)
       }
     },
 
-    // Cesium定位
-    locateEq(eq) {
-      this.pickEqPoint(eq);
-      this.renderQueryEqPoints();
-
-      // 提取地震的经纬度
-      const longitude = parseFloat(eq.longitude);
-      const latitude = parseFloat(eq.latitude);
-
-      // 设置相机的飞行动作
-      window.viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 200000),
-        orientation: {
-          heading: Cesium.Math.toRadians(0.0),
-          pitch: Cesium.Math.toRadians(-90.0),
-          roll: Cesium.Math.toRadians(0.0)
-        },
-      });
-    },
 
     pickEqPoint(eq) {
       this.listEqPoints.forEach(entity => {
