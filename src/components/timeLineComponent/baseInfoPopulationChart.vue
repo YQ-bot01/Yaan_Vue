@@ -2,7 +2,7 @@
     <div class="chart-container">
          <span
              style=" position: absolute;    font-weight: bold;padding-left: 0px;margin-top: 7px; margin-left: 3%; font-size: 14px; color: #fff;">
-                            {{populationDataChartUpdateTime}}年各区县人口情况
+                            {{populationDataChartUpdateTime}}年各区县 人口情况
                           </span>
       <div ref="pieChart" class="chart"></div>
     </div>

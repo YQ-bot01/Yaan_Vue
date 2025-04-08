@@ -13,8 +13,8 @@
 
       <div v-for="item in getPicData" :key="item.label" class="legend-item">
         <div v-if="item.img && item.img !== ''">
-<!--          <img  class="legend-img" :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' + item.img+ '.png?t=' + new Date().getTime()" alt="暂无符号">-->
-          <img  class="legend-img" :src="'http://localhost:8080'+'/uploads/PlotsPic/' + item.img+ '.png?t=' + new Date().getTime()" alt="暂无符号">
+          <img  class="legend-img" :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' + item.img+ '.png?t=' + new Date().getTime()" alt="暂无符号">
+<!--          <img  class="legend-img" :src="'http://localhost:8080'+'/uploads/PlotsPic/' + item.img+ '.png?t=' + new Date().getTime()" alt="暂无符号">-->
 
         </div>
         <span class="legend-label">{{ item.name }}</span>

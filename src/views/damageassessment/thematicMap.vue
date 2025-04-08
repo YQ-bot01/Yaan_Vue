@@ -20,7 +20,7 @@
               <!-- 圆圈震级 -->
               <div style="width: 55px">
                 <div class="eqMagnitude"
-                     :style="{ backgroundColor: eq.magnitude >= 4.0 && eq.magnitude < 6.0 ? '#f0aa2e' : 'red' }">
+                     :style="{ backgroundColor: eq.magnitude >= 2.0 && eq.magnitude < 6.0 ? '#f0aa2e' : 'red' }">
                   {{ eq.magnitude }}
                 </div>
               </div>
@@ -337,7 +337,9 @@ export default {
         pageSize: 10,
       }
       getEqList(eqListDTO).then((res) => {
-        let resData = res.data.filter((item) => item.magnitude >= 4.0);
+        let resData = res.data.filter(item =>
+            item.earthquakeName.includes("雅安") || Number(item.magnitude) >= 4
+        )
         let data = resData.map((item) => ({
           ...item,
           occurrenceTime: timestampToTime(item.occurrenceTime, "full"),
