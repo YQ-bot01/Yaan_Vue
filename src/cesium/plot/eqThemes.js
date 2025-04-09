@@ -112,7 +112,7 @@ export function addHospitalLayer() {
 // 绘制村庄
 export function addVillageLayer() {
   // GeoJSON文件路径
-  const geoJsonUrl = new URL("@/assets/geoJson/village.geojson", import.meta.url).href;
+  const geoJsonUrl = new URL("@/assets/geoJson/village_20250409.geojson", import.meta.url).href;
   if (viewer.dataSources.getByName("village").length === 0) {
     // 使用fetch加载GeoJSON文件
     fetch(geoJsonUrl)
@@ -133,8 +133,8 @@ export function addVillageLayer() {
             entity.properties.sourceName = "village";  // 追加自定义的属性
             entity.billboard = new Cesium.BillboardGraphics({
               image: villageIcon, // 使用导入的图片
-              width: 32, // 图片宽度
-              height: 32, // 图片高度
+              width: 30, // 图片宽度
+              height: 30, // 图片高度
               scale: 1, // 图片缩放
             });
           });

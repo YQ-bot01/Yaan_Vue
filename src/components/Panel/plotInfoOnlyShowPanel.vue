@@ -286,7 +286,7 @@ export default {
 
 .videoMonitorWin {
   position: absolute;
-  width: 600px;
+  width: 660px;
   padding: 4px;
   z-index: 80;
   background-color: rgba(40, 40, 40, 0.7);

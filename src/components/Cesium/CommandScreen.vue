@@ -2102,34 +2102,6 @@ export default {
             this.dataSourcePopupVisible = false
             return;
           }
-
-
-          // if (entity._layer === "断裂带") {
-          //   //console.log("断裂带")
-          //
-          //   const faultName = pickedEntity.id.properties.name._value;
-          //
-          //   if (faultName) {
-          //     // 获取点击位置的地理坐标 (Cartesian3)
-          //     const cartesian = viewer.scene.pickPosition(click.position);
-          //     if (!Cesium.defined(cartesian)) {
-          //       return;
-          //     }
-          //
-          //     // 更新 faultInfo 的位置和内容
-          //     this.updateFaultInfoPosition(faultName);
-          //
-          //     // 显示 faultInfo
-          //     pointLabelDiv.style.display = 'block';
-          //
-          //     // 监听地图变化，动态更新 div 的位置
-          //     window.viewer.scene.postRender.addEventListener(() => {
-          //       this.updateFaultInfoPosition(faultName);
-          //     });
-          //
-          //     //console.log(faultName)
-          //   }
-          // }
           // 新增判断：跳过行政区划实体
           if (entity._layer === '行政区划') {
             this.plotShowOnlyPanelVisible = false;
@@ -2262,9 +2234,8 @@ export default {
               this.plotShowOnlyPanelVisible = false
               this.routerPopupVisible = false;
               pointLabelDiv.style.display = 'none';
-
             }
-          } else if (Cesium.defined(pickedEntity) && pickedEntity.id.name) {
+          } else if (pickedEntity.id.name) {
             console.log(112211)
             let ray = viewer.camera.getPickRay(click.position);
             let position = viewer.scene.globe.pick(ray, viewer.scene);
@@ -2300,12 +2271,30 @@ export default {
               console.log(this.eqThemeData)
             }
             // 如果是村庄点
+            // else if (sourceName === "village") {
+            //   this.tableName = "村庄信息";
+            //   this.eqThemeData = {
+            //     "名称": properties._NAME._value,
+            //     "经纬度": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
+            //   }
+            // }
             else if (sourceName === "village") {
+              console.log(properties,"properties 村庄")
               this.tableName = "村庄信息";
               this.eqThemeData = {
-                "名称": properties._NAME._value,
-                "经纬度": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
+                "名称": properties._O_Name._value,
+                "地理位置": "经度: " +  properties._O_Lng._value.toFixed(2) + "°E, 纬度: " + properties._O_Lat._value.toFixed(2) + "°N",
               }
+              // console.log()
+              const lines = properties._O_Com._value.split("\n");
+              lines.forEach((line) => {
+                const [key, value] = line.split("：");
+                // 过滤掉不需要的键值对
+                if (key.trim() !== "统计用区划代码" && key.trim() !== "城乡分类代码") {
+                  // 将键值对存储到 parsedData 对象中
+                  this.eqThemeData[key.trim()] = value.trim();
+                }
+              });
             }
             else if (sourceName === "school") {
               this.tableName = "学校信息";

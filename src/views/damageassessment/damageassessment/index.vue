@@ -213,8 +213,6 @@ import HistoryEqPanel from "../../../components/DamageAssessment/historyEqPanel.
 import PersonalCasualtyPanel from "../../../components/DamageAssessment/personalCasualtyPanel.vue";
 import yaanCounty from "@/assets/geoJson/yaan1.json";
 import yaanTown from "@/assets/geoJson/yaan.json";
-// import hospital from "@/assets/geoJson/hospital.geojson";
-// import village from "@/assets/geoJson/village.geojson";
 import {
   addFaultZones,
   addHistoryEqPoints, addOCTest,
@@ -540,110 +538,97 @@ export default {
     // 注册鼠标事件监听
     initMouseEvents() {
       const faultInfoDiv = document.getElementById('faultInfo');
-
-      // 鼠标移动时设置指针样式
-      window.viewer.screenSpaceEventHandler.setInputAction((movement) => {
-        const pickedObject = window.viewer.scene.pick(movement.endPosition);
-        if (Cesium.defined(pickedObject) && pickedObject.id.billboard) {
-          document.body.style.cursor = 'pointer';
-        } else {
-          document.body.style.cursor = 'default';
-        }
-      }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-
       // 鼠标点击事件
       window.viewer.screenSpaceEventHandler.setInputAction((click) => {
         let pickedObject = window.viewer.scene.pick(click.position);
         window.selectedEntity = pickedObject?.id;
-        // console.log(pickedObject.id.properties,"pickedObject")
         this.selectedEntityPosition = this.calculatePosition(click.position);
-        // 与断裂带名称div绑定
-        if (Cesium.defined(pickedObject) && pickedObject.id.polyline) {
-          // console.log("pickedObject", pickedObject)
-          // 获取断裂带的 name 属性
-          // const faultName = pickedObject.id.properties.name._value;
+        console.log(pickedObject,"拾取点")
 
-          // if (faultName) {
-          //   // 获取点击位置的地理坐标 (Cartesian3)
-          //   const cartesian = viewer.scene.pickPosition(click.position);
-          //   if (!Cesium.defined(cartesian)) {
-          //     return;
-          //   }
-          //
-          //   // 更新 faultInfo 的位置和内容
-          //   this.updateFaultInfoPosition(faultName);
-          //
-          //   // 显示 faultInfo
-          //   faultInfoDiv.style.display = 'block';
-          //
-          //   // 监听地图变化，动态更新 div 的位置
-          //   window.viewer.scene.postRender.addEventListener(() => {
-          //     this.updateFaultInfoPosition(faultName);
-          //   });
-          // }
-          this.popupVisible = false;
+        if(Cesium.defined(pickedObject)){
+          // 如果是历史地震点
+          if (pickedObject.id._layer && pickedObject.id._layer === '历史地震') {
+            pickedObject.id.label._show._value = !pickedObject.id.label._show._value;
+            this.popupVisible = false;
+          }
+          //医院或村庄
+          else if(pickedObject.id._properties.sourceName&&(pickedObject.id._properties.sourceName === "hospital" || pickedObject.id._properties.sourceName === "village")) {
+              let ray = viewer.camera.getPickRay(click.position);
+              let position = viewer.scene.globe.pick(ray, viewer.scene);
+              let cartographic = Cesium.Cartographic.fromCartesian(position);
+              let latitude = Cesium.Math.toDegrees(cartographic.latitude);
+              let longitude = Cesium.Math.toDegrees(cartographic.longitude);
 
-        }
-        // 如果是历史地震点
-        else if (Cesium.defined(pickedObject) && pickedObject.id.billboard && pickedObject.id.label) {
-          console.log(pickedObject)
-          pickedObject.id.label._show._value = !pickedObject.id.label._show._value;
-          this.popupVisible = false;
-        } else if (Cesium.defined(pickedObject) && pickedObject.id.name) {
-          if (pickedObject.id._properties.sourceName === "hospital" || pickedObject.id._properties.sourceName === "village") {
-            // console.log(pickedObject.id._properties.sourceName);
-
-            let ray = viewer.camera.getPickRay(click.position);
-            let position = viewer.scene.globe.pick(ray, viewer.scene);
-            let cartographic = Cesium.Cartographic.fromCartesian(position);
-            let latitude = Cesium.Math.toDegrees(cartographic.latitude);
-            let longitude = Cesium.Math.toDegrees(cartographic.longitude);
-
-            // 如果有地形加载，更新高度
-            let height = 0;
-            if (this.isTerrainLoaded()) {
-              height = viewer.scene.globe.getHeight(cartographic);
-            }
-            this.selectedEntityHighDiy = Cesium.Cartesian3.fromDegrees(longitude, latitude, height);
-
-            const properties = pickedObject.id._properties;
-            const sourceName = properties.sourceName;
-
-            // 如果是医院点
-            if (sourceName === "hospital") {
-              this.tableName = "医院信息";
-              this.popupData = {
-                "名称": properties._name._value,
-                "位置": properties._location._value,
-                "医院等级": properties._grade._value,
-                "联系电话": properties._tel._value,
-                "床铺数量": properties._bed._value,
-                "所属单位": properties._membership._value,
-                "救护车数量": properties._ambulance._value,
-                "血浆数量": properties._plasma._value,
-                "葡萄糖数量": properties._surgery_dc._value,
-                "医生数量": properties._doctor._value,
-                "麻醉剂数量": properties._anesthetis._value,
-                "护士数量": properties._nurse._value,
-                "地理位置": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
+              // 如果有地形加载，更新高度
+              let height = 0;
+              if (this.isTerrainLoaded()) {
+                height = viewer.scene.globe.getHeight(cartographic);
               }
-              // console.log(this.popupData)
-            }
-            // 如果是村庄点
-            else if (sourceName === "village") {
-              this.tableName = "村庄信息";
-              this.popupData = {
-                "名称": properties._NAME._value,
-                "地理位置": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
+              this.selectedEntityHighDiy = Cesium.Cartesian3.fromDegrees(longitude, latitude, height);
+              const properties = pickedObject.id._properties;
+              const sourceName = properties.sourceName;
+
+              // 如果是医院点
+              if (sourceName === "hospital") {
+                this.tableName = "医院信息";
+                this.popupData = {
+                  "名称": properties._name._value,
+                  "位置": properties._location._value,
+                  "医院等级": properties._grade._value,
+                  "联系电话": properties._tel._value,
+                  "床铺数量": properties._bed._value,
+                  "所属单位": properties._membership._value,
+                  "救护车数量": properties._ambulance._value,
+                  "血浆数量": properties._plasma._value,
+                  "葡萄糖数量": properties._surgery_dc._value,
+                  "医生数量": properties._doctor._value,
+                  "麻醉剂数量": properties._anesthetis._value,
+                  "护士数量": properties._nurse._value,
+                  "地理位置": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
+                }
               }
-              // console.log(this.popupData)
+              // 如果是村庄点
+              else if (sourceName === "village") {
+                console.log(properties,"properties 村庄")
+                this.tableName = "村庄信息";
+
+
+                this.popupData = {
+                  "名称": properties._O_Name._value,
+                  "地理位置": "经度: " +  properties._O_Lng._value.toFixed(2) + "°E, 纬度: " + properties._O_Lat._value.toFixed(2) + "°N",
+                }
+                // console.log()
+                const lines = properties._O_Com._value.split("\n");
+                lines.forEach((line) => {
+                  const [key, value] = line.split("：");
+                  // 过滤掉不需要的键值对
+                  if (key.trim() !== "统计用区划代码" && key.trim() !== "城乡分类代码") {
+                    // 将键值对存储到 parsedData 对象中
+                    this.popupData[key.trim()] = value.trim();
+                  }
+                });
+              }
+            console.log(this.popupData)
+              this.popupVisible = true;
+              this.updatePopupPosition();
             }
-            this.popupVisible = true;
-            this.updatePopupPosition();
+          //其他情况关闭其他弹框
+          else {
+            this.popupVisible = false;
+            if (this.selectedEqPoint) {
+              this.selectedEqPoint.label._show._value = false;
+            }
+            this.listEqPoints.forEach(entity => {
+              entity.label._show._value = false;
+            });
+            this.historyEqPoints.forEach(entity => {
+              entity.label._show._value = false;
+            });
+            // 隐藏 faultInfoDiv
+            faultInfoDiv.style.display = 'none';
           }
         }
-
-        // 如果点击其他位置，隐藏所有地震点的标签，并关闭 faultInfoDiv
+        // !Cesium.defined(pickedObject) 如果点击其他位置，隐藏所有地震点的标签，并关闭 faultInfoDiv
         else {
           this.popupVisible = false;
           if (this.selectedEqPoint) {
@@ -659,12 +644,26 @@ export default {
           faultInfoDiv.style.display = 'none';
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-      // 确保在地图拖动时弹窗位置更新
-      window.viewer.screenSpaceEventHandler.setInputAction(movement => {
+      //鼠标移动事件
+      window.viewer.screenSpaceEventHandler.setInputAction((movement) => {
+        // 鼠标移动时设置指针样式
+        const pickedObject = window.viewer.scene.pick(movement.endPosition);
+        if (Cesium.defined(pickedObject) && pickedObject.id.billboard) {
+          document.body.style.cursor = 'pointer';
+        } else {
+          document.body.style.cursor = 'default';
+        }
+        // 确保在地图拖动时弹窗位置更新
         if (this.popupVisible && window.selectedEntity) {
           this.updatePopupPosition();
         }
       }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+      // 确保在地图拖动时弹窗位置更新
+      // window.viewer.screenSpaceEventHandler.setInputAction(movement => {
+      //   if (this.popupVisible && window.selectedEntity) {
+      //     this.updatePopupPosition();
+      //   }
+      // }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
     },
 
     // 地图渲染查询地震点(根据页码、根据搜索框)
