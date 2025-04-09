@@ -183,8 +183,6 @@ export function addSchoolLayer() {
   }
 }
 
-
-// 绘制断裂带
 export function addFaultZones(centerPoint) {
   // GeoJSON文件路径
   const geoJsonUrl = new URL("@/assets/geoJson/duanliedai.geojson", import.meta.url).href;
@@ -201,21 +199,33 @@ export function addFaultZones(centerPoint) {
         viewer.dataSources.add(
             Cesium.GeoJsonDataSource.load(geoJsonData, {
               stroke: Cesium.Color.RED,
-              fill: Cesium.Color.RED.withAlpha(0.5),
-              strokeWidth: 3,
+              fill:  Cesium.Color.fromCssColorString("#f1cfcf").withAlpha(0.5),
+              strokeWidth: 2, // 默认线条粗细
               clampToGround: true,
             })
         ).then(function (dataSource) {
           // 给 dataSource 添加 name 属性
           dataSource.name = "faultZone";
 
-          // 遍历所有实体，提取断层名称并添加 label
+          // 遍历所有实体，提取断层名称并设置线条粗细
           dataSource.entities.values.forEach((entity) => {
-            if (entity.properties && entity.properties.O_Com) {
+            console.log(entity,"entity faultZone")
+            if (entity._properties && entity._properties._O_Com && entity._properties._O_Com.getValue() ) {
               // 提取断裂带名称
-              const faultNameMatch = entity.properties.O_Com.getValue().match(/"断层名称":"([^"]+)"/);
+              // console.log(entity._properties._O_Com,"entity._properties._O_Com")
+              // console.log(entity._properties._O_Com.getValue(),"entity._properties._O_Com.getValue().")
+              const faultNameMatch = entity._properties._O_Com.getValue().match(/"断层名称":"([^"]+)"/);
               if (faultNameMatch) {
                 const faultName = faultNameMatch[1];
+                // 根据断层名称设置线条粗细
+                if (faultName === "鲜水河断裂带"||faultName === "九襄断裂"||faultName === "竹马断裂"||faultName === "公益海断裂"|| faultName === "大凉山断裂"||faultName === "安宁河断裂"||faultName === "双石-大川断裂"||faultName === "盐井-五龙断裂") {
+                  console.log("鲜水河断裂带")
+                  entity.polyline.material = Cesium.Color.fromCssColorString("#a41919").withAlpha(1); // 使用白色，不透明度70%
+                  entity.polyline.width = 6; // 鲜水河断裂带的线条粗细为5
+                } else {
+                  entity.polyline.material = Cesium.Color.fromCssColorString("#ecc9c9").withAlpha(0.7); // 使用白色，不透明度70%
+                  entity.polyline.width = 2; // 其他断裂带的线条粗细为3
+                }
 
                 // 如果该名称已经添加，则跳过
                 if (addedFaultNames.has(faultName)) {

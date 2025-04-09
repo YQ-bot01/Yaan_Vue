@@ -3919,7 +3919,7 @@ export default {
           name: '行政区划要素图层',
           add:  () => {
             console.log("add 行政区划要素图层 ")
-            this.addYaanRegion
+            this.addYaanRegion()
           },
           remove: () => {
             console.log("remove 行政区划要素图层 ")
@@ -4208,8 +4208,10 @@ export default {
      * 如果图层已存在，则不会重复添加
      */
     addYaanRegion() {
+      console.log("addYaanRegion ")
       // 添加监听器
       viewer.camera.changed.addEventListener(this.handleCameraChange);
+      console.log(viewer.dataSources.getByName('siChuanCityRegionLayer')[0])
       // 初始加载市级图层
       if (!viewer.dataSources.getByName('siChuanCityRegionLayer')[0]) {
         this.loadCityLayer(viewer);
@@ -4282,6 +4284,7 @@ export default {
 
 // 加载市级图层
     loadCityLayer(viewer) {
+      console.log("loadCityLayer 加载市级图层")
       Cesium.GeoJsonDataSource.load(siChuanCity, {
         clampToGround: false,
         stroke: Cesium.Color.WHITE,
