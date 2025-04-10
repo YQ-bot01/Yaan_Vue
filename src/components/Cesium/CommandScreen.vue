@@ -1306,9 +1306,9 @@ export default {
         {id: '2', name: '应急物资存储要素图层'},
       ],
       DamageAssessmentLayers: [
-        {id: '0', name: '历史地震要素图层',type:'multipleChoice'},
-        {id: '1', name: '断裂带要素图层',type:'multipleChoice'},
-        {id: '2', name: '烈度圈要素图层',type:'multipleChoice'},
+        {id: '0', name: '历史地震要素图层', type: 'multipleChoice'},
+        {id: '1', name: '断裂带要素图层', type: 'multipleChoice'},
+        {id: '2', name: '烈度圈要素图层', type: 'multipleChoice'},
         {id: '3', name: '灾损预估-人员伤亡要素图层'},
         {id: '4', name: '灾损预估-经济损失要素图层'},
         {id: '5', name: '灾损预估-建筑损毁要素图层'},
@@ -1815,6 +1815,7 @@ export default {
           }
         });
 
+
         viewer.clock.multiplier = 3600
         let that = this
         viewer.clock.onTick.addEventListener(function (clock) {
@@ -1971,6 +1972,7 @@ export default {
       timeLine.fly(this.centerPoint.longitude, this.centerPoint.latitude, 60000, 5).then(() => {
         viewer.clockViewModel.shouldAnimate = true;
       });
+
       timeLine.addDataSourceLayer("pointData")
       timeLine.addDataSourceLayer("label")
       timeLine.addCenterPoint(this.centerPoint)
@@ -2119,8 +2121,7 @@ export default {
             this.PanelData = {}
             this.PanelData = this.extractDataForRouter(entity)
             console.log("PanelData 震中", this.PanelData)
-          }
-          else if (entity._layer === "倾斜模型") {
+          } else if (entity._layer === "倾斜模型") {
             const terrainProviderViewModels = getTerrainProviderViewModelsArr()
             window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand();
             window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[1];
@@ -2141,8 +2142,7 @@ export default {
             this.modelInfo.rze = row.rze
             this.tiltphotographymodel(row);
             goModel(row)
-          }
-          else if (entity._layer === "标绘点") {
+          } else if (entity._layer === "标绘点") {
             this.eqCenterPanelVisible = false;
             pointLabelDiv.style.display = 'none';
             this.plotShowOnlyPanelVisible = true;
@@ -2270,20 +2270,20 @@ export default {
               }
               console.log(this.eqThemeData)
             }
-            // 如果是村庄点
-            // else if (sourceName === "village") {
-            //   this.tableName = "村庄信息";
-            //   this.eqThemeData = {
-            //     "名称": properties._NAME._value,
-            //     "经纬度": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
-            //   }
+                // 如果是村庄点
+                // else if (sourceName === "village") {
+                //   this.tableName = "村庄信息";
+                //   this.eqThemeData = {
+                //     "名称": properties._NAME._value,
+                //     "经纬度": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
+                //   }
             // }
             else if (sourceName === "village") {
-              console.log(properties,"properties 村庄")
+              console.log(properties, "properties 村庄")
               this.tableName = "村庄信息";
               this.eqThemeData = {
                 "名称": properties._O_Name._value,
-                "地理位置": "经度: " +  properties._O_Lng._value.toFixed(2) + "°E, 纬度: " + properties._O_Lat._value.toFixed(2) + "°N",
+                "地理位置": "经度: " + properties._O_Lng._value.toFixed(2) + "°E, 纬度: " + properties._O_Lat._value.toFixed(2) + "°N",
               }
               // console.log()
               const lines = properties._O_Com._value.split("\n");
@@ -2295,8 +2295,7 @@ export default {
                   this.eqThemeData[key.trim()] = value.trim();
                 }
               });
-            }
-            else if (sourceName === "school") {
+            } else if (sourceName === "school") {
               this.tableName = "学校信息";
               this.eqThemeData = {
                 "名称": properties._UNITNAME._value,
@@ -3882,11 +3881,11 @@ export default {
             this.isMarkingLayerLocal = true;
             timeLine.markerLayerShow(this.plots)
             clearTimeout(this.timeoutlayerActions)
-            this.timeoutlayerActions=null
+            this.timeoutlayerActions = null
           },
           remove: () => {
             this.isMarkingLayerLocal = false;
-            this.timeoutlayerActions=setTimeout(() => {
+            this.timeoutlayerActions = setTimeout(() => {
               timeLine.markerLayerHidden(this.plots);
             }, 1000);
           }
@@ -3898,15 +3897,37 @@ export default {
           },
           remove: () => {
             const terrainProviderViewModels = getTerrainProviderViewModelsArr()
+            // const newTerrainProvider = terrainProviderViewModels[0].creationCommand(); // 获取新的地形提供者
             window.viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand();
             window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[0];
             layer.removeModelLayer()
+            setTimeout(() => {
+              // 获取当前相机的位置
+              const currentPosition = window.viewer.scene.camera.position.clone();
+
+              // 计算目标位置（在当前位置的基础上增加高度）
+              const targetPosition = Cesium.Cartesian3.add(
+                  currentPosition,
+                  Cesium.Cartesian3.multiplyByScalar(Cesium.Cartesian3.UNIT_Z, 20000, new Cesium.Cartesian3()),
+                  new Cesium.Cartesian3()
+              );
+
+              // 设置相机的视角
+              window.viewer.camera.setView({
+                destination: targetPosition, // 设置目标位置
+                orientation: {
+                  heading: 6.283185307179581, // 方位角
+                  pitch: -1.5688168484696687, // 俯仰角
+                  roll: 0.0 // 翻滚角
+                }
+              });
+            }, 1000);
           }
         },
 
         {
           name: '行政区划要素图层',
-          add:  () => {
+          add: () => {
             console.log("add 行政区划要素图层 ")
             this.addYaanRegion()
           },
@@ -4786,7 +4807,8 @@ export default {
       this.modelTableData = this.getPageArr(this.modelList)
       this.currentPage = val;
       this.showSuppliesList = this.getPageArr(this.selectedSuppliesList);
-    },
+    }
+    ,
 
     handleCheckChange(data, checked, indeterminate) {
       console.log('handleCheckChange triggered', {data, checked, indeterminate});
@@ -4804,7 +4826,8 @@ export default {
         this.updateMapLayers(); // 更新地图图层
       }
 
-    },
+    }
+    ,
     loadNode(node, resolve) {
       // 根节点层
       if (node.level === 0) {
