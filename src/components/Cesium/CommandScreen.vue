@@ -2051,15 +2051,19 @@ export default {
               let markData = JSON.parse(e.data).data
               markData.plot.longitude = Number(markData.plot.geom.coordinates[0])
               markData.plot.latitude = Number(markData.plot.geom.coordinates[1])
-              that.plots.push(markData.plot)
-              if (drawType === "point") {
-                timeLine.addMakerPoint(markData.plot, "标绘点")
-              } else if (drawType === "polyline") {
-                timeLine.addPolyline(markData.plot, "标绘点")
-              } else if (drawType === "polygon") {
-                timeLine.addPolygon(markData.plot, "标绘点")
-              } else if (drawType === "arrow") {
-                timeLine.addArrow(markData.plot, "标绘点")
+
+              const existingPlot = this.plots.find(plot => plot.id === markData.plot.id);
+              if (!existingPlot) {
+                that.plots.push(markData.plot)
+                if (drawType === "point") {
+                  timeLine.addMakerPoint(markData.plot, "标绘点")
+                } else if (drawType === "polyline") {
+                  timeLine.addPolyline(markData.plot, "标绘点")
+                } else if (drawType === "polygon") {
+                  timeLine.addPolygon(markData.plot, "标绘点")
+                } else if (drawType === "arrow") {
+                  timeLine.addArrow(markData.plot, "标绘点")
+                }
               }
             }
           } else if (markOperate === "delete") {
