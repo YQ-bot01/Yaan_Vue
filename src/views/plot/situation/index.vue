@@ -2749,11 +2749,9 @@ export default {
         markData.plot.longitude = Number(markData.plot.geom.coordinates[0])
         markData.plot.latitude = Number(markData.plot.geom.coordinates[1])
 
-        const existingPlot = this.plots.find(plot => plot.id === markData.plot.id);
-        if (!existingPlot) {
-          this.plots.push(markData.plot);
-          console.log(this.plots, "this.plots wsSendPoint existingPlot");
-        }
+        this.plots.push(markData.plot);
+        console.log(this.plots, "this.plots wsSendPoint existingPlot");
+
         if (this.loadingupdate === true) {
           this.loadingupdate = false
         }
