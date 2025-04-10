@@ -24,6 +24,14 @@
         <img class="legend-img" src="@/assets/icons/TimeLine/聚合图标.png" />
         <span class="legend-label">聚合信息</span>
       </div>
+      <div class="legend-item">
+        <img class="legend-img" src="@/assets/images/EmergencyResourceInformation/rescueTeamsInfoLogo.png" />
+        <span class="legend-label">救援队伍分布点</span>
+      </div>
+      <div class="legend-item">
+        <img class="legend-img" src="@/assets/images/EmergencyResourceInformation/emergencyRescueEquipmentLogo.png" />
+        <span class="legend-label">应急物资存储点</span>
+      </div>
 <!--      用于填满图例表，不可删除。  删除则导致最后一行中间为空-->
       <div class="legend-item">
         <span class="legend-label"></span>
