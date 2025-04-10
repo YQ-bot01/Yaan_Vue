@@ -92,7 +92,8 @@
         </el-pagination>
       </el-form>
       <el-form v-if="showToolbar" class="noteContainer">
-        <div class="modelAdj">信息标注工具<span style="margin-left: 10px;" @click="showToolbar = false">隐藏工具栏</span></div>
+        <div class="modelAdj">信息标注工具<span style="margin-left: 10px;"
+                                                @click="showToolbar = false">隐藏工具栏</span></div>
         <el-row>
           <el-col :span="13">
             <el-tree class="plotTool" :data="plotTreeData" :props="defaultProps" @node-click="handleNodeClick"
@@ -102,7 +103,8 @@
           <span class="plotTreeItem" v-for="(item,index) in plotTreeClassification" @click="treeItemClick(item)">
             <el-tooltip class="plottreetooltip" effect="dark" :content="item.name" placement="top-start">
 <!--              <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"  width="17%" height="43.3px">-->
-              <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()" width="17%" height="43.3px">
+              <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"
+                   width="17%" height="43.3px">
             </el-tooltip>
           </span>
           </el-col>
@@ -228,8 +230,12 @@
 
       </el-dialog>
 
-      <el-button style="position: absolute;top: 90px;left: 10px;z-index: 1;" v-if="!showEqList" @click="showEqList = true">显示地震列表</el-button>
-      <el-button style="position: absolute;top: 500px;left: 10px;z-index: 1;" v-if="!showToolbar" @click="showToolbar = true">显示工具栏</el-button>
+      <el-button style="position: absolute;top: 90px;left: 10px;z-index: 1;" v-if="!showEqList"
+                 @click="showEqList = true">显示地震列表
+      </el-button>
+      <el-button style="position: absolute;top: 500px;left: 10px;z-index: 1;" v-if="!showToolbar"
+                 @click="showToolbar = true">显示工具栏
+      </el-button>
     </div>
     <!-- Cesium 视图 -->
     <!--    <layeredShowPlot :zoomLevel="zoomLevel" :pointsLayer="pointsLayer"/>-->
@@ -239,8 +245,9 @@
                 style="width: 100%">
         <el-table-column label="图标" width="50">
           <template v-slot="scope">
-<!--        <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>-->
-            <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>
+            <!--        <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>-->
+            <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()"
+                 alt="icon" style="width: 20px; height: 20px;"/>
           </template>
         </el-table-column>
         <el-table-column prop="plotType" label="类型" width="180"></el-table-column>
@@ -291,10 +298,9 @@
     <!--      地震列表组件-点击列表“详情”显示专题图列表      -->
     <plotSearch
         :eqid="eqid"
-
         :plotArray="plots"
     ></plotSearch>
-<!--    :plotArray="plotArray"-->
+    <!--    :plotArray="plotArray"-->
 
   </div>
 </template>
@@ -510,7 +516,7 @@ export default {
 
       //-----------导出图片----------------
       loading: false, // 控制加载状态
-      loadingupdate:false,//上传
+      loadingupdate: false,//上传
       //向预览组件传递数据
       imgshowURL: null,// 保存预览图片的 URL
       imgurlFromDate: "",
@@ -668,7 +674,7 @@ export default {
         sheets: this.sheet,
         excelContent: this.excelContent
       };
-      console.log(plotBTO,"plotBTO downloadExcel")
+      console.log(plotBTO, "plotBTO downloadExcel")
 
       // console.log("sheet:",sheet)
 
@@ -711,7 +717,7 @@ export default {
         this.isLoaded = false
         this.downloadConfirmed = false
         this.loading = false
-        console.log("this.loading，模板下载结束",this.loading)
+        console.log("this.loading，模板下载结束", this.loading)
       })
     },
 
@@ -865,12 +871,12 @@ export default {
 
     confirmDownload() {
       this.loading = true
-      console.log(this.loading,"this.loading 导出")
+      console.log(this.loading, "this.loading 导出")
       this.sheet = this.selectedNodes.map(node => {
         const typeKey = Object.keys(plotType).find(key => plotType[key].name === node);
         const fields = [];
 
-        console.log("typeKey",typeKey)
+        console.log("typeKey", typeKey)
         console.log(fields)
 
         // 指定类型列表
@@ -905,8 +911,7 @@ export default {
               {name: "标注附近道路", type: "text"},
               {name: "标注附近道路距离(米)", type: "text"},
           );
-        }
-        else {
+        } else {
           fields.unshift(
               {name: "绘制类型", type: "text"},
               {name: "经度", type: "text"},
@@ -934,7 +939,7 @@ export default {
 
         if (typeKey) {
           const typeData = plotType[typeKey];
-          console.log("typeData:",typeData)
+          console.log("typeData:", typeData)
           for (const [key, value] of Object.entries(typeData)) {
             if (value.name !== undefined && value.type !== undefined) {
               // 仅处理有 content 的字段或 type 为 text 的 字段
@@ -1015,7 +1020,7 @@ export default {
             const plotTypeFields = plotInfo.plotType ? Object.values(plotType).find(team => team.name === plotInfo.plotType) : null;
             const filteredPlotTypeInfo = Object.keys(plotTypeFields).filter(key => key !== 'name')
                 .reduce((obj, key) => {
-                  if (plotTypeInfo&&plotTypeInfo[key] !== undefined) {
+                  if (plotTypeInfo && plotTypeInfo[key] !== undefined) {
                     obj[plotTypeFields[key].name] = plotTypeInfo[key];
                   }
                   return obj;
@@ -1049,7 +1054,7 @@ export default {
               "角度": plotInfo.angle,
               "开始时间": plotInfo.startTime ? plotInfo.startTime.replace("T", " ") : "", // 检查是否为 null 或 undefined
               "结束时间": plotInfo.endTime ? plotInfo.endTime.replace("T", " ") : "", // 同样检查
-              "标注所在省":plotInfo.belongProvince,
+              "标注所在省": plotInfo.belongProvince,
               "标注所在市": plotInfo.belongCity,
               "标注所在区县": plotInfo.belongCounty,
               "标注所在城镇": plotInfo.belongTown,
@@ -1116,8 +1121,7 @@ export default {
           console.log(888)
           this.isLoaded = true;
         });
-      }
-      else {
+      } else {
         this.excelPanel = "下载导入标绘模板"
         this.isLoaded = true;
       }
@@ -1140,7 +1144,7 @@ export default {
     },
 
     beforeUpload(file) {
-      this.loadingupdate=true
+      this.loadingupdate = true
       const type = file.name.split('.').pop();
       // 获取不带扩展名的文件名
       const filename = file.name.slice(0, file.name.lastIndexOf('.'));
@@ -1184,7 +1188,7 @@ export default {
       };
 
       reader.readAsArrayBuffer(file);
-      this.uploadUrl = import.meta.env.VITE_APP_BASE_API +`/excel/importPlotExcel/${filename}&${this.eqid}`;
+      this.uploadUrl = import.meta.env.VITE_APP_BASE_API + `/excel/importPlotExcel/${filename}&${this.eqid}`;
       // this.uploadUrl = `http://localhost:8080/excel/importPlotExcel/${filename}&${this.eqid}&${this.fieldMapping}`;
       return true;
     },
@@ -1192,7 +1196,7 @@ export default {
     handleSuccess(response) {
       this.plotArray = []
       const startTime = performance.now();
-      console.log(response,"response handleSuccess")
+      console.log(response, "response handleSuccess")
       // 解构 response 中的 plotDataList 和 updatedPlotProperty
       const {plotDataList, updatedPlotProperty} = response.data;
       // 记录开始时间
@@ -2226,7 +2230,7 @@ export default {
     // 切换地震，渲染切换地震的标绘
     plotAdj(row) {
 
-      console.log("所有信息",row)
+      console.log("所有信息", row)
       // {
       //   "eqid": "69b02afc-9aa8-4c32-8272-d5672d845c3c",
       //     "eqqueueId": "69b02afc-9aa8-4c32-8272-d5672d845c3c01",
@@ -2301,17 +2305,17 @@ export default {
       this.renderedPlotIds.clear(); // 清空已渲染 ID 集合
       this.initPlot(row.eqid)
       this.eqOccurrenceTime = row.occurrenceTime.replace('T', ' ') + ':00';
-      console.log("更换地震后的时间",this.eqOccurrenceTime)
+      console.log("更换地震后的时间", this.eqOccurrenceTime)
       this.title = this.timestampToTimeChina(row.occurrenceTime) + row.earthquakeName + row.magnitude
 
       // 输入框有无内容调用接口不同返回数据格式不同
       let latitude = null
       let longitude = null
 
-      if (!this.queryParams){
+      if (!this.queryParams) {
         latitude = row.latitude
         longitude = row.longitude
-      }else{
+      } else {
         latitude = row.geom.coordinates[1]
         longitude = row.geom.coordinates[0]
       }
@@ -2598,7 +2602,7 @@ export default {
       // 删除全局视角锁定（解决箭头标绘绘制时双击会聚焦在点上）
       window.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
       this.isShowMessageIcon = true
-      this.messageIcon = import.meta.env.VITE_APP_BASE_API +'/uploads/PlotsPic/' + item.img + '.png?t=' + new Date().getTime()
+      this.messageIcon = import.meta.env.VITE_APP_BASE_API + '/uploads/PlotsPic/' + item.img + '.png?t=' + new Date().getTime()
 
       if (item.plottype === '点图层') {
         console.log("点图层")
@@ -2739,16 +2743,19 @@ export default {
     wsSendPoint(data) {
       if (JSON.parse(data).operate === "delete") {
         this.plots = this.plots.filter(plot => plot.plotId !== JSON.parse(data).id);
-        console.log(this.plots,"this.plots wsSendPoint")
-      }
-      else if (JSON.parse(data).operate === "add") {
+        console.log(this.plots, "this.plots wsSendPoint")
+      } else if (JSON.parse(data).operate === "add") {
         let markData = JSON.parse(data).data
         markData.plot.longitude = Number(markData.plot.geom.coordinates[0])
         markData.plot.latitude = Number(markData.plot.geom.coordinates[1])
-        this.plots.push(markData.plot)
-        console.log(this.plots,"this.plots wsSendPoint existingPlot")
-        if(this.loadingupdate===true){
-          this.loadingupdate=false
+
+        const existingPlot = this.plots.find(plot => plot.id === markData.plot.id);
+        if (!existingPlot) {
+          this.plots.push(markData.plot);
+          console.log(this.plots, "this.plots wsSendPoint existingPlot");
+        }
+        if (this.loadingupdate === true) {
+          this.loadingupdate = false
         }
       }
       console.log(this.websock, "websock:")
