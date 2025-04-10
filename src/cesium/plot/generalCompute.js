@@ -9,7 +9,8 @@ let generalCompute = {
                 params: {
                     postStr: JSON.stringify({lon, lat, ver: 1}),
                     type: 'geocode',
-                    tk: 'd6b4dece749d481fe817775d0aafeb42'
+                    // tk: '31f4628fd3dd7fa4d98dd14042665db1'
+                    tk: '5977634187c7e8866476add35ace55d0'
                 }
             });
             // console.log(response,"response")

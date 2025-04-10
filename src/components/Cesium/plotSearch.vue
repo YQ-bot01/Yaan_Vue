@@ -196,7 +196,10 @@ export default {
           let plotArray = Array.isArray(params.plotArray)
               ? params.plotArray
               : [params.plotArray]; // 如果不是数组，则转为数组
-          this.plots=plotArray
+          this.plots = plotArray.filter((plot, index, self) => {
+            return index === self.findIndex(t => t.plotId === plot.plotId);
+          });
+          // this.plots=plotArray
           // this.plots=[...this.plots,...plotArray]
           this.filteredEqData=this.plots
           console.log(this.plots,"params.plotArray")
