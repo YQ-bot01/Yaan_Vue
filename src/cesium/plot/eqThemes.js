@@ -125,6 +125,7 @@ export function addVillageLayer() {
           strokeWidth: 2,
           clampToGround: true,
         })).then(function (dataSource) {
+          console.log("dataSource.entities.values:",dataSource.entities.values)
           // 给 dataSource 添加 name 属性
           dataSource.name = "village";
 
@@ -218,7 +219,7 @@ export function addFaultZones(centerPoint) {
               if (faultNameMatch) {
                 const faultName = faultNameMatch[1];
                 // 根据断层名称设置线条粗细
-                if (faultName === "鲜水河断裂带"||faultName === "九襄断裂"||faultName === "竹马断裂"||faultName === "公益海断裂"|| faultName === "大凉山断裂"||faultName === "安宁河断裂"||faultName === "双石-大川断裂"||faultName === "盐井-五龙断裂") {
+                if (faultName === "鲜水河断裂带"||faultName === "竹马断裂"||faultName === "公益海断裂"|| faultName === "大凉山断裂"||faultName === "安宁河断裂"||faultName === "双石-大川断裂"||faultName === "盐井-五龙断裂") {
                   console.log("鲜水河断裂带")
                   entity.polyline.material = Cesium.Color.fromCssColorString("#a41919").withAlpha(1); // 使用白色，不透明度70%
                   entity.polyline.width = 6; // 鲜水河断裂带的线条粗细为5
@@ -945,7 +946,8 @@ export function handleTownData(town) {
   // 建筑破坏
   const buildingDamageData = yaanCountyData.map(entry => ({
       county: entry.county,
-      size: parseFloat((entry.buildingDamage / 100).toFixed(2)),
+      // size: parseFloat((entry.buildingDamage / 100).toFixed(2)),
+      size: parseFloat((entry.buildingDamage).toFixed(2)),
     }));
 
   // 经济损失
