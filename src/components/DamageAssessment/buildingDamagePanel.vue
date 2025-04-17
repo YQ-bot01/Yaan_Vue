@@ -2,7 +2,7 @@
   <div class="economicLossPanel">
 
     <div class="panelLegend">
-      <span>图例（平方千米）</span>
+      <span>图例（万平方米）</span>
       <ul>
         <li v-for="(item, index) in legendItems" :key="index">
           <span
@@ -16,7 +16,7 @@
       <div class="text" style="display: flex; justify-content: space-between; align-items: center;">
         <span style="margin: 0 auto">
           <span>地震造成建筑破坏共计约</span>
-          <span class="emphasis">{{ total }}平方公里</span>
+          <span class="emphasis">{{ total }}万平方米</span>
         </span>
 
       </div>
@@ -24,7 +24,7 @@
         <el-table :data="copiedbuildingDamageData" :height="180" :max-height="180" stripe
                   :header-cell-style="tableHeaderColor" :cell-style="tableColor" :row-style="{ height: '46px' }">
           <el-table-column prop="county" label="区县名称" align="center"></el-table-column>
-          <el-table-column prop="size" label="建筑破坏 / km²" align="center" :formatter="formatSize"></el-table-column>
+          <el-table-column prop="size" label="建筑破坏 / 万m²" align="center" :formatter="formatSize"></el-table-column>
         </el-table>
       </div>
     </div>
@@ -62,13 +62,13 @@ export default {
       copiedbuildingDamageData: [],
       total: 0,
       legendItems: [
-        {color: '(232, 236, 248)', label: '< 0.1km²'},
-        {color: '(188, 197, 228)', label: '0.1~0.5km²'},
-        {color: '(114, 143, 199)', label: '0.5~1km²'},
-        {color: '(84, 127, 195)', label: '1~2km²'},
-        {color: '(55, 109, 185)', label: '2~5km²'},
-        {color: '(28, 96, 174)', label: '5~10km²'},
-        {color: '(0, 84, 165)', label: '> 10km²'},
+        {color: '(232, 236, 248)', label: '< 0.1万m²'},
+        {color: '(188, 197, 228)', label: '0.1~0.5万m²'},
+        {color: '(114, 143, 199)', label: '0.5~1万m²'},
+        {color: '(84, 127, 195)', label: '1~2万m²'},
+        {color: '(55, 109, 185)', label: '2~5万m²'},
+        {color: '(28, 96, 174)', label: '5~10万m²'},
+        {color: '(0, 84, 165)', label: '> 10万m²'},
       ],
 
       isNoData: false,
@@ -102,8 +102,8 @@ export default {
 
     settleData() {
       this.copiedbuildingDamageData = [...this.buildingDamageData];
-      console.log("11111")
-      console.log(this.copiedbuildingDamageData)
+
+      console.log("this.copiedbuildingDamageData",this.copiedbuildingDamageData)
 
       // 按 size 从大到小排序
       this.copiedbuildingDamageData.sort((a, b) => b.size - a.size);
@@ -168,10 +168,10 @@ export default {
         },
         yAxis: {
           type: 'value',
-          name: '损坏/km²',
+          name: '损坏/万m²',
           min: 0,
-          max: 10,
-          interval: 2,
+          max: 150,
+          interval: 30,
           axisLabel: {
             color: '#fff', // 设置Y轴标签颜色为白色
           },
@@ -283,7 +283,7 @@ export default {
 }
 
 .panelLegend {
-  width: 150px;
+  width: 190px;
   height: 100%;
   padding: 5px 0 0 10px;
 }

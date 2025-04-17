@@ -900,7 +900,7 @@ export default {
 
       getEqTownResult(eqTownResultDTO).then((res) => {
         const resultData = handleTownData(res.data)
-
+        console.log("handleTownData resultData",resultData)
         // 提取对应专题数据
         this.panelData.buildingDamageData = resultData.buildingDamageData
         this.panelData.economicLossData = resultData.economicLossData

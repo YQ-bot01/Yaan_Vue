@@ -245,7 +245,7 @@
                 style="width: 100%">
         <el-table-column label="图标" width="50">
           <template v-slot="scope">
-            <!--        <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>-->
+<!--                    <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>-->
             <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()"
                  alt="icon" style="width: 20px; height: 20px;"/>
           </template>

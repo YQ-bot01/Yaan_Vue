@@ -1061,7 +1061,6 @@ import end from "@/assets/end.svg";
 import {gcj02towgs84, wgs84togcj02} from "@/api/tool/wgs_gcj_encrypts.js";
 import arrow from "@/cesium/drawArrow/drawPlot.js";
 import {AmapApiLocal, tianditu} from "@/utils/server.js";
-import fileUrl from "@/assets/json/TimeLine/2020年6月1日四川雅安芦山县6.1级地震灾害报告.pdf";
 import routePlanningIcon from '../../assets/icons/svg/routePlanning.svg';
 import rescueForceMatchingIcon from '../../assets/icons/svg/rescueForceMatching.svg';
 import rescueInfoTableIcon from '../../assets/icons/svg/rescueInfoTable.svg';

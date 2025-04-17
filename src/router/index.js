@@ -98,7 +98,6 @@ export const constantRoutes = [
   },
   {
     path:'/thd',
-    // component: () =>import('@/components/Cesium/thd.vue'),
     component: () =>import('@/components/Cesium/CommandScreen.vue'),
     hidden: true
   },
