@@ -1,77 +1,77 @@
 <template>
   <el-carousel trigger="click" height="880px" :interval="0" >
-    <el-carousel-item>
-      <div class="people-item">
-        <!--        人员伤亡统计表格-->
-        <div class="people-table">
-          <div class="pop">
-            <div class="pop_header">
-              <span class="pop_title">人员伤亡统计表格</span>
-            </div>
-          </div>
-          <div class="statistics">
-            <span class="total">雅安地区预估伤亡人数：</span>
-            <span class="emphasis"> {{ totalCasualtyNum }} </span>
-            <span class="total"> 人</span>
-          </div>
-          <div class="tables">
-            <el-table :data="PCTableData" :height="230" :max-height="230" :row-style="{ height: '46px', backgroundColor: 'transparent' }"
-                      :header-cell-style="tableHeaderColor" :cell-style="tableColor">
-              <el-table-column type="index" label="序号" align="center" width="60"></el-table-column>
-              <el-table-column prop="county" label="雅安市地区" align="center" width="100"></el-table-column>
-              <el-table-column prop="casualty.death" label="死亡人数" align="center" width="90"></el-table-column>
-              <el-table-column prop="casualty.injury" label="受伤人数" align="center" width="90"></el-table-column>
-              <el-table-column prop="casualty.pops" label="受灾人数" align="center" width="90"></el-table-column>
-              <el-table-column prop="casualty.buriedCount" label="压埋人数" align="center"></el-table-column>
-              <el-table-column prop="casualty.missing" label="失踪人数" align="center"></el-table-column>
-              <el-table-column prop="casualty.buriedCount" label="需转移安置人数" align="center"
-                               width="120"></el-table-column>
-            </el-table>
-          </div>
-        </div>
-        <!--        人员统计chart图-->
-        <div class="people-chart">
-          <div class="pop">
-            <div class="pop_header">
-              <span class="pop_title">人员伤亡</span>
-            </div>
-          </div>
-          <div class="panelChart" ref="PCChart"></div>
-        </div>
-      </div>
-    </el-carousel-item>
-    <el-carousel-item>
-      <div class="economic-item">
-        <div class="economic-table">
-          <div class="pop">
-            <div class="pop_header">
-              <span class="pop_title">经济损失统计表格</span>
-            </div>
-          </div>
-          <div class="statistics">
-            <span class="total">地震造成经济损失共计约</span>
-            <span class="emphasis"> {{ ELTotal.toFixed(2) }} </span>
-            <span class="total">万元</span>
-          </div>
-          <div class="tables">
-            <el-table :data="panelData.economicLossData" :height="230" :max-height="230" :row-style="{ height: '46px' }"
-                      :header-cell-style="tableHeaderColor" :cell-style="tableColor">
-              <el-table-column type="index" label="序号" align="center" width="60"></el-table-column>
-              <el-table-column prop="county" label="区县名称" align="center"></el-table-column>
-              <el-table-column prop="amount" label="经济损失 / 万元" align="center"></el-table-column>
-            </el-table>
-          </div>
-        </div>
-        <div class="economic-chart">
-          <div class="pop">
-            <div class="pop_header">
-              <span class="pop_title">经济损失</span>
-            </div>
-          </div>
-          <div class="panelChart" ref="ELChart"></div>
-        </div>
-      </div>
-    </el-carousel-item>
+<!--    <el-carousel-item>-->
+<!--      <div class="people-item">-->
+<!--        &lt;!&ndash;        人员伤亡统计表格&ndash;&gt;-->
+<!--        <div class="people-table">-->
+<!--          <div class="pop">-->
+<!--            <div class="pop_header">-->
+<!--              <span class="pop_title">人员伤亡统计表格</span>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--          <div class="statistics">-->
+<!--            <span class="total">雅安地区预估伤亡人数：</span>-->
+<!--            <span class="emphasis"> {{ totalCasualtyNum }} </span>-->
+<!--            <span class="total"> 人</span>-->
+<!--          </div>-->
+<!--          <div class="tables">-->
+<!--            <el-table :data="PCTableData" :height="230" :max-height="230" :row-style="{ height: '46px', backgroundColor: 'transparent' }"-->
+<!--                      :header-cell-style="tableHeaderColor" :cell-style="tableColor">-->
+<!--              <el-table-column type="index" label="序号" align="center" width="60"></el-table-column>-->
+<!--              <el-table-column prop="county" label="雅安市地区" align="center" width="100"></el-table-column>-->
+<!--              <el-table-column prop="casualty.death" label="死亡人数" align="center" width="90"></el-table-column>-->
+<!--              <el-table-column prop="casualty.injury" label="受伤人数" align="center" width="90"></el-table-column>-->
+<!--              <el-table-column prop="casualty.pops" label="受灾人数" align="center" width="90"></el-table-column>-->
+<!--              <el-table-column prop="casualty.buriedCount" label="压埋人数" align="center"></el-table-column>-->
+<!--              <el-table-column prop="casualty.missing" label="失踪人数" align="center"></el-table-column>-->
+<!--              <el-table-column prop="casualty.buriedCount" label="需转移安置人数" align="center"-->
+<!--                               width="120"></el-table-column>-->
+<!--            </el-table>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        &lt;!&ndash;        人员统计chart图&ndash;&gt;-->
+<!--        <div class="people-chart">-->
+<!--          <div class="pop">-->
+<!--            <div class="pop_header">-->
+<!--              <span class="pop_title">人员伤亡</span>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--          <div class="panelChart" ref="PCChart"></div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </el-carousel-item>-->
+<!--    <el-carousel-item>-->
+<!--      <div class="economic-item">-->
+<!--        <div class="economic-table">-->
+<!--          <div class="pop">-->
+<!--            <div class="pop_header">-->
+<!--              <span class="pop_title">经济损失统计表格</span>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--          <div class="statistics">-->
+<!--            <span class="total">地震造成经济损失共计约</span>-->
+<!--            <span class="emphasis"> {{ ELTotal.toFixed(2) }} </span>-->
+<!--            <span class="total">万元</span>-->
+<!--          </div>-->
+<!--          <div class="tables">-->
+<!--            <el-table :data="panelData.economicLossData" :height="230" :max-height="230" :row-style="{ height: '46px' }"-->
+<!--                      :header-cell-style="tableHeaderColor" :cell-style="tableColor">-->
+<!--              <el-table-column type="index" label="序号" align="center" width="60"></el-table-column>-->
+<!--              <el-table-column prop="county" label="区县名称" align="center"></el-table-column>-->
+<!--              <el-table-column prop="amount" label="经济损失 / 万元" align="center"></el-table-column>-->
+<!--            </el-table>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <div class="economic-chart">-->
+<!--          <div class="pop">-->
+<!--            <div class="pop_header">-->
+<!--              <span class="pop_title">经济损失</span>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--          <div class="panelChart" ref="ELChart"></div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </el-carousel-item>-->
     <el-carousel-item>
       <div class="building-item">
         <div class="building-table">
@@ -83,14 +83,14 @@
           <div class="statistics">
             <span class="total">地震造成建筑破坏共计约</span>
             <span class="emphasis"> {{ BDTotal.toFixed(2) }} </span>
-            <span class="total">平方公里</span>
+            <span class="total">万平方米</span>
           </div>
           <div class="tables">
             <el-table :data="panelData.buildingDamageData" :height="230" :max-height="230" :row-style="{ height: '46px' }"
                       :header-cell-style="tableHeaderColor" :cell-style="tableColor">
               <el-table-column type="index" label="序号" align="center" width="60"></el-table-column>
               <el-table-column prop="county" label="区县名称" align="center"></el-table-column>
-              <el-table-column prop="size" label="建筑破坏 / km²" align="center"></el-table-column>
+              <el-table-column prop="size" label="建筑破坏 / 万m²" align="center"></el-table-column>
             </el-table>
           </div>
         </div>
@@ -625,10 +625,10 @@ export default {
         },
         yAxis: {
           type: 'value',
-          name: '损坏/km²',
+          name: '损坏/万m²',
           min: 0,
-          max: 10,
-          interval: 2,
+          max: 150,
+          interval: 30,
           axisLabel: {
             color: '#fff', // 设置Y轴标签颜色为白色
           },
