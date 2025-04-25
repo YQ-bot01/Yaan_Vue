@@ -694,7 +694,7 @@ export default {
 
     // 切换到对应面板
     toTab(eq) {
-      // console.log(eq)
+      // console.log("eq",eq)
       this.isNoData = false
       this.thisTab = `${eq.earthquakeName} ${eq.magnitude}级地震`;
       this.eqid = eq.eqid
@@ -709,10 +709,10 @@ export default {
        */
 
       if (this.thisTab !== '震害事件') {
-
+        console.log("this.thisTab")
         // 查找与选项卡名称匹配的地震数据
         this.selectedTabData = this.eqData.find(
-          eq => `${eq.earthquakeName} ${eq.magnitude}级地震` === this.thisTab
+          eq => eq.eqid === this.eqid
         );
         // 如果找到对应数据，调用定位函数
         if (this.selectedTabData) {
@@ -724,6 +724,7 @@ export default {
 
     selectEqPoint() {
       if (this.selectedTabData) {
+        console.log("this.selectedTabData",this.selectedTabData)
         this.listEqPoints.forEach(entity => window.viewer.entities.remove(entity));
         this.listEqPoints = [];
 

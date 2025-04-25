@@ -930,7 +930,8 @@ export default {
 
         // 查找与选项卡名称匹配的地震数据
         this.selectedTabData = this.eqData.find(
-          eq => `${eq.earthquakeName} ${eq.magnitude}级地震` === this.thisTab
+          // eq => `${eq.earthquakeName} ${eq.magnitude}级地震` === this.thisTab
+            eq => eq.eqid === this.eqid
         );
         // 如果找到对应数据，调用定位函数
         if (this.selectedTabData) {
