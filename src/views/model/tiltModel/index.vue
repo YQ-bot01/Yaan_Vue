@@ -294,6 +294,7 @@ function switchToLocalDEM(){
 }
 
 function changeModel(row){
+  switchToLocalDEM()
   if (isTerrainLoaded()){
     tz.value=row.tze
     rz.value=row.rze
