@@ -108,8 +108,8 @@ function getImageryProviderArr() {
             creationFunction: function () {
                 return new Cesium.WebMapTileServiceImageryProvider({
                     // url:`https://10.0.76.48/services/newtianditu/tile/{TileMatrix}/{TileRow}/{TileCol}?&tk=0c15ca6927fhfqnsqeeedc2e84254568`,
-                     url:`http://t0.tianditu.com/img_c/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=c&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=${TianDiTuToken}`,
-                    // url: `http://59.255.48.160:81/img_c/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=c&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=${TianDiTuToken}`,
+                    //  url:`http://t0.tianditu.com/img_c/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=c&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=${TianDiTuToken}`,
+                    url: `http://59.255.48.160:81/img_c/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=c&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=${TianDiTuToken}`,
                     format: 'tiles',
                     tileMatrixSetID: 'c',
                     tilingScheme: new Cesium.GeographicTilingScheme(),
@@ -148,8 +148,8 @@ function getImageryProviderArr() {
             creationFunction: function () {
                 return [
                     new Cesium.WebMapTileServiceImageryProvider({
-                         url:`http://t0.tianditu.com/img_c/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=c&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=${TianDiTuToken}`,
-                        // url: `http://59.255.48.160:81/img_c/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=c&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=${TianDiTuToken}`,
+                         // url:`http://t0.tianditu.com/img_c/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=c&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=${TianDiTuToken}`,
+                        url: `http://59.255.48.160:81/img_c/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=c&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles&tk=${TianDiTuToken}`,
                         format: 'tiles',
                         tileMatrixSetID: 'c',
                         tilingScheme: new Cesium.GeographicTilingScheme(),
@@ -162,8 +162,8 @@ function getImageryProviderArr() {
                     }),
                     // 默认添加 GeoServer 提供的 WMS 图层
                     new Cesium.WebMapServiceImageryProvider({
-                        // url: 'http://59.213.183.56/localmap/geoserver/yaan/wms',
-                        url: 'http://10.16.7.35:9097/geoserver/yaan/wms',
+                        url: 'http://59.213.183.56/localmap/geoserver/yaan/wms',
+                        // url: 'http://10.16.7.35:9097/geoserver/yaan/wms',
                         layers: 'yaan:fd513a41f7ea47c985bd8b299b4c2695', // GeoServer 的图层名称
                         parameters: {
                             service: 'WMS',
@@ -218,7 +218,7 @@ export function getTerrainProviderViewModelsArr() {
             //图层的名称
             name: '本地DEM地形',
             //显示项目被隐藏的工具提示
-            tooltip: 'DEM地形',
+            tooltip: '本地DEM地形',
             //代表图层的图标
             iconUrl: CesiumWorldTerrain,
             //一个函数或命令，用于创建一个或多个提供程序，这些提供程序将在选择此项目时添加到地球仪中
