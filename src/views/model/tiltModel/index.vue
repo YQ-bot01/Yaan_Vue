@@ -294,6 +294,7 @@ function switchToLocalDEM(){
 }
 
 function changeModel(row){
+  switchToLocalDEM()
   if (isTerrainLoaded()){
     tz.value=row.tze
     rz.value=row.rze
@@ -324,7 +325,7 @@ function changeModel(row){
       let cartographic = Cesium.Cartographic.fromCartesian(center);
       let longitude = Cesium.Math.toDegrees(cartographic.longitude);
       let latitude = Cesium.Math.toDegrees(cartographic.latitude);
-      rotateCamera({lng:longitude, lat:latitude, pitch: -85, height:2000, time:60})
+      rotateCamera({lng:longitude, lat:latitude, pitch: -85, height:2500, time:60})
     }
     )
   })

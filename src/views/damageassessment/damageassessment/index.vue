@@ -930,7 +930,7 @@ export default {
 
         // 查找与选项卡名称匹配的地震数据
         this.selectedTabData = this.eqData.find(
-            eq => eq.eqid === this.eqid
+            eq => eq.eqid === eqTownResultDTO.eqid
         );
         // 如果找到对应数据，调用定位函数
         if (this.selectedTabData) {

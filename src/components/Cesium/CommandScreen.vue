@@ -1779,16 +1779,16 @@ export default {
         const switchToLocalDEM = () => {
           // 切换地形提供者
           if (isThirdParty) {
-            viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand(); // 切换到第三方地形
+            viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand(); // 切换到第三方地形
           } else {
             viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand(); // 切换到仅底图
           }
 
           // 更新选中的地形
-          viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[isThirdParty ? 1 : 0];
+          viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[isThirdParty ? 2 : 0];
 
           // 高亮当前选中的地形
-          const currentLayer = document.querySelector(`[title="${isThirdParty ? '第三方地形' : 'WGS84标准球体'}"]`);
+          const currentLayer = document.querySelector(`[title="${isThirdParty ? '本地DEM地形' : 'WGS84标准球体'}"]`);
           if (currentLayer) {
             currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
           }
@@ -2124,9 +2124,9 @@ export default {
             console.log("PanelData 震中", this.PanelData)
           } else if (entity._layer === "倾斜模型") {
             const terrainProviderViewModels = getTerrainProviderViewModelsArr()
-            window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand();
-            window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[1];
-            const currentLayer = document.querySelector(`[title="${true ? '第三方地形' : 'WGS84标准球体'}"]`);
+            window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand();
+            window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[2];
+            const currentLayer = document.querySelector(`[title="${true ? '本地DEM地形' : 'WGS84标准球体'}"]`);
             if (currentLayer) {
               currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
             }
