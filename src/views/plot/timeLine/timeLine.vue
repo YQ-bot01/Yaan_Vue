@@ -67,7 +67,7 @@
             :plots="plots"
             :currentTime="currentTimeString"
             :startTime="centerPoint.startTime"
-            :zoomLevel="zoomLevel"
+            :zoomLevel="plotzoomLevel"
             :isTimeRunning="isTimeRunning"
             :viewCenterCoordinate="viewCenterCoordinate"
             :earthquakeName="centerPoint.earthquakeName"
@@ -147,7 +147,7 @@ export default {
 
       isTimeRunning: true,
       plots: [],
-      zoomLevel: '市', // 初始化缩放层级
+      plotzoomLevel: '市', // 初始化缩放层级
       viewCenterCoordinate: {
         lon: null,
         lat: null
@@ -273,7 +273,7 @@ export default {
                 // console.log("更新视角中心");
                 const positionCartographic = viewer.camera.positionCartographic;
                 let height = positionCartographic.height;
-                that.updateZoomLevel(height);
+                that.updatePlotZoomLevel(height);
                 let longitude = Cesium.Math.toDegrees(positionCartographic.longitude);
                 let latitude = Cesium.Math.toDegrees(positionCartographic.latitude);
                 that.viewCenterCoordinate = {
@@ -318,16 +318,13 @@ export default {
       })
     },
 
-    updateZoomLevel(cameraHeight) {
-      // console.log("层级", cameraHeight)
-      // 根据相机高度设置 zoomLevel
+    updatePlotZoomLevel(cameraHeight) {
       if (cameraHeight < 50000) {
-        this.zoomLevel = '区/县'
+        this.plotzoomLevel = '区/县'
       } else {
-        this.zoomLevel = '市'
+        this.plotzoomLevel = '市'
       }
-    }
-    ,
+    },
     updateMapAndVariableBeforeInit() {
       timeLine.fly(this.centerPoint.longitude, this.centerPoint.latitude, 60000, 5).then(() => {
         viewer.clockViewModel.shouldAnimate = true;

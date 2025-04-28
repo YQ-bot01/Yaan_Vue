@@ -714,10 +714,9 @@ export default {
         // console.log("1123", this.yaanLayerRequire)
         this.eqThemes.show.isshowRegion = true;
         let geoPromise = Cesium.GeoJsonDataSource.load(yaanCounty, {
-          clampToGround: true, //贴地显示
+          // clampToGround: true, //贴地显示
+          clampToGround: false, //贴地显示
           stroke: Cesium.Color.YELLOW,
-          // fill: Cesium.Color.TRANSPARENT, // 完全透明填充
-          // fill: Cesium.Color.WHITE.withAlpha(0.0),
           strokeWidth: 4,
         });
         geoPromise.then((dataSource) => {
@@ -778,7 +777,7 @@ export default {
         // console.log("1123", this.yaanLayerRequire)
         this.eqThemes.show.isshowRegion = true;
         let geoPromise = Cesium.GeoJsonDataSource.load(yaanTown, {
-          clampToGround: true, //贴地显示
+          clampToGround: false, //贴地显示
           stroke: Cesium.Color.ORANGE,
           fill: Cesium.Color.WHITE.withAlpha(0.0),
           strokeWidth: 4,

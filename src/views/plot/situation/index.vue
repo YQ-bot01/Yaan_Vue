@@ -237,8 +237,7 @@
                  @click="showToolbar = true">显示工具栏
       </el-button>
     </div>
-    <!-- Cesium 视图 -->
-    <!--    <layeredShowPlot :zoomLevel="zoomLevel" :pointsLayer="pointsLayer"/>-->
+
 
     <div class="legend-container" style="position: absolute;bottom: 0;right: 0;" v-if="showLegend">
       <el-table stripe :row-style="{ height: '30px' }" :cell-style="{ padding: '0px' }" :data="legendPlotData"
@@ -326,7 +325,6 @@ import {plotType} from "../../../cesium/plot/plotType.js";
 import {downloadPlotExcel} from "../../../api/system/excel.js";
 import {getToken} from "../../../utils/auth.js";
 import * as XLSX from "xlsx";
-import layeredShowPlot from '@/components/Cesium/layeredShowPlot.vue'
 import html2canvas from "html2canvas";
 import {querySituationData} from "@/api/system/model.js";
 import plotSearch from '@/components/Cesium/plotSearch.vue'
@@ -341,7 +339,7 @@ export default {
     Position,
     ThematicMapPreview,
     dataSourcePanel,
-    addMarkCollectionDialog, commonPanel, addPolygonDialog, addPolylineDialog, layeredShowPlot, plotSearch
+    addMarkCollectionDialog, commonPanel, addPolygonDialog, addPolylineDialog, plotSearch
   },
   data: function () {
     return {
@@ -496,8 +494,6 @@ export default {
       //----------------------------------
       renderedPlotIds: new Set(), // 用于存储已经渲染的 plotid
       //----------------------------------
-      zoomLevel: '市', // 初始化缩放层级
-      pointsLayer: [], //传到子组件
       //----------------------------------
       plotList: [], // 用于指定地震标绘点导出
       plots: [],
@@ -727,11 +723,8 @@ export default {
       Arrow.disable();
       Arrow.init(viewer);
       viewer._cesiumWidget._creditContainer.style.display = 'none' // 隐藏版权信息
-      // 监听相机高度并更新 zoomLevel
-      viewer.camera.changed.addEventListener(() => {
-        const cameraHeight = viewer.camera.positionCartographic.height
-        this.updateZoomLevel(cameraHeight)
-      })
+
+
       window.viewer = viewer
       let options = {}
       // 用于在使用重置导航重置地图视图时设置默认视图控制。接受的值是Cesium.Cartographic 和 Cesium.Rectangle.
@@ -762,7 +755,6 @@ export default {
     },
     // 获取本次地震数据库中的数据渲染到地图上
     initPlot(eqid) {
-      this.pointsLayer = []
       let that = this
       getPlot({eqid}).then(res => {
         let data = res
@@ -791,8 +783,6 @@ export default {
           }
         })
         that.drawPoints(points, false)
-        that.pointsLayer = [...points]
-        console.log(that.pointsLayer)
         let polylineArr = data.filter(e => e.drawtype === 'polyline');
         console.log("pointArr", pointArr)
         console.log("polylineArr", polylineArr)
@@ -3031,20 +3021,7 @@ export default {
         heights: heights // 高度单独返回
       };
     },
-    /*获取目前相机所属高度*/
-    updateZoomLevel(cameraHeight) {
-      // console.log("层级",cameraHeight)
-      // 根据相机高度设置 zoomLevel
-      if (cameraHeight > 200000) {
-        this.zoomLevel = '市'
-      } else if (cameraHeight > 70000) {
-        this.zoomLevel = '区/县'
-      } else if (cameraHeight > 4000) {
-        this.zoomLevel = '乡/镇'
-      } else {
-        this.zoomLevel = '村'
-      }
-    },
+
 
     // 搜索框
     handleQuery() {

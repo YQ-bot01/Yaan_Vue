@@ -232,6 +232,9 @@ export default {
         case '区/县':
           pushStatisticInfo(groupedEntities.districtOrCountyEntities)
           break;
+        case '乡镇':
+          pushStatisticInfo(groupedEntities.districtOrCountyEntities)
+          break;
         default:
           pushStatisticInfo(groupedEntities.cityEntities)
           break;

@@ -108,30 +108,7 @@
           </el-col>
         </el-row>
       </el-form>
-
-      <!--    <el-dialog v-model="dialogFormVisible" title="新增模型" width="500" :show-close="false">-->
-      <!--      <el-form :model="modelInfo">-->
-      <!--        <el-form-item label="模型名称">-->
-      <!--          <el-input v-model="modelInfo.name" autocomplete="off"/>-->
-      <!--        </el-form-item>-->
-      <!--        <el-form-item label="模型路径">-->
-      <!--          <el-input v-model="modelInfo.path" autocomplete="off"/>-->
-      <!--        </el-form-item>-->
-      <!--      </el-form>-->
-      <!--      <template #footer>-->
-      <!--        <div class="dialog-footer">-->
-      <!--          <el-button @click="closeDialog">Cancel</el-button>-->
-      <!--          <el-button type="primary" @click="commitDialog">-->
-      <!--            Confirm-->
-      <!--          </el-button>-->
-      <!--        </div>-->
-      <!--      </template>-->
-      <!--    </el-dialog>-->
-
     </div>
-    <!--  <div v-if="!pageStatus">-->
-    <!--    <tiltTable />-->
-    <!--  </div>-->
   </div>
 
 </template>
@@ -150,10 +127,7 @@ import {
   updataModelNoElevation,
   updataModelElevation, querytiltModelData,
 } from '@/api/system/model.js'
-// import tiltTable from '@/components/Model/tiltModel/tiltTable.vue'
-import {ElMessageBox} from 'element-plus';
 import {ElMessage} from 'element-plus';
-import {CustomShader} from "cesium";
 
 import {
   goModel,
@@ -167,6 +141,7 @@ import {
   transferModel,
   rotationModel
 } from '@/cesium/model.js';
+import layer from "@/cesium/layer.js";
 
 
 let pageStatus = ref(true)
@@ -226,7 +201,8 @@ function init() {
   window.viewer = viewer
   let options = {}
   // 用于在使用重置导航重置地图视图时设置默认视图控制。接受的值是Cesium.Cartographic 和 Cesium.Rectangle.
-  options.defaultResetView = Cesium.Cartographic.fromDegrees(103.00, 29.98, 1500, new Cesium.Cartographic)
+
+  options.defaultResetView = Cesium.Cartographic.fromDegrees(103.00, 29.98, 200000, new Cesium.Cartographic)
   // 用于启用或禁用罗盘。true是启用罗盘，false是禁用罗盘。默认值为true。如果将选项设置为false，则罗盘将不会添加到地图中。
   options.enableCompass = true
   // 用于启用或禁用缩放控件。true是启用，false是禁用。默认值为true。如果将选项设置为false，则缩放控件将不会添加到地图中。
@@ -238,6 +214,16 @@ function init() {
   options.resetTooltip = "重置视图";
   options.zoomInTooltip = "放大";
   options.zoomOutTooltip = "缩小";
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(103.00, 29.98, 20000),//足够高可以看到整个地球
+    orientation: {
+      // 指向
+      heading: 6.283185307179581,
+      // 视角
+      pitch: -1.5688168484696687,
+      roll: 0.0
+    }
+  });
   //新版必须new  CesiumNavigation ,可以查看作者github
   window.navigation = new CesiumNavigation(viewer, options)
   // document.getElementsByClassName('navigation-control-icon-zoom-in')[0].style.color = '#409EFF'
@@ -271,9 +257,38 @@ function init() {
       altitudeShow.innerHTML = altiString;
     }
   }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-
+  layer.loadYaAnVillageLayer();
+  window.viewer.camera.changed.addEventListener(handleCameraChange);
 }
 
+function handleCameraChange() {
+  // 定义相机高度阈值
+  let CITY_LAYER_HEIGHT = 1000000; // 市级图层的高度阈值
+  let COUNTY_LAYER_HEIGHT = 100000; // 区县级图层的高度阈值
+  let height = window.viewer.camera.positionCartographic.height; // 获取相机高度
+  console.log("当前相机高度:", height);
+
+  // 根据高度动态加载或移除图层
+  if (height > CITY_LAYER_HEIGHT) {
+    // 移除区县级和道路级标签
+    layer.removeSiChuanCountyLayer()
+    layer.removeYaAnVillageLayer()
+    // 加载市级图层
+    layer.loadSichuanCityLayer();
+  } else if (height > COUNTY_LAYER_HEIGHT) {
+    // 移除市级和道路级标签
+    layer.removeSichuanCityLayer()
+    layer.removeYaAnVillageLayer()
+    // 加载区县级图层
+    layer.loadSiChuanCountyLayer();
+  }
+  else {
+    layer.removeSichuanCityLayer()
+    layer.removeSiChuanCountyLayer()
+    // 加载乡镇级图层
+    layer.loadYaAnVillageLayer();
+  }
+}
 function switchToLocalDEM(){
   // 切换地形提供者
   if (true) {

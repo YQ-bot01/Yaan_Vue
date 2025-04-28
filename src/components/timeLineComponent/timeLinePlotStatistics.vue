@@ -350,7 +350,7 @@ export default {
           this.centerPosionName = '雅安市'
         }
         else if(this.selectedDistrict==="回到震中"){
-            if (this.zoomLevel === "区/县") {
+            if (this.zoomLevel === "区/县"||this.zoomLevel === "乡镇") {
               this.dataInTimeAndZoom = originalArray.filter(data => data.belongCounty === this.viewCenterCountyNew);
               this.centerPosionName = this.viewCenterCountyNew
             } else {
@@ -364,7 +364,7 @@ export default {
         }
       }
       else{
-          if (this.zoomLevel === "区/县") {
+        if (this.zoomLevel === "区/县"||this.zoomLevel === "乡镇") {
             this.dataInTimeAndZoom = originalArray.filter(data => data.belongCounty === this.viewCenterCountyNew);
             this.centerPosionName = this.viewCenterCountyNew
           } else {
