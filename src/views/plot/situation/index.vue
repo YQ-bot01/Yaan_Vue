@@ -102,8 +102,8 @@
           <el-col :span="11">
           <span class="plotTreeItem" v-for="(item,index) in plotTreeClassification" @click="treeItemClick(item)">
             <el-tooltip class="plottreetooltip" effect="dark" :content="item.name" placement="top-start">
-<!--              <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"  width="17%" height="43.3px">-->
-              <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"
+              <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"  width="17%" height="43.3px">
+<!--              <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"-->
                    width="17%" height="43.3px">
             </el-tooltip>
           </span>
@@ -333,6 +333,9 @@ import {Position} from "@element-plus/icons-vue";
 import {TianDiTuToken} from "@/cesium/tool/config.js";
 import {tianditu} from "@/utils/server.js";
 import timeLine from "@/cesium/timeLine.js";
+import siChuanCity from "@/assets/geoJson/sichuan.json";
+import sichuanCounty from "@/assets/geoJson/sichuanCounty.json";
+import yaAnVillage from "@/assets/geoJson/yaan.json";
 
 export default {
   components: {
@@ -343,6 +346,9 @@ export default {
   },
   data: function () {
     return {
+      siChuanCityEntity: [],
+      siChuanCountyEntity: [],
+      siChuanVillageEntity: [],
       //----------menu选择框----------------
       menus: [
         {
@@ -564,6 +570,7 @@ export default {
     // 生成实体点击事件的handler
     this.entitiesClickPonpHandler()
     this.watchTerrainProviderChanged()
+    this.addYaanRegion()
     // 干四件事获取地震列表、获取最新地震的eqid、设置websocket的eqid、渲染已有的标绘
     this.getEq()
     // 获取标绘图片
@@ -600,6 +607,231 @@ export default {
   //   this.websock.close()
   // },
   methods: {
+    /**
+     * 添加雅安地区图层
+     * 此函数负责将雅安地区的地理边界数据加载到3D地图中，并为其添加可视化图层
+     * 如果图层已存在，则不会重复添加
+     */
+    addYaanRegion() {
+      console.log("addYaanRegion ")
+      // 添加监听器
+      viewer.camera.changed.addEventListener(this.handleCameraChange);
+      console.log(viewer.dataSources.getByName('siChuanCityRegionLayer')[0])
+      // 初始加载市级图层
+      if (!viewer.dataSources.getByName('siChuanCityRegionLayer')[0]) {
+        this.loadCityLayer(viewer);
+      }
+    }
+    ,
+
+// 定义命名函数
+    handleCameraChange() {
+      // 定义相机高度阈值
+      const CITY_LAYER_HEIGHT = 1000000; // 市级图层的高度阈值
+      const COUNTY_LAYER_HEIGHT = 100000; // 区县级图层的高度阈值
+      const VILLAGE_LAYER_HEIGHT = 10000; // 道路级图层的高度阈值
+
+      const height = viewer.camera.positionCartographic.height; // 获取相机高度
+      console.log("当前相机高度:", height);
+
+      // 根据高度动态加载或移除图层
+      if (height > CITY_LAYER_HEIGHT) {
+        // 移除区县级和道路级标签
+        this.siChuanCountyEntity.forEach(entity => {
+          viewer.entities.remove(entity);
+        });
+
+        this.siChuanVillageEntity.forEach(entity => {
+          viewer.entities.remove(entity);
+        });
+
+        // 加载市级图层
+        if (!viewer.dataSources.getByName('siChuanCityRegionLayer')[0]) {
+          this.loadCityLayer(viewer);
+        }
+        // 移除区县级和道路级图层
+        this.removeDataSourcesLayer('sichuanCountyRegionLayer');
+        this.removeDataSourcesLayer('yaAnVillageRegionLayer');
+      } else if (height > COUNTY_LAYER_HEIGHT) {
+        // 移除市级和道路级标签
+        this.siChuanCityEntity.forEach(entity => {
+          viewer.entities.remove(entity);
+        });
+
+        this.siChuanVillageEntity.forEach(entity => {
+          viewer.entities.remove(entity);
+        });
+        // 加载区县级图层
+        if (!viewer.dataSources.getByName('sichuanCountyRegionLayer')[0]) {
+          this.loadCountyLayer(viewer);
+        }
+        // 移除道路级图层
+        this.removeDataSourcesLayer('yaAnVillageRegionLayer');
+        this.removeDataSourcesLayer('siChuanCityRegionLayer');
+      } else if (height > VILLAGE_LAYER_HEIGHT) {
+        // 移除市级和区县级标签
+        this.siChuanCityEntity.forEach(entity => {
+          viewer.entities.remove(entity);
+        });
+
+        this.siChuanCountyEntity.forEach(entity => {
+          viewer.entities.remove(entity);
+        });
+        // 加载道路级图层
+        if (!viewer.dataSources.getByName('yaAnVillageRegionLayer')[0]) {
+          this.loadVillageLayer(viewer);
+        }
+        this.removeDataSourcesLayer('siChuanCityRegionLayer');
+        this.removeDataSourcesLayer('sichuanCountyRegionLayer');
+      }
+    }
+    ,
+
+// 加载市级图层
+    loadCityLayer(viewer) {
+      console.log("loadCityLayer 加载市级图层")
+      Cesium.GeoJsonDataSource.load(siChuanCity, {
+        clampToGround: false,
+        stroke: Cesium.Color.WHITE,
+        strokeWidth: 4,
+        fill: Cesium.Color.TRANSPARENT,
+      }).then(dataSource => {
+        viewer.dataSources.add(dataSource);
+        dataSource.name = 'siChuanCityRegionLayer';
+
+        // 添加区域标签
+        siChuanCity.features.forEach(feature => {
+          const firstPolygon = feature.geometry.coordinates[0][0];
+          const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+          const centroid = this.calculateCentroid(positions);
+
+          const regionLabel = viewer.entities.add({
+            position: centroid,
+            label: {
+              text: feature.properties.name || '未命名',
+              font: '18px sans-serif',
+              fillColor: Cesium.Color.WHITE,
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 2,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              verticalOrigin: Cesium.VerticalOrigin.CENTER,
+              horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              pixelOffset: new Cesium.Cartesian2(0, 0),
+            }
+          });
+          this.siChuanCityEntity.push(regionLabel); // 使用 this.RegionLabels
+
+        });
+        console.log("1111111111", this.siChuanCityEntity)
+        console.log("市级图层加载成功！");
+      }).catch(error => {
+        console.error("加载市级图层失败:", error);
+      });
+    }
+    ,
+
+// 加载区县级图层
+    loadCountyLayer(viewer) {
+      Cesium.GeoJsonDataSource.load(sichuanCounty, {
+        clampToGround: false,
+        stroke: Cesium.Color.YELLOW,
+        strokeWidth: 4,
+        fill: Cesium.Color.TRANSPARENT,
+      }).then(dataSource => {
+        viewer.dataSources.add(dataSource);
+        dataSource.name = 'sichuanCountyRegionLayer';
+
+        // 添加区域标签
+        sichuanCounty.features.forEach(feature => {
+          const firstPolygon = feature.geometry.coordinates[0][0];
+          const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+          const centroid = this.calculateCentroid(positions);
+          const regionLabel = viewer.entities.add({
+            position: centroid,
+            label: {
+              text: feature.properties.name || '未命名',
+              font: '18px sans-serif',
+              fillColor: Cesium.Color.WHITE,
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 2,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              verticalOrigin: Cesium.VerticalOrigin.CENTER,
+              horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              pixelOffset: new Cesium.Cartesian2(0, 0),
+            }
+          });
+
+          this.siChuanCountyEntity.push(regionLabel); // 使用 this.RegionLabels
+
+        });
+        console.log("22222222222", this.siChuanCountyEntity)
+        console.log("区县级图层加载成功！");
+      }).catch(error => {
+        console.error("加载区县级图层失败:", error);
+      });
+    }
+    ,
+
+    // 加载道路级图层
+    loadVillageLayer(viewer) {
+      Cesium.GeoJsonDataSource.load(yaAnVillage, {
+        clampToGround: false,
+        stroke: Cesium.Color.ORANGE,
+        strokeWidth: 4,
+        fill: Cesium.Color.TRANSPARENT,
+      }).then(dataSource => {
+        viewer.dataSources.add(dataSource);
+        dataSource.name = 'yaAnVillageRegionLayer';
+
+        // 添加区域标签
+        yaAnVillage.features.forEach(feature => {
+          const firstPolygon = feature.geometry.coordinates[0][0];
+          const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+          const centroid = this.calculateCentroid(positions);
+
+          const regionLabel = viewer.entities.add({
+            position: centroid,
+            label: {
+              text: feature.properties.name || '未命名',
+              font: '18px sans-serif',
+              fillColor: Cesium.Color.WHITE,
+              outlineColor: Cesium.Color.BLACK,
+              outlineWidth: 2,
+              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+              verticalOrigin: Cesium.VerticalOrigin.CENTER,
+              horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              pixelOffset: new Cesium.Cartesian2(0, 0),
+            }
+          });
+          this.siChuanVillageEntity.push(regionLabel); // 使用 this.RegionLabels
+        });
+        console.log("33333333333", this.siChuanVillageEntity)
+
+        console.log("道路级图层加载成功！");
+      }).catch(error => {
+        console.error("加载道路级图层失败:", error);
+      });
+    }
+    ,
+
+// 计算多边形的质心
+    calculateCentroid(positions) {
+      let centroid = Cesium.Cartesian3.ZERO;
+      positions.forEach(pos => {
+        centroid = Cesium.Cartesian3.add(centroid, pos, new Cesium.Cartesian3());
+      });
+      return Cesium.Cartesian3.divideByScalar(centroid, positions.length, new Cesium.Cartesian3());
+    },
+    removeDataSourcesLayer(layerName) {
+      // 通过图层名称获取数据源对象如果存在，则执行移除操作
+      const dataSource = window.viewer.dataSources.getByName(layerName)[0];
+      if (dataSource) {
+        window.viewer.dataSources.remove(dataSource);
+      }
+    },
 
     updateQuery() {
       let tempEqid = this.eqid;
