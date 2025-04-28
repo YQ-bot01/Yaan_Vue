@@ -664,6 +664,8 @@ export default {
       //     this.updatePopupPosition();
       //   }
       // }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+      // Enable depth testing so things behind the terrain disappear.
+      viewer.scene.globe.depthTestAgainstTerrain = true;
     },
 
     // 地图渲染查询地震点(根据页码、根据搜索框)
@@ -712,9 +714,10 @@ export default {
         // console.log("1123", this.yaanLayerRequire)
         this.eqThemes.show.isshowRegion = true;
         let geoPromise = Cesium.GeoJsonDataSource.load(yaanCounty, {
-          clampToGround: this.isTerrainLoading, //贴地显示
+          clampToGround: true, //贴地显示
           stroke: Cesium.Color.YELLOW,
-          fill: Cesium.Color.WHITE.withAlpha(0.0),
+          // fill: Cesium.Color.TRANSPARENT, // 完全透明填充
+          // fill: Cesium.Color.WHITE.withAlpha(0.0),
           strokeWidth: 4,
         });
         geoPromise.then((dataSource) => {
@@ -761,6 +764,11 @@ export default {
             }));
             this.RegionLabels.push(entity);
           });
+
+
+
+
+
           //雅安行政区加载 end
         })
       } else if (require === "town") {
@@ -770,7 +778,7 @@ export default {
         // console.log("1123", this.yaanLayerRequire)
         this.eqThemes.show.isshowRegion = true;
         let geoPromise = Cesium.GeoJsonDataSource.load(yaanTown, {
-          clampToGround: this.isTerrainLoading, //贴地显示
+          clampToGround: true, //贴地显示
           stroke: Cesium.Color.ORANGE,
           fill: Cesium.Color.WHITE.withAlpha(0.0),
           strokeWidth: 4,
@@ -930,7 +938,7 @@ export default {
 
         // 查找与选项卡名称匹配的地震数据
         this.selectedTabData = this.eqData.find(
-            eq => eq.eqid === eqTownResultDTO.eqid
+          eq => `${eq.earthquakeName} ${eq.magnitude}级地震` === this.thisTab
         );
         // 如果找到对应数据，调用定位函数
         if (this.selectedTabData) {
@@ -1511,40 +1519,6 @@ export default {
       entity.polygon.outline = false;
     },
 
-    // 添加标签
-    // addRegionLabel(entity, regionName, type, level) {
-    //   console.log(entity)
-    //   console.log(entity.geometry)
-    //
-    //   if (level === 'town') {
-    //
-    //   }
-
-      // const center = entity._properties._center._value;
-
-      // if (center && center.length === 2) {
-      //   const position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-      //   viewer.entities.add(new Cesium.Entity({
-      //     position: position,
-      //     label: new Cesium.LabelGraphics({
-      //       text: regionName,
-      //       scale: 1,
-      //       font: '18px Sans-serif',
-      //       style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-      //       outlineWidth: 2,
-      //       verticalOrigin: Cesium.VerticalOrigin.CENTER,
-      //       horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-      //       fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-      //       heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-      //       clampToGround: true,
-      //       pixelOffset: new Cesium.Cartesian2(0, 0),
-      //       eyeOffset: new Cesium.Cartesian3(0, 0, -10000),
-      //       // distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 800000),
-      //     }),
-      //     properties: {type},
-      //   }));
-      // }
-    // },
 
     // 将中文转化成对应要用的属性，[0]为控制对应底部面板展示，[1]为控制对应右侧信息展示，[2]为图层专题名，[3]为专题数据
     // 目前使用映射处理，如果有新增，请先在this.tabMapping处注册
