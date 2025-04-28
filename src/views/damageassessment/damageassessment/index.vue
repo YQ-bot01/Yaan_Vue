@@ -422,6 +422,7 @@ export default {
   },
 
   methods: {
+    timestampToTime,
     // 获取地震列表并渲染
     getEq() {
       const eqListDTO = {
