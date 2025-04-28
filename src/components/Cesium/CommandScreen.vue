@@ -4199,7 +4199,6 @@ export default {
     },
 
     addTieredAdministrativeBundaries(){
-
       if (!window.viewer.dataSources.getByName('siChuanCityRegionLayer')[0]&&!window.viewer.dataSources.getByName('sichuanCountyRegionLayer')[0]&&!window.viewer.dataSources.getByName('yaAnVillageRegionLayer')[0]) {
         let height = window.viewer.camera.positionCartographic.height;
         let CITY_LAYER_HEIGHT = 1000000; // 市级图层的高度阈值

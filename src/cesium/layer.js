@@ -34,7 +34,7 @@ let layer = {
                     const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
                     const centroid = this.calculateCentroid(positions);
 
-                    let entity=window.viewer.entities.add({
+                    let entity = window.viewer.entities.add({
                         layer: "siChuanCityRegionLabel",
                         position: centroid,
                         label: {
@@ -53,6 +53,7 @@ let layer = {
                     siChuanCityRegionLabels.push(entity)
                 });
                 console.log("市级图层加载成功！");
+
             }).catch(error => {
                 console.error("加载市级图层失败:", error);
             });
@@ -75,7 +76,7 @@ let layer = {
                     const firstPolygon = feature.geometry.coordinates[0][0];
                     const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
                     const centroid = this.calculateCentroid(positions);
-                    let entity=window.viewer.entities.add({
+                    let entity = window.viewer.entities.add({
                         layer: "sichuanCountyRegionLabel",
                         position: centroid,
                         label: {
@@ -93,6 +94,7 @@ let layer = {
                     });
                     sichuanCountyRegionLabels.push(entity)
                 });
+
             }).catch(error => {
                 console.error("加载区县级图层失败:", error);
             });
@@ -109,12 +111,13 @@ let layer = {
             }).then(dataSource => {
                 window.viewer.dataSources.add(dataSource);
                 dataSource.name = 'yaAnVillageRegionLayer';
+
                 // 添加区域标签
                 yaAnVillage.features.forEach(feature => {
                     const firstPolygon = feature.geometry.coordinates[0][0];
                     const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
                     const centroid = this.calculateCentroid(positions);
-                    let entity=window.viewer.entities.add({
+                    let entity = window.viewer.entities.add({
                         layer: "yaAnVillageRegionLabel",
                         position: centroid,
                         label: {
@@ -133,6 +136,7 @@ let layer = {
                     yaAnVillageRegionLabels.push(entity)
                 });
                 console.log("雅安市乡镇级图层加载成功！");
+
             }).catch(error => {
                 console.error("加载道路级图层失败:", error);
             });
