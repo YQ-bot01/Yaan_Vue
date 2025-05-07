@@ -738,9 +738,139 @@ export default {
         console.log("无图片数据")
       }
     },
+    // downloadAll() {
+    //   // 提示用户下载开始
+    //   let startNotify=this.$notify({
+    //     title: '一键下载',
+    //     message: '正在下载所有报告和专题图，请稍候...',
+    //     duration: 0, // 持续显示
+    //     zIndex: 9999,
+    //   });
+    //
+    //   let allUrls = [];
+    //
+    //   // 创建 JSZip 实例
+    //   const zip = new JSZip();
+    //
+    //   Promise.all([
+    //     handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'AssistantDecision'),
+    //     handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'thematicMap'),
+    //     handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'report')
+    //
+    //   ]).then(([res1, res2, res3]) => {
+    //     console.log(res1,"辅助决策报告")
+    //     // 创建文件夹
+    //     const assistantDecisionFolder = zip.folder('辅助决策报告');
+    //     const thematicMapFolder = zip.folder('专题图');
+    //     const reportFolder = zip.folder('灾情简报');
+    //
+    //     // 处理 AssistantDecision 的结果
+    //     this.outputData.themeName = res1.themeName;
+    //     this.outputData.themeData = res1.themeData;
+    //     res1.themeData.forEach(item => {
+    //       if (item.docxUrl) {
+    //         allUrls.push({ url: item.docxUrl, folder: assistantDecisionFolder });
+    //       }
+    //     });
+    //
+    //     // 处理专题图的结果
+    //     this.outputData.themeName = res2.themeName;
+    //     this.outputData.themeData = res2.themeData;
+    //     res2.themeData.forEach(item => {
+    //       if (item.imgUrl) {
+    //         allUrls.push({ url: item.imgUrl, folder: thematicMapFolder });
+    //       }
+    //     });
+    //
+    //     // 处理报告的结果
+    //     this.outputData.themeName = res3.themeName;
+    //     this.outputData.themeData = res3.themeData;
+    //     res3.themeData.forEach(item => {
+    //       if (item.docxUrl) {
+    //         allUrls.push({ url: item.docxUrl, folder: reportFolder });
+    //       }
+    //     });
+    //
+    //     // 下载每个文件并添加到对应的文件夹中
+    //     const downloadPromises = allUrls.map((entry, index) => {
+    //       return fetch(entry.url, {
+    //         method: 'GET',
+    //         headers: {
+    //           'Authorization': `Bearer ${localStorage.getItem('token') || ''}`, // 如果需要认证
+    //         },
+    //       })
+    //           .then(response => {
+    //             if (!response.ok) {
+    //               console.log(entry.url, "下载失败");
+    //               throw new Error(`下载失败: ${response.status}`);
+    //             }
+    //             return response.blob();
+    //           })
+    //           .then(blob => {
+    //             // 获取文件名
+    //             const fileName = entry.url.split('/').pop() || `file_${index}.unknown`;
+    //             entry.folder.file(fileName, blob); // 将文件添加到对应的文件夹中
+    //           })
+    //           .catch(error => {
+    //             console.error('下载失败:', error);
+    //             return Promise.reject(error); // 如果下载失败，返回一个拒绝的 Promise
+    //           });
+    //     });
+    //
+    //     // 等待所有文件下载完成
+    //     Promise.all(downloadPromises)
+    //         .then(() => {
+    //           // 生成 ZIP 文件
+    //           zip.generateAsync({ type: 'blob' })
+    //               .then(blob => {
+    //                 const url = window.URL.createObjectURL(blob);
+    //                 const a = document.createElement('a');
+    //                 a.href = url;
+    //                 a.download = this.earthquakeFullName+'.zip'; // 设置 ZIP 文件名
+    //                 document.body.appendChild(a);
+    //                 a.click();
+    //                 document.body.removeChild(a);
+    //                 window.URL.revokeObjectURL(url); // 释放 URL 对象
+    //
+    //                 // 提示用户下载完成
+    //                 this.$notify({
+    //                   title: '一键下载完成',
+    //                   message: '所有文件已打包下载完成',
+    //                   type: 'success',
+    //                   duration: 5000,
+    //                 });
+    //                 startNotify.close()
+    //                 this.isPanelShow.DownloadAll=false
+    //               });
+    //
+    //         })
+    //         .catch(error => {
+    //           console.error('打包下载失败:', error);
+    //           this.$notify({
+    //             title: '下载失败',
+    //             message: '部分文件下载失败，请检查网络或重试',
+    //             type: 'error',
+    //             duration: 5000,
+    //           });
+    //           startNotify.close()
+    //           this.isPanelShow.DownloadAll=false
+    //         });
+    //   }).catch((error) => {
+    //     console.error("Error fetching data:", error);
+    //     this.$notify({
+    //       title: '下载失败',
+    //       message: '获取数据失败，请检查网络或重试',
+    //       type: 'error',
+    //       duration: 5000,
+    //     });
+    //
+    //     startNotify.close()
+    //     this.isPanelShow.DownloadAll=falses
+    //   });
+    // },
     downloadAll() {
       // 提示用户下载开始
-      let startNotify=this.$notify({
+      let startNotify = this.$notify({
         title: '一键下载',
         message: '正在下载所有报告和专题图，请稍候...',
         duration: 0, // 持续显示
@@ -756,22 +886,22 @@ export default {
         handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'AssistantDecision'),
         handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'thematicMap'),
         handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'report')
-
       ]).then(([res1, res2, res3]) => {
-        console.log(res1,"辅助决策报告")
+        console.log(res1, "辅助决策报告");
+
         // 创建文件夹
         const assistantDecisionFolder = zip.folder('辅助决策报告');
         const thematicMapFolder = zip.folder('专题图');
         const reportFolder = zip.folder('灾情简报');
 
         // 处理 AssistantDecision 的结果
-        // this.outputData.themeName = res1.themeName;
-        // this.outputData.themeData = res1.themeData;
-        // res1.themeData.forEach(item => {
-        //   if (item.docxUrl) {
-        //     allUrls.push({ url: item.docxUrl, folder: assistantDecisionFolder });
-        //   }
-        // });
+        this.outputData.themeName = res1.themeName;
+        this.outputData.themeData = res1.themeData;
+        res1.themeData.forEach(item => {
+          if (item.docxUrl) {
+            allUrls.push({ url: item.docxUrl, folder: assistantDecisionFolder });
+          }
+        });
 
         // 处理专题图的结果
         this.outputData.themeName = res2.themeName;
@@ -813,7 +943,7 @@ export default {
               })
               .catch(error => {
                 console.error('下载失败:', error);
-                return Promise.reject(error); // 如果下载失败，返回一个拒绝的 Promise
+                return null; // 返回 null，而不是拒绝的 Promise
               });
         });
 
@@ -826,7 +956,7 @@ export default {
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = this.earthquakeFullName+'.zip'; // 设置 ZIP 文件名
+                    a.download = this.earthquakeFullName + '.zip'; // 设置 ZIP 文件名
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -839,9 +969,9 @@ export default {
                       type: 'success',
                       duration: 5000,
                     });
-                    startNotify.close()
+                    startNotify.close();
+                    this.isPanelShow.DownloadAll = false;
                   });
-
             })
             .catch(error => {
               console.error('打包下载失败:', error);
@@ -851,8 +981,8 @@ export default {
                 type: 'error',
                 duration: 5000,
               });
-
-              startNotify.close()
+              startNotify.close();
+              this.isPanelShow.DownloadAll = false;
             });
       }).catch((error) => {
         console.error("Error fetching data:", error);
@@ -862,8 +992,8 @@ export default {
           type: 'error',
           duration: 5000,
         });
-
-        startNotify.close()
+        startNotify.close();
+        this.isPanelShow.DownloadAll = false;
       });
     },
     handleOpen(index) {
