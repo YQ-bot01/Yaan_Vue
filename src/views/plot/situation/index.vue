@@ -102,8 +102,8 @@
           <el-col :span="11">
           <span class="plotTreeItem" v-for="(item,index) in plotTreeClassification" @click="treeItemClick(item)">
             <el-tooltip class="plottreetooltip" effect="dark" :content="item.name" placement="top-start">
-              <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"  width="17%" height="43.3px">
-<!--              <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"-->
+<!--              <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"  width="17%" height="43.3px">-->
+              <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"
                    width="17%" height="43.3px">
             </el-tooltip>
           </span>
