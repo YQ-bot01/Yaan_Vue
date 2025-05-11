@@ -250,7 +250,6 @@ export default {
         { prop: 'emergencyMobile', label: '应急手机', width: 150 },
         { prop: 'affiliatedOrganization', label: '所属机构', width: 140 },
         { prop: 'designServiceLife', label: '设计使用年限（年）', width: 190 },
-        { prop: 'dataSourceUnit', label: '数据来源单位', width: 180 },
         { prop: 'longitude', label: '经度（度分）', width: 120 },
         { prop: 'latitude', label: '纬度（度分）', width: 120 },
         { prop: 'remarks', label: '备注', width: 300 },
@@ -260,6 +259,7 @@ export default {
         { prop: 'shelterTypeName', label: '场所类型名称', width: 120 },
         { prop: 'levelName', label: '级别名称', width: 120 },
         { prop: 'secretLevel', label: '保密级别', width: 120 },
+        { prop: 'dataSourceUnit', label: '数据来源', width: 180 },
       ],
       // 查询功能
       queryParams: '',   // 搜索关键字

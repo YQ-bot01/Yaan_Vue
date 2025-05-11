@@ -29,30 +29,6 @@
           :width="header.width"
           show-overflow-tooltip
       >
-        <!-- 为表格单元格内容定义默认模板 -->
-        <!--            <template #default="scope">-->
-        <!--              &lt;!&ndash; 对特定表头，使用Popover显示完整信息 &ndash;&gt;-->
-        <!--              <div v-if="header.label === '地址'">-->
-        <!--                <el-popover placement="top" :width="200" trigger="hover">-->
-        <!--                  <div style="text-align: left">{{ scope.row[header.prop] }}</div>-->
-        <!--                  &lt;!&ndash; 定义触发Popover显示的参考元素 &ndash;&gt;-->
-        <!--                  <template #reference>-->
-        <!--                    <div-->
-        <!--                        :style="{ width: header.width + 'px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left' }"-->
-        <!--                    >-->
-        <!--                      &lt;!&ndash; 在参考元素内显示截断的字段值 &ndash;&gt;-->
-        <!--                      <span class="myNote" style="text-align: left">-->
-        <!--                                             {{ scope.row[header.prop] }}-->
-        <!--                                         </span>-->
-        <!--                    </div>-->
-        <!--                  </template>-->
-        <!--                </el-popover>-->
-        <!--              </div>-->
-        <!--              &lt;!&ndash; 对其他表头，直接显示字段值 &ndash;&gt;-->
-        <!--              <div v-else>-->
-        <!--                {{ scope.row[header.prop] }}-->
-        <!--              </div>-->
-        <!--            </template>-->
       </el-table-column>
 
       <el-table-column label="操作" align="center" width="150" fixed="right">
@@ -272,7 +248,6 @@ export default {
         { prop: 'totalMembers', label: '总人数', width: 100 },
         { prop: 'personInCharge', label: '负责人', width: 120 },
         { prop: 'chargePhone', label: '负责人电话', width: 150 },
-        { prop: 'dataSource', label: '数据来源', width: 200 },
         { prop: 'teamTypeName', label: '队伍类型名称', width: 150 },
         { prop: 'establishmentDate', label: '成立日期', width: 200 },
         { prop: 'affiliatedAgency', label: '所属机构', width: 150 },
@@ -287,6 +262,7 @@ export default {
         { prop: 'confidentialityName', label: '保密级别', width: 150 },
         { prop: 'modifierName', label: '修改人', width: 150 },
         { prop: 'qualificationLevel', label: '资质级别', width: 150 },
+        { prop: 'dataSource', label: '数据来源', width: 200 },
         { prop: 'notes', label: '备注', width: 150 }
       ],
       // 查询功能

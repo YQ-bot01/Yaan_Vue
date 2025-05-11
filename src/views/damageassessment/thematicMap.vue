@@ -142,7 +142,13 @@
       <div class="eqPanel" v-if="isPanelShow.thematicMap || isPanelShow.report
       || isPanelShow.instrument||isPanelShow.AssistantDecision
       || isPanelShow.InstrumentIntensity">
-        <h2>{{ this.outputData.themeName }}</h2>
+<!--      <span style="display: flex; align-items: center;justify-content: space-between; width: 100%;">-->
+      <h2>{{ this.outputData.themeName }}</h2>
+<!--        <div v-if="this.outputData.type === `thematicMap`">-->
+<!--          <button class="handleEveryDownload download" @click="handleEveryDownloadMap">一键下载</button>-->
+<!--        </div>-->
+<!--      </span>-->
+
         <div style="width: 100%;height: calc(100% - 120px);text-align: center;color: #fff;font-size: 16px" v-if="isNoData">
           该地震暂无评估图件产出
         </div>
@@ -1345,6 +1351,15 @@ export default {
   cursor: pointer;
 }
 
+handleEveryDownload{
+  margin-left:-90px;
+  width: 60px;
+  height: 25px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+
 .thematicMapPreview {
   position: absolute;
   width: 75%;
@@ -1357,7 +1372,6 @@ export default {
   border-radius: 10px;
   z-index: 4;
 }
-
 .preview {
   background-color: #ebf5ff;
   color: #409eff;

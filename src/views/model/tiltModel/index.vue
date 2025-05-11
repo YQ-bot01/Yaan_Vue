@@ -274,19 +274,37 @@ function init() {
 
 }
 
+// function switchToLocalDEM(){
+//   // 切换地形提供者
+//   if (true) {
+//     window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand(); // 切换到第三方地形
+//   } else {
+//     window.viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand(); // 切换到仅底图
+//   }
+//
+//   // 更新选中的地形
+//   window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[true ? 2 : 0];
+//
+//   // 高亮当前选中的地形
+//   const currentLayer = document.querySelector(`[title="${true ? '本地DEM地形' : 'WGS84标准球体'}"]`);
+//   // console.log("currentLayer",currentLayer)
+//   if (currentLayer) {
+//     currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
+//   }
+// }
 function switchToLocalDEM(){
   // 切换地形提供者
   if (true) {
-    window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand(); // 切换到第三方地形
+    window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand(); // 切换到第三方地形
   } else {
     window.viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand(); // 切换到仅底图
   }
 
   // 更新选中的地形
-  window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[true ? 2 : 0];
+  window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[true ? 1 : 0];
 
   // 高亮当前选中的地形
-  const currentLayer = document.querySelector(`[title="${true ? '本地DEM地形' : 'WGS84标准球体'}"]`);
+  const currentLayer = document.querySelector(`[title="${true ? '第三方地形' : 'WGS84标准球体'}"]`);
   // console.log("currentLayer",currentLayer)
   if (currentLayer) {
     currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');

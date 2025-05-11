@@ -1612,18 +1612,19 @@ export default {
       }
     },
 
-    // 专门用来移除指定图层
+    // 专门用来移除指定图层，但不改变视图位置
     removeLayers(layersToRemove) {
-      // layersToRemove 是一个数组
       layersToRemove.forEach(layerName => {
-        // 获取所有与 layerName 匹配的 DataSource
-        let matchingLayers = window.viewer.dataSources._dataSources.filter(layer => layer._name === layerName);
-        // 遍历匹配的 DataSource 并删除
+        let matchingLayers = window.viewer.dataSources._dataSources.filter(
+            layer => layer._name === layerName
+        );
         matchingLayers.forEach(layer => {
+          // 第2个参数 keepData 默认为 false，这里不改视图
           window.viewer.dataSources.remove(layer);
         });
       });
     },
+
 
     // 专门用来渲染指定图层，同时去掉（隐藏/销毁）其他图层
     renderLayer(layerToRender, flag) {

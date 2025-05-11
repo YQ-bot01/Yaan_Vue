@@ -1009,8 +1009,6 @@ export function handleOutputData(eqid, eqqueueId, eqFullName, type) {
         const data = res.data;
         const themeName = eqFullName + "-" + "专题图";
         let thematicMapData = [];
-        const url = `${domainName}/jcpt/profile/EqProduct/${eqid}/${batch}/本地产品/专题图`;
-        const urlBase = 'http://59.213.183.7/jcpt';  // 设置新的基础 URL
         console.log("专题图")
         for (let i = 0; i < res.data.length; i++) {
           const thematicMapObject = {
