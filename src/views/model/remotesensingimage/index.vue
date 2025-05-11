@@ -453,7 +453,7 @@ export default {
 
     handleOpen(row) {
       console.log(row);
-      window.open('/orthophotographViewer', "_blank");
+      window.open('/remotesensingimage');
     },
 
     handleEdit(title, row = {}) {

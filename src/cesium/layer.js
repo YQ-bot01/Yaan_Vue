@@ -1,10 +1,191 @@
-import sichuanCounty from "@/assets/geoJson/sichuanCounty.json";
 import * as Cesium from 'cesium'
+
+import siChuanCity from "@/assets/geoJson/sichuan.json";
+import sichuanCounty from "@/assets/geoJson/sichuanCounty.json";
+import yaAnVillage from "@/assets/geoJson/yaan.json";
+
 import yaAn from "@/assets/geoJson/yaan1.json";
 import {getModelData} from "@/api/system/tiltPhotography.js";
 import modelicon from "@/assets/icons/png/3D.png";
+
+
 const modelEntities = [];
+const siChuanCityRegionLabels = [];
+const sichuanCountyRegionLabels = [];
+const yaAnVillageRegionLabels = [];
+
 let layer = {
+    // 四川省-雅安市三级行政区划
+    // 加载四川省市级图层
+    loadSichuanCityLayer() {
+        if (!window.viewer.dataSources.getByName('siChuanCityRegionLayer')[0]) {
+            console.log("loadCityLayer 加载市级图层")
+            Cesium.GeoJsonDataSource.load(siChuanCity, {
+                clampToGround: false,
+                stroke: Cesium.Color.WHITE,
+                strokeWidth: 4,
+                fill: Cesium.Color.TRANSPARENT,
+            }).then(dataSource => {
+                window.viewer.dataSources.add(dataSource);
+                dataSource.name = 'siChuanCityRegionLayer';
+                // 添加区域标签
+                siChuanCity.features.forEach(feature => {
+                    const firstPolygon = feature.geometry.coordinates[0][0];
+                    const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+                    const centroid = this.calculateCentroid(positions);
+
+                    let entity = window.viewer.entities.add({
+                        layer: "siChuanCityRegionLabel",
+                        position: centroid,
+                        label: {
+                            text: feature.properties.name || '未命名',
+                            font: '18px sans-serif',
+                            fillColor: Cesium.Color.WHITE,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                            pixelOffset: new Cesium.Cartesian2(0, 0),
+                        }
+                    });
+                    siChuanCityRegionLabels.push(entity)
+                });
+                console.log("市级图层加载成功！");
+
+            }).catch(error => {
+                console.error("加载市级图层失败:", error);
+            });
+        }
+    },
+    // 加载四川省区县级图层
+    loadSiChuanCountyLayer() {
+        if (!window.viewer.dataSources.getByName('sichuanCountyRegionLayer')[0]) {
+            Cesium.GeoJsonDataSource.load(sichuanCounty, {
+                clampToGround: false,
+                stroke: Cesium.Color.YELLOW,
+                strokeWidth: 4,
+                fill: Cesium.Color.TRANSPARENT,
+            }).then(dataSource => {
+                window.viewer.dataSources.add(dataSource);
+                dataSource.name = 'sichuanCountyRegionLayer';
+
+                // 添加区域标签
+                sichuanCounty.features.forEach(feature => {
+                    const firstPolygon = feature.geometry.coordinates[0][0];
+                    const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+                    const centroid = this.calculateCentroid(positions);
+                    let entity = window.viewer.entities.add({
+                        layer: "sichuanCountyRegionLabel",
+                        position: centroid,
+                        label: {
+                            text: feature.properties.name || '未命名',
+                            font: '18px sans-serif',
+                            fillColor: Cesium.Color.WHITE,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                            pixelOffset: new Cesium.Cartesian2(0, 0),
+                        }
+                    });
+                    sichuanCountyRegionLabels.push(entity)
+                });
+
+            }).catch(error => {
+                console.error("加载区县级图层失败:", error);
+            });
+        }
+    },
+    // 加载雅安市乡镇级图层
+    loadYaAnVillageLayer() {
+        if (!window.viewer.dataSources.getByName('yaAnVillageRegionLayer')[0]) {
+            Cesium.GeoJsonDataSource.load(yaAnVillage, {
+                clampToGround: false,
+                stroke: Cesium.Color.ORANGE,
+                strokeWidth: 4,
+                fill: Cesium.Color.TRANSPARENT,
+            }).then(dataSource => {
+                window.viewer.dataSources.add(dataSource);
+                dataSource.name = 'yaAnVillageRegionLayer';
+
+                // 添加区域标签
+                yaAnVillage.features.forEach(feature => {
+                    const firstPolygon = feature.geometry.coordinates[0][0];
+                    const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+                    const centroid = this.calculateCentroid(positions);
+                    let entity = window.viewer.entities.add({
+                        layer: "yaAnVillageRegionLabel",
+                        position: centroid,
+                        label: {
+                            text: feature.properties.name || '未命名',
+                            font: '18px sans-serif',
+                            fillColor: Cesium.Color.WHITE,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                            pixelOffset: new Cesium.Cartesian2(0, 0),
+                        }
+                    });
+                    yaAnVillageRegionLabels.push(entity)
+                });
+                console.log("雅安市乡镇级图层加载成功！");
+
+            }).catch(error => {
+                console.error("加载道路级图层失败:", error);
+            });
+        }
+    },
+    // 计算多边形的质心
+    calculateCentroid(positions) {
+        let centroid = Cesium.Cartesian3.ZERO;
+        positions.forEach(pos => {
+            centroid = Cesium.Cartesian3.add(centroid, pos, new Cesium.Cartesian3());
+        });
+        return Cesium.Cartesian3.divideByScalar(centroid, positions.length, new Cesium.Cartesian3());
+    },
+
+    removeSichuanCityLayer() {
+        // 移除标签
+        siChuanCityRegionLabels.forEach((item) => {
+            window.viewer.entities.remove(item)
+        })
+        //移除图层
+        const dataSource = window.viewer.dataSources.getByName('siChuanCityRegionLayer')[0];
+        if (dataSource) {
+            window.viewer.dataSources.remove(dataSource);
+        }
+    },
+    removeSiChuanCountyLayer() {
+        // 移除标签
+        sichuanCountyRegionLabels.forEach((item) => {
+            window.viewer.entities.remove(item)
+        })
+        //移除图层
+        const dataSource = window.viewer.dataSources.getByName('sichuanCountyRegionLayer')[0];
+        if (dataSource) {
+            window.viewer.dataSources.remove(dataSource);
+        }
+    },
+    removeYaAnVillageLayer() {
+        // 移除标签
+        yaAnVillageRegionLabels.forEach((item) => {
+            window.viewer.entities.remove(item)
+        })
+        //移除图层
+        const dataSource = window.viewer.dataSources.getByName('yaAnVillageRegionLayer')[0];
+        if (dataSource) {
+            window.viewer.dataSources.remove(dataSource);
+        }
+    },
+    //四川省-雅安市三级行政区划 end
+
     //视角跳转-加载雅安市
     addYaanCityDistrict() {
         let geoPromise = Cesium.GeoJsonDataSource.load(yaAn, {
@@ -119,13 +300,14 @@ let layer = {
             window.viewer.entities.remove(labelEntity)
         }
     },
+
     //多源要素图层-加载三维模型图层
-    addModelLayer(){
+    addModelLayer() {
         getModelData().then(res => {
             console.log("倾斜模型数据，新加的点，", res)
             // 创建一个数组来保存实体和对应的数据
             for (let i = 0; i < res.length; i++) {
-                let alltiltPhotography=window.viewer.entities.add({
+                let alltiltPhotography = window.viewer.entities.add({
                     position: Cesium.Cartesian3.fromDegrees(res[i].geom.coordinates[0], res[i].geom.coordinates[1]),
                     layer: "倾斜模型",
                     // point: {
@@ -153,11 +335,11 @@ let layer = {
             }
         })
     },
-    removeModelLayer(){
-        if(window.modelObject){
+    removeModelLayer() {
+        if (window.modelObject) {
             window.modelObject.show = false
         }
-        modelEntities.forEach((item)=>{
+        modelEntities.forEach((item) => {
             window.viewer.entities.remove(item)
         })
     },

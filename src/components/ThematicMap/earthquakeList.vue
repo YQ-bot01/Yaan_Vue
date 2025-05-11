@@ -111,7 +111,7 @@ import TwoAndThreeDIntegrationImageData
 import {getAllEq, getAllEqList} from "../../api/system/eqlist.js";
 import * as Cesium from "cesium";
 import eqMark from '@/assets/images/DamageAssessment/eqMark.png';
-import yaan from "@/assets/geoJson/yaan1.json";
+// import yaan from "@/assets/geoJson/yaan1.json";
 import {handleOutputData} from "../../cesium/plot/eqThemes.js";
 import {getEqList} from "@/api/system/damageassessment.js";
 
@@ -129,8 +129,8 @@ export default {
       listEqPoints: [],
 
       // 行政区划
-      RegionLabels: [],
-      sichuanRegionLabels: [],
+      // RegionLabels: [],
+      // sichuanRegionLabels: [],
       title: "",
       thematicMapData: [],
       reportData: [],
@@ -252,10 +252,6 @@ export default {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = this.currentPage * this.pageSize;
       this.pagedEqData = this.filteredEqData.slice(start, end);
-      // console.log("pagedEqData:", this.pagedEqData)
-
-      // 清除之前的点并重新添加
-      viewer.entities.removeAll();
       this.renderQueryEqPoints();
     },
 
@@ -291,29 +287,6 @@ export default {
           },
           id: eq.eqid
         });
-        yaan.features.forEach((feature) => {
-          let center = feature.properties.center;
-
-          if (center && center.length === 2) {
-            let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-            let regionlabel = viewer.entities.add(new Cesium.Entity({
-              position: position,
-              label: new Cesium.LabelGraphics({
-                text: feature.properties.name,
-                scale: 1,
-                font: '18px Sans-serif',
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                outlineWidth: 2,
-                verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-                fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-                pixelOffset: new Cesium.Cartesian2(0, 0),
-                eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
-              })
-            }));
-            this.RegionLabels.push(regionlabel)
-          }
-        })
         this.listEqPoints.push(entity);
       });
     },

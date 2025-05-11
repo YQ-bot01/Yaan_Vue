@@ -54,8 +54,7 @@ export default {
           "地形服务";
 
       viewer.scene.globe.depthTestAgainstTerrain = false;
-      this.addOrthophotographViewer()
-      layer.loadYaAnVillageLayer();
+      layer.loadSiChuanCountyLayer();
       window.viewer.camera.changed.addEventListener(this.handleCameraChange);
     },
     handleCameraChange() {
@@ -86,28 +85,6 @@ export default {
         layer.loadYaAnVillageLayer();
       }
     },
-    addOrthophotographViewer(){
-      let url = this.$route.query.url
-      let layers = this.$route.query.layers
-      let lon = parseFloat(this.$route.query.lon )
-      let lat = parseFloat(this.$route.query.lat )
-      window.viewer.imageryLayers.addImageryProvider(
-          new Cesium.WebMapServiceImageryProvider({
-            url,
-            layers,
-            parameters: {
-              service: 'WMS', // 指定服务类型为WMS
-              format: 'image/png', // 指定返回的图像格式为PNG
-              transparent: true // 启用透明背景
-            }
-          })
-      );
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(lon, lat, 5000), // 设置经度、纬度和高度
-        duration:1
-      });
-    }
-
   }
 }
 </script>
@@ -117,8 +94,5 @@ export default {
 </template>
 
 <style scoped>
-#cesiumContainer{
-  width: 100%;
-  height: 100%;
-}
+
 </style>

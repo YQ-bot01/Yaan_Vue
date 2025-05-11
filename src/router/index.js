@@ -106,6 +106,11 @@ export const constantRoutes = [
     component: () =>import('@/components/Cesium/orthophotographViewer'),
     hidden: true
   },
+  {
+    path:'/remotesensingimage',
+    component: () =>import('@/components/Cesium/remotesensingimage.vue'),
+    hidden: true
+  },
 
   {
     path: '/statistics/pic/:flag',

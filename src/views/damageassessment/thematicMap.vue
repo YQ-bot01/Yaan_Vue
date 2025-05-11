@@ -1,10 +1,7 @@
 <template>
   <div>
     <div id="cesiumContainer" class="situation_cesiumContainer">
-      <!--  小组件  -->
-      <!--    <div class="layers">-->
-      <!--      <div class="layer" title="雅安市行政区划" @click="toggleYaanLayer"><img src="../../../assets/images/DamageAssessment/yaanRegion.png"></div>-->
-      <!--    </div>-->
+
 
       <!-- 右侧表单 -->
       <div class="eqTable">
@@ -124,6 +121,11 @@
                  style="height: 45px;margin-top: 15px;margin-bottom: 10px"
                  @click="handlePanel(`InstrumentIntensity`); isPreviewShow = false;">仪器烈度数据
             </div>
+            <div class="button themes"
+                 :class="{ active: isPanelShow.DownloadAll }"
+                 style="height: 45px;margin-top: 15px;margin-bottom: 10px"
+                 @click="handlePanel(`DownloadAll`); isPreviewShow = false;">一键下载
+            </div>
 
             <div style="height: 10px;background-color: #054576"></div>
             <el-divider content-position="left">大屏展示</el-divider>
@@ -222,12 +224,14 @@ import {
   getEqOutputMaps,
   getEqOutputReports
 } from "../../api/system/damageassessment.js";
-import yaan from "../../assets/geoJson/yaan1.json";
+// import yaan from "../../assets/geoJson/yaan1.json";
 import {handleOutputData, timestampToTime} from "../../cesium/plot/eqThemes.js";
 import eqMark from "@/assets/images/DamageAssessment/eqMark.png";
-import yaAnVillage from "@/assets/geoJson/yaan.json";
-import yaAnTown from "@/assets/geoJson/yaan1.json";
+// import yaAnVillage from "@/assets/geoJson/yaan.json";
+// import yaAnTown from "@/assets/geoJson/yaan1.json";
 import timeLine from "@/cesium/timeLine.js";
+import layer from "@/cesium/layer.js";
+import JSZip from 'jszip';
 
 export default {
   components: {},
@@ -258,7 +262,8 @@ export default {
         report: false,
         instrument: false,
         AssistantDecision:false,
-        InstrumentIntensity:false
+        InstrumentIntensity:false,
+        DownloadAll:false,
       },
       isPreviewShow: false,
       // 记录当前显示的 panelButtons 索引，默认为 null
@@ -276,8 +281,8 @@ export default {
       isNoData: false,
 
       // cesium实体
-      yaAnVillageEntity: [],
-      yaAnTownEntity: [],
+      // yaAnVillageEntity: [],
+      // yaAnTownEntity: [],
     };
   },
 
@@ -285,7 +290,6 @@ export default {
     this.init();
     this.getEq();
     this.viewer = new Cesium.Viewer("cesiumContainer");
-    this.addEventListeners();
   },
 
   beforeUnmount() {
@@ -294,7 +298,7 @@ export default {
       let viewer = window.viewer
       let gl = viewer.scene.context._gl
       viewer.entities.removeAll()
-      // viewer.scene.primitives.removeAll()
+
       // 不用写这个，viewer.destroy时包含此步，在DatasourceDisplay中
       viewer.destroy()
       gl.getExtension("WEBGL_lose_context").loseContext();
@@ -306,38 +310,6 @@ export default {
 
   methods: {
     timestampToTime,
-
-    // 不知道为什么要在上面这里导入，可能是template里面的调用要这么搞？？？
-
-    // 初始化要做的
-    // -----------------------------------------------------------------------------------------------------------------
-    addEventListeners() {
-      // 延迟绑定事件，确保控件已经加载
-      this.$nextTick(() => {
-        const baseLayerContainer = document.querySelector(
-          ".cesium-baseLayerPicker-dropDown"
-        );
-
-        if (baseLayerContainer) {
-          // 事件代理监听点击事件
-          baseLayerContainer.addEventListener("click", (event) => {
-            const clickedIcon = event.target.closest(
-              ".cesium-baseLayerPicker-itemIcon"
-            );
-            const clickedLabel = event.target.closest(
-              ".cesium-baseLayerPicker-itemLabel"
-            );
-
-            if (clickedIcon || clickedLabel) {
-              console.log("是否加载了地形图：", this.isTerrainLoaded())
-              this.isTerrainLoading = this.isTerrainLoaded()
-              this.toggleYaanLayer()
-            }
-          });
-        }
-      });
-    },
-
     // 获取地震列表并渲染
     getEq() {
       const eqListDTO = {
@@ -393,7 +365,8 @@ export default {
         "地形服务";
 
       this.initMouseEvents();
-      this.toggleYaanLayer();
+      layer.loadSiChuanCountyLayer();
+      window.viewer.camera.changed.addEventListener(this.handleCameraChange);
       this.renderQueryEqPoints();
     },
 
@@ -433,7 +406,6 @@ export default {
     renderQueryEqPoints() {
       this.listEqPoints.forEach(entity => window.viewer.entities.remove(entity));
       this.listEqPoints = [];
-
       this.pagedEqData.forEach(eq => {
         const entity = window.viewer.entities.add({
           position: Cesium.Cartesian3.fromDegrees(Number(eq.longitude), Number(eq.latitude)),
@@ -460,179 +432,74 @@ export default {
           id: eq.eqid,
         });
 
-        Cesium.GeoJsonDataSource.load(yaAnTown, {
-          clampToGround: false,
-          stroke: Cesium.Color.ORANGE,
-          strokeWidth: 4,
-          fill: Cesium.Color.TRANSPARENT,
-        }).then(dataSource => {
-          viewer.dataSources.add(dataSource);
-          dataSource.name = 'yaAnTownRegionLayer1';
-
-          // 添加区域标签
-          yaAnTown.features.forEach(feature => {
-            const firstPolygon = feature.geometry.coordinates[0][0];
-            const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
-            const centroid = this.calculateCentroid(positions);
-
-            const regionLabel = viewer.entities.add({
-              position: centroid,
-              label: {
-                text: feature.properties.name || '未命名',
-                font: '18px sans-serif',
-                fillColor: Cesium.Color.WHITE,
-                outlineColor: Cesium.Color.BLACK,
-                outlineWidth: 2,
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                pixelOffset: new Cesium.Cartesian2(0, 0),
-              }
-            });
-            this.RegionLabels.push(regionLabel);
-
-          });
-        }).catch(error => {
-          console.error("加载市级图层失败:", error);
-        });
+        // Cesium.GeoJsonDataSource.load(yaAnTown, {
+        //   clampToGround: false,
+        //   stroke: Cesium.Color.ORANGE,
+        //   strokeWidth: 4,
+        //   fill: Cesium.Color.TRANSPARENT,
+        // }).then(dataSource => {
+        //   viewer.dataSources.add(dataSource);
+        //   dataSource.name = 'yaAnTownRegionLayer1';
+        //
+        //   // 添加区域标签
+        //   yaAnTown.features.forEach(feature => {
+        //     const firstPolygon = feature.geometry.coordinates[0][0];
+        //     const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+        //     const centroid = this.calculateCentroid(positions);
+        //
+        //     const regionLabel = viewer.entities.add({
+        //       position: centroid,
+        //       label: {
+        //         text: feature.properties.name || '未命名',
+        //         font: '18px sans-serif',
+        //         fillColor: Cesium.Color.WHITE,
+        //         outlineColor: Cesium.Color.BLACK,
+        //         outlineWidth: 2,
+        //         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        //         verticalOrigin: Cesium.VerticalOrigin.CENTER,
+        //         horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+        //         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        //         pixelOffset: new Cesium.Cartesian2(0, 0),
+        //       }
+        //     });
+        //     this.RegionLabels.push(regionLabel);
+        //
+        //   });
+        // }).catch(error => {
+        //   console.error("加载市级图层失败:", error);
+        // });
 
         this.listEqPoints.push(entity);
       });
     },
-
-    // 雅安行政区划
-    toggleYaanLayer() {
-      // 添加监听器
-      viewer.camera.changed.addEventListener(this.handleCameraChange);
-    },
-
     handleCameraChange() {
-      // 移除道路级图层
-      this.removeDataSourcesLayer('yaAnTownRegionLayer1');
-
-      // 移除初始化的标签（因为这里有个不明ｂｕｇ无法解决）
-      this.RegionLabels.forEach(entity => {
-        viewer.entities.remove(entity);
-      });
-
-
       // 定义相机高度阈值
-      const COUNTY_LAYER_HEIGHT = 100000; // 区县级图层的高度阈值
-      const BUFFER_THRESHOLD = 50000; // 缓冲阈值
-      const height = viewer.camera.positionCartographic.height; // 获取相机高度
+      let CITY_LAYER_HEIGHT = 1000000; // 市级图层的高度阈值
+      let COUNTY_LAYER_HEIGHT = 100000; // 区县级图层的高度阈值
+      let VILLAGE_LAYER_HEIGHT = 10000; // 道路级图层的高度阈值
+      let height = window.viewer.camera.positionCartographic.height; // 获取相机高度
+      console.log("当前相机高度:", height);
+
       // 根据高度动态加载或移除图层
-      if (height > COUNTY_LAYER_HEIGHT + BUFFER_THRESHOLD) {
-        // 移除道路级标签
-        this.yaAnVillageEntity.forEach(entity => {
-          viewer.entities.remove(entity);
-        });
-        // 移除道路级图层
-        this.removeDataSourcesLayer('yaAnVillageRegionLayer');
+      if (height > CITY_LAYER_HEIGHT) {
+        // 移除区县级和道路级标签
+        layer.removeSiChuanCountyLayer()
+        layer.removeYaAnVillageLayer()
+        // 加载市级图层
+        layer.loadSichuanCityLayer();
+      } else if (height > COUNTY_LAYER_HEIGHT) {
+        // 移除市级和道路级标签
+        layer.removeSichuanCityLayer()
+        layer.removeYaAnVillageLayer()
         // 加载区县级图层
-        if (!viewer.dataSources.getByName('yaAnTownRegionLayer')[0]) {
-          this.loadYaAnTown(viewer);
-        }
-      } else if (height < COUNTY_LAYER_HEIGHT - BUFFER_THRESHOLD) {
-        // 移除区县标签
-        this.yaAnTownEntity.forEach(entity => {
-          viewer.entities.remove(entity);
-        });
-        this.removeDataSourcesLayer('yaAnTownRegionLayer');
-        // 加载道路级图层
-        if (!viewer.dataSources.getByName('yaAnVillageRegionLayer')[0]) {
-          this.loadYaAnVillage(viewer);
-        }
+        layer.loadSiChuanCountyLayer();
       }
-    },
-
-    // 加载道路图层
-    loadYaAnVillage(viewer) {
-      Cesium.GeoJsonDataSource.load(yaAnVillage, {
-        clampToGround: false,
-        stroke: Cesium.Color.RED,
-        strokeWidth: 4,
-        fill: Cesium.Color.TRANSPARENT,
-      }).then(dataSource => {
-        viewer.dataSources.add(dataSource);
-        dataSource.name = 'yaAnVillageRegionLayer';
-
-        // 添加区域标签
-        yaAnVillage.features.forEach(feature => {
-          const firstPolygon = feature.geometry.coordinates[0][0];
-          const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
-          const centroid = this.calculateCentroid(positions);
-
-          const regionLabel = viewer.entities.add({
-            position: centroid,
-            label: {
-              text: feature.properties.name || '未命名',
-              font: '18px sans-serif',
-              fillColor: Cesium.Color.WHITE,
-              outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 2,
-              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-              verticalOrigin: Cesium.VerticalOrigin.CENTER,
-              horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-              pixelOffset: new Cesium.Cartesian2(0, 0),
-            }
-          });
-          this.yaAnVillageEntity.push(regionLabel); // 使用 this.RegionLabels
-
-        });
-      }).catch(error => {
-        console.error("加载市级图层失败:", error);
-      });
-    },
-
-    // 加载区县图层
-    loadYaAnTown(viewer) {
-      Cesium.GeoJsonDataSource.load(yaAnTown, {
-        clampToGround: false,
-        stroke: Cesium.Color.ORANGE,
-        strokeWidth: 4,
-        fill: Cesium.Color.TRANSPARENT,
-      }).then(dataSource => {
-        viewer.dataSources.add(dataSource);
-        dataSource.name = 'yaAnTownRegionLayer';
-
-        // 添加区域标签
-        yaAnTown.features.forEach(feature => {
-          const firstPolygon = feature.geometry.coordinates[0][0];
-          const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
-          const centroid = this.calculateCentroid(positions);
-
-          const regionLabel = viewer.entities.add({
-            position: centroid,
-            label: {
-              text: feature.properties.name || '未命名',
-              font: '18px sans-serif',
-              fillColor: Cesium.Color.WHITE,
-              outlineColor: Cesium.Color.BLACK,
-              outlineWidth: 2,
-              style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-              verticalOrigin: Cesium.VerticalOrigin.CENTER,
-              horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-              pixelOffset: new Cesium.Cartesian2(0, 0),
-            }
-          });
-          this.yaAnTownEntity.push(regionLabel);
-
-        });
-      }).catch(error => {
-        console.error("加载市级图层失败:", error);
-      });
-    },
-
-    // 计算多边形的质心
-    calculateCentroid(positions) {
-      let centroid = Cesium.Cartesian3.ZERO;
-      positions.forEach(pos => {
-        centroid = Cesium.Cartesian3.add(centroid, pos, new Cesium.Cartesian3());
-      });
-      return Cesium.Cartesian3.divideByScalar(centroid, positions.length, new Cesium.Cartesian3());
+      else {
+        layer.removeSichuanCityLayer()
+        layer.removeSiChuanCountyLayer()
+        // 加载乡镇级图层
+        layer.loadYaAnVillageLayer();
+      }
     },
 
 
@@ -670,7 +537,7 @@ export default {
       // console.log("pagedEqData:", this.pagedEqData)
 
       // 清除之前的点并重新添加
-      viewer.entities.removeAll();
+      // viewer.entities.removeAll();
       this.renderQueryEqPoints();
     },
 
@@ -786,6 +653,8 @@ export default {
       }
 
       this.isPanelShow[type] = !this.isPanelShow[type];
+
+
       if( this.isPanelShow.AssistantDecision){
         handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, type).then((res) => {
 
@@ -800,31 +669,13 @@ export default {
         });
       }
       else if (this.isPanelShow.thematicMap || this.isPanelShow.report) {
-        getEqOutputMaps(this.eqid, this.eqqueueId).then((res) => {
-          console.log("专题图", res.data)
-        })
-
-        getEqOutputReports(this.eqid, this.eqqueueId).then((res) => {
-          console.log("灾情报告", res.data)
-        })
-
-        // getEqOutPutJueCes(this.eqid, this.eqqueueId).then((res)=>{
-        //   console.log("决策报告",res.data)
-        // })
-
         console.log("开始进行评估------------------------")
 
         handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, type).then((res) => {
-
           console.log("评估结果",res)
-
           this.outputData.themeName = res.themeName;
-
           this.outputData.themeData = res.themeData;
           this.outputData.type = type;
-
-
-
           this.isNoData = res.themeData.length === 0;
         });
       }
@@ -886,11 +737,271 @@ export default {
         this.outputData.type = 'InstrumentIntensity';
         this.outputData.themeName = '2022年06月01日四川雅安市芦山县6.1级地震-仪器烈度数据';
       }
+      else if(this.isPanelShow.DownloadAll){
+        this.downloadAll()
+      }
       else{
         console.log("无图片数据")
       }
     },
+    // downloadAll() {
+    //   // 提示用户下载开始
+    //   let startNotify=this.$notify({
+    //     title: '一键下载',
+    //     message: '正在下载所有报告和专题图，请稍候...',
+    //     duration: 0, // 持续显示
+    //     zIndex: 9999,
+    //   });
+    //
+    //   let allUrls = [];
+    //
+    //   // 创建 JSZip 实例
+    //   const zip = new JSZip();
+    //
+    //   Promise.all([
+    //     handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'AssistantDecision'),
+    //     handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'thematicMap'),
+    //     handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'report')
+    //
+    //   ]).then(([res1, res2, res3]) => {
+    //     console.log(res1,"辅助决策报告")
+    //     // 创建文件夹
+    //     const assistantDecisionFolder = zip.folder('辅助决策报告');
+    //     const thematicMapFolder = zip.folder('专题图');
+    //     const reportFolder = zip.folder('灾情简报');
+    //
+    //     // 处理 AssistantDecision 的结果
+    //     this.outputData.themeName = res1.themeName;
+    //     this.outputData.themeData = res1.themeData;
+    //     res1.themeData.forEach(item => {
+    //       if (item.docxUrl) {
+    //         allUrls.push({ url: item.docxUrl, folder: assistantDecisionFolder });
+    //       }
+    //     });
+    //
+    //     // 处理专题图的结果
+    //     this.outputData.themeName = res2.themeName;
+    //     this.outputData.themeData = res2.themeData;
+    //     res2.themeData.forEach(item => {
+    //       if (item.imgUrl) {
+    //         allUrls.push({ url: item.imgUrl, folder: thematicMapFolder });
+    //       }
+    //     });
+    //
+    //     // 处理报告的结果
+    //     this.outputData.themeName = res3.themeName;
+    //     this.outputData.themeData = res3.themeData;
+    //     res3.themeData.forEach(item => {
+    //       if (item.docxUrl) {
+    //         allUrls.push({ url: item.docxUrl, folder: reportFolder });
+    //       }
+    //     });
+    //
+    //     // 下载每个文件并添加到对应的文件夹中
+    //     const downloadPromises = allUrls.map((entry, index) => {
+    //       return fetch(entry.url, {
+    //         method: 'GET',
+    //         headers: {
+    //           'Authorization': `Bearer ${localStorage.getItem('token') || ''}`, // 如果需要认证
+    //         },
+    //       })
+    //           .then(response => {
+    //             if (!response.ok) {
+    //               console.log(entry.url, "下载失败");
+    //               throw new Error(`下载失败: ${response.status}`);
+    //             }
+    //             return response.blob();
+    //           })
+    //           .then(blob => {
+    //             // 获取文件名
+    //             const fileName = entry.url.split('/').pop() || `file_${index}.unknown`;
+    //             entry.folder.file(fileName, blob); // 将文件添加到对应的文件夹中
+    //           })
+    //           .catch(error => {
+    //             console.error('下载失败:', error);
+    //             return Promise.reject(error); // 如果下载失败，返回一个拒绝的 Promise
+    //           });
+    //     });
+    //
+    //     // 等待所有文件下载完成
+    //     Promise.all(downloadPromises)
+    //         .then(() => {
+    //           // 生成 ZIP 文件
+    //           zip.generateAsync({ type: 'blob' })
+    //               .then(blob => {
+    //                 const url = window.URL.createObjectURL(blob);
+    //                 const a = document.createElement('a');
+    //                 a.href = url;
+    //                 a.download = this.earthquakeFullName+'.zip'; // 设置 ZIP 文件名
+    //                 document.body.appendChild(a);
+    //                 a.click();
+    //                 document.body.removeChild(a);
+    //                 window.URL.revokeObjectURL(url); // 释放 URL 对象
+    //
+    //                 // 提示用户下载完成
+    //                 this.$notify({
+    //                   title: '一键下载完成',
+    //                   message: '所有文件已打包下载完成',
+    //                   type: 'success',
+    //                   duration: 5000,
+    //                 });
+    //                 startNotify.close()
+    //                 this.isPanelShow.DownloadAll=false
+    //               });
+    //
+    //         })
+    //         .catch(error => {
+    //           console.error('打包下载失败:', error);
+    //           this.$notify({
+    //             title: '下载失败',
+    //             message: '部分文件下载失败，请检查网络或重试',
+    //             type: 'error',
+    //             duration: 5000,
+    //           });
+    //           startNotify.close()
+    //           this.isPanelShow.DownloadAll=false
+    //         });
+    //   }).catch((error) => {
+    //     console.error("Error fetching data:", error);
+    //     this.$notify({
+    //       title: '下载失败',
+    //       message: '获取数据失败，请检查网络或重试',
+    //       type: 'error',
+    //       duration: 5000,
+    //     });
+    //
+    //     startNotify.close()
+    //     this.isPanelShow.DownloadAll=falses
+    //   });
+    // },
+    downloadAll() {
+      // 提示用户下载开始
+      let startNotify = this.$notify({
+        title: '一键下载',
+        message: '正在下载所有报告和专题图，请稍候...',
+        duration: 0, // 持续显示
+        zIndex: 9999,
+      });
 
+      let allUrls = [];
+
+      // 创建 JSZip 实例
+      const zip = new JSZip();
+
+      Promise.all([
+        handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'AssistantDecision'),
+        handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'thematicMap'),
+        handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, 'report')
+      ]).then(([res1, res2, res3]) => {
+        console.log(res1, "辅助决策报告");
+
+        // 创建文件夹
+        const assistantDecisionFolder = zip.folder('辅助决策报告');
+        const thematicMapFolder = zip.folder('专题图');
+        const reportFolder = zip.folder('灾情简报');
+
+        // 处理 AssistantDecision 的结果
+        this.outputData.themeName = res1.themeName;
+        this.outputData.themeData = res1.themeData;
+        res1.themeData.forEach(item => {
+          if (item.docxUrl) {
+            allUrls.push({ url: item.docxUrl, folder: assistantDecisionFolder });
+          }
+        });
+
+        // 处理专题图的结果
+        this.outputData.themeName = res2.themeName;
+        this.outputData.themeData = res2.themeData;
+        res2.themeData.forEach(item => {
+          if (item.imgUrl) {
+            allUrls.push({ url: item.imgUrl, folder: thematicMapFolder });
+          }
+        });
+
+        // 处理报告的结果
+        this.outputData.themeName = res3.themeName;
+        this.outputData.themeData = res3.themeData;
+        res3.themeData.forEach(item => {
+          if (item.docxUrl) {
+            allUrls.push({ url: item.docxUrl, folder: reportFolder });
+          }
+        });
+
+        // 下载每个文件并添加到对应的文件夹中
+        const downloadPromises = allUrls.map((entry, index) => {
+          return fetch(entry.url, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token') || ''}`, // 如果需要认证
+            },
+          })
+              .then(response => {
+                if (!response.ok) {
+                  console.log(entry.url, "下载失败");
+                  throw new Error(`下载失败: ${response.status}`);
+                }
+                return response.blob();
+              })
+              .then(blob => {
+                // 获取文件名
+                const fileName = entry.url.split('/').pop() || `file_${index}.unknown`;
+                entry.folder.file(fileName, blob); // 将文件添加到对应的文件夹中
+              })
+              .catch(error => {
+                console.error('下载失败:', error);
+                return null; // 返回 null，而不是拒绝的 Promise
+              });
+        });
+
+        // 等待所有文件下载完成
+        Promise.all(downloadPromises)
+            .then(() => {
+              // 生成 ZIP 文件
+              zip.generateAsync({ type: 'blob' })
+                  .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = this.earthquakeFullName + '.zip'; // 设置 ZIP 文件名
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url); // 释放 URL 对象
+
+                    // 提示用户下载完成
+                    this.$notify({
+                      title: '一键下载完成',
+                      message: '所有文件已打包下载完成',
+                      type: 'success',
+                      duration: 5000,
+                    });
+                    startNotify.close();
+                    this.isPanelShow.DownloadAll = false;
+                  });
+            })
+            .catch(error => {
+              console.error('打包下载失败:', error);
+              this.$notify({
+                title: '下载失败',
+                message: '部分文件下载失败，请检查网络或重试',
+                type: 'error',
+                duration: 5000,
+              });
+              startNotify.close();
+              this.isPanelShow.DownloadAll = false;
+            });
+      }).catch((error) => {
+        console.error("Error fetching data:", error);
+        this.$notify({
+          title: '下载失败',
+          message: '获取数据失败，请检查网络或重试',
+          type: 'error',
+          duration: 5000,
+        });
+        startNotify.close();
+        this.isPanelShow.DownloadAll = false;
+      });
+    },
     handleOpen(index) {
       this.showPanelButtonsIndex = index;
     },
@@ -969,13 +1080,14 @@ export default {
       document.body.removeChild(a);
     },
     handleJueCeReport(docxUrl) {
+      console.log("handleJueCeReport docxUrl",docxUrl)
       this.$notify({
         title: '辅助决策报告下载',
         message: '数据正在解析中...',
         duration: 7000,
         zIndex: 9999
       });
-
+      console.log("localStorage.getItem('token')",localStorage.getItem('token'));
       // 使用 fetch 获取文件数据
       fetch(docxUrl, {
         method: 'GET',
@@ -1065,8 +1177,6 @@ export default {
     // -----------------------------------------------------------------------------------------------------------------
     // 工具函数
     // -----------------------------------------------------------------------------------------------------------------
-
-    // 检查条件并调用相应的 toggleYaanLayer 方法
 
     // 计算点击位置的经纬度
     calculatePosition(clickPosition) {

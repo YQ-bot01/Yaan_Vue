@@ -1009,6 +1009,8 @@ export function handleOutputData(eqid, eqqueueId, eqFullName, type) {
         const data = res.data;
         const themeName = eqFullName + "-" + "专题图";
         let thematicMapData = [];
+        const url = `${domainName}/jcpt/profile/EqProduct/${eqid}/${batch}/本地产品/专题图`;
+        const urlBase = 'http://59.213.183.7/jcpt';  // 设置新的基础 URL
         console.log("专题图")
         for (let i = 0; i < res.data.length; i++) {
           const thematicMapObject = {
@@ -1016,7 +1018,7 @@ export function handleOutputData(eqid, eqqueueId, eqFullName, type) {
             imgUrl: `${zaisunimageipLocal}${data[i].sourceFile}`,
             theme: data[i].fileName,
           };
-          console.log("专题图",thematicMapObject)
+          // console.log("专题图",thematicMapObject)
           thematicMapData.push(thematicMapObject);
         }
 
@@ -1072,14 +1074,14 @@ export function handleOutputData(eqid, eqqueueId, eqFullName, type) {
     // }
     else if(type==="AssistantDecision"){
       getEqOutPutJueCeLocal(DTO).then((res) => {
-        console.log("辅助决策数据：", res);
+        // console.log("辅助决策数据：", res);
         const data = res.data;
         const themeName = eqFullName + "-" + "辅助决策报告";
         let jueceData = [];
 
         for (let i = 0; i < res.data.length; i++) {
           const fullPath = `${zaiSunFuZhuJueCe}${data[i].sourceFile}`;
-          console.log("docxUrl:", fullPath); // 检查路径是否正确
+          // console.log("docxUrl:", fullPath); // 检查路径是否正确
           const reportObject = {
             docxUrl: fullPath,
             theme: data[i].fileName,

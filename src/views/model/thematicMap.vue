@@ -6,7 +6,6 @@
       <EarthquakeList
           @imag-selected="onImagSelected"
           @selectEq="selectEq"
-
       ></EarthquakeList>
     </div>
     <!-- 加载中的提示 -->
@@ -34,13 +33,13 @@ import * as Cesium from "cesium";
 import CesiumNavigation from "cesium-navigation-es6";
 import {initCesium} from "@/cesium/tool/initCesium.js";
 import eqMark from '@/assets/images/DamageAssessment/eqMark.png';
-import yaan from "@/assets/geoJson/yaan1.json";
 import EarthquakeList from "../../components/ThematicMap/earthquakeList.vue";
 import ThematicMapPreview from "../../components/ThematicMap/thematicMapPreview.vue";
 import html2canvas from "html2canvas";
 import * as turf from '@turf/turf';
 import {sampleTerrainMostDetailed} from "cesium";
 import {getEqList} from "@/api/system/damageassessment.js";
+import layer from "@/cesium/layer.js";
 
 
 export default {
@@ -58,40 +57,13 @@ export default {
       filteredEqData: [],
       pagedEqData: [],
 
-      selectedTabData: null,
-      historyEqData: [],
-      historyEqPoints: [],
-
       title: "",
-      isLeftShow: true,
       isFoldShow: true,
-      isFoldUnfolding: false,
-      isHistoryEqPointsShow: false,
-      isShow: false,
-      isshowFaultZone: false, //断裂带显示隐藏
-      faultzonelines: [], //断裂带线
-      isshowOvalCircle: false, //烈度圈显示隐藏
-      OvalCirclelayer: [],
-
-      isshowPersonalCasualty: false,
-      PersonalCasualtyNum: 0,
-      yaancasual: false,
-      yaanitemcasual: [],
-
-      tabs: [],
-      currentTab: '震害事件', // 默认选项卡设置为『震害事件』
 
       listEqPoints: [], // 列表地震点
-      area: null,
-      // layerVisible: true, // 图层可见性状态
-      isshowRegion: true,//行政区划
-      RegionLabels: [],
-
-
       //-----------导出图片----------------
       loading: false, // 控制加载状态
 
-      thematicMapClass: 'TwoAndThreeDIntegration', // 二三维一体化的专题图
 
       //向预览组件传递数据
       imgshowURL: null,// 保存预览图片的 URL
@@ -111,10 +83,6 @@ export default {
       //还有step也在经纬度这里用到了
       rectangleBounds: [],//按东南西北的顺序存储
       latLonEntities: [], // 用于存储经纬度线实体的数组
-      divBoxCount: 0,
-      flexPercentages: [],
-      points: [],
-
       contourSource: null, // 存等高线
     };
   },
@@ -147,7 +115,6 @@ export default {
         this.getEqData = data;
         this.filteredEqData = data;
         this.updatePagedEqData();
-        // console.log("data:", data)
       });
     },
 
@@ -157,15 +124,15 @@ export default {
       viewer._cesiumWidget._creditContainer.style.display = "none";
       window.viewer = viewer;
       let options = {};
-      viewer.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(103.0, 29.98, 500000), // 设置经度、纬度和高度
-      });
       options.defaultResetView = Cesium.Cartographic.fromDegrees(
           103.0,
           29.98,
           500000,
           new Cesium.Cartographic()
       );
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(103.0, 29.98, 500000), // 设置经度、纬度和高度
+      });
       options.enableCompass = true;
       options.enableZoomControls = true;
       options.enableDistanceLegend = true;
@@ -183,9 +150,38 @@ export default {
 
       this.initMouseEvents();
       this.renderQueryEqPoints();
-      this.addYaanLayer()
+      // this.addYaanLayer()
+      layer.loadSiChuanCountyLayer();
+      window.viewer.camera.changed.addEventListener(this.handleCameraChange);
     },
+    handleCameraChange() {
+      // 定义相机高度阈值
+      let CITY_LAYER_HEIGHT = 1000000; // 市级图层的高度阈值
+      let COUNTY_LAYER_HEIGHT = 100000; // 区县级图层的高度阈值
+      let height = window.viewer.camera.positionCartographic.height; // 获取相机高度
+      console.log("当前相机高度:", height);
 
+      // 根据高度动态加载或移除图层
+      if (height > CITY_LAYER_HEIGHT) {
+        // 移除区县级和道路级标签
+        layer.removeSiChuanCountyLayer()
+        layer.removeYaAnVillageLayer()
+        // 加载市级图层
+        layer.loadSichuanCityLayer();
+      } else if (height > COUNTY_LAYER_HEIGHT) {
+        // 移除市级和道路级标签
+        layer.removeSichuanCityLayer()
+        layer.removeYaAnVillageLayer()
+        // 加载区县级图层
+        layer.loadSiChuanCountyLayer();
+      }
+      else {
+        layer.removeSichuanCityLayer()
+        layer.removeSiChuanCountyLayer()
+        // 加载乡镇级图层
+        layer.loadYaAnVillageLayer();
+      }
+    },
     // 鼠标事件监听
     initMouseEvents() {
 
@@ -211,9 +207,6 @@ export default {
           this.listEqPoints.forEach(entity => {
             entity.label._show._value = false;
           });
-          this.historyEqPoints.forEach(entity => {
-            entity.label._show._value = false;
-          });
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
     },
@@ -224,10 +217,7 @@ export default {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = this.currentPage * this.pageSize;
       this.pagedEqData = this.filteredEqData.slice(start, end);
-      // console.log("pagedEqData:", this.pagedEqData)
-
       // 清除之前的点并重新添加
-      viewer.entities.removeAll();
       this.renderQueryEqPoints();
     },
 
@@ -264,90 +254,10 @@ export default {
           },
           id: eq.eqid
         });
-        yaan.features.forEach((feature) => {
-          let center = feature.properties.center;
-
-          if (center && center.length === 2) {
-            let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-            let regionlabel = viewer.entities.add(new Cesium.Entity({
-              position: position,
-              label: new Cesium.LabelGraphics({
-                text: feature.properties.name,
-                scale: 1,
-                font: '18px Sans-serif',
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                outlineWidth: 2,
-                verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-                fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-                pixelOffset: new Cesium.Cartesian2(0, 0)
-              })
-            }));
-            this.RegionLabels.push(regionlabel)
-          }
-        })
         this.listEqPoints.push(entity);  // 保存实体到 listEqPoints
       });
     },
 
-    addYaanLayer() {
-      //雅安行政区加载
-      let geoPromise = Cesium.GeoJsonDataSource.load(yaan, {
-        clampToGround: true, //贴地显示
-        stroke: Cesium.Color.RED,
-        fill: Cesium.Color.SKYBLUE.withAlpha(0.5),
-        strokeWidth: 4,
-      });
-      geoPromise.then((dataSource) => {
-        window.viewer.dataSources.add(dataSource);
-        dataSource.name = 'YaanRegionLayer'; // 给图层取名字,以便删除时找到
-
-        const colors = [
-          {color: Cesium.Color.GOLD.withAlpha(0.5), name: '雨城区'},
-          {color: Cesium.Color.GOLD.withAlpha(0.5), name: '雨城区'},
-          {color: Cesium.Color.LIGHTGREEN.withAlpha(0.5), name: '名山区'},
-          {color: Cesium.Color.LAVENDER.withAlpha(0.5), name: '荥经县'},
-          {color: Cesium.Color.ORANGE.withAlpha(0.5), name: '汉源县'},
-          {color: Cesium.Color.CYAN.withAlpha(0.5), name: '石棉县'},
-          {color: Cesium.Color.TAN.withAlpha(0.5), name: '天全县'},
-          {color: Cesium.Color.SALMON.withAlpha(0.5), name: '芦山县'},
-          {color: Cesium.Color.LIGHTBLUE.withAlpha(0.5), name: '宝兴县'},
-        ];
-        dataSource.entities.values.forEach((entity, index) => {
-          // console.log("dataSource entity",entity)
-          // 根据实体索引依次从颜色数组中取颜色
-          const colorIndex = index % colors.length; // 通过模运算确保不会超出颜色数组范围
-          // 使用 ColorMaterialProperty 包装颜色
-          entity.polygon.material = new Cesium.ColorMaterialProperty(colors[colorIndex].color); // 设置填充颜色
-          // console.log("--------", index, "----------------", entity)
-        });
-        yaan.features.forEach((feature) => {
-          let center = feature.properties.center;
-
-          if (center && center.length === 2) {
-            let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-            let regionlabel = viewer.entities.add(new Cesium.Entity({
-              position: position,
-              label: new Cesium.LabelGraphics({
-                text: feature.properties.name,
-                scale: 1,
-                font: '18px Sans-serif',
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                outlineWidth: 2,
-                verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-                fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-                pixelOffset: new Cesium.Cartesian2(0, 0),
-                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-              })
-            }));
-            this.RegionLabels.push(regionlabel)
-          }
-        })
-
-        //雅安行政区加载 end
-      })
-    },
 
     locateEq(eq) {
       this.pickEqPoint(eq);
@@ -372,11 +282,6 @@ export default {
     handleCurrentChange(page) {
       this.currentPage = page;
       this.updatePagedEqData();
-    },
-
-    back() {
-      this.currentTab = '震害事件';
-      this.removeData()
     },
 
     // 模糊匹配地震时间、位置和震级
@@ -702,14 +607,14 @@ export default {
       this.selectedEqData = eq
     },
 
-    removeData() {
-      this.historyEqPoints = [];
-      this.historyEqData = [];
-      this.removeEntitiesByType("historyEq")
-     this.removeDataSourcesLayer('duanliedai');
-      this.removeEntitiesByType("ovalCircle")
-      this.isHistoryEqPointsShow = false;
-    },
+    // removeData() {
+    //   // this.historyEqPoints = [];
+    //   // this.historyEqData = [];
+    //   this.removeEntitiesByType("historyEq")
+    //  this.removeDataSourcesLayer('duanliedai');
+    //   this.removeEntitiesByType("ovalCircle")
+    //   // this.isHistoryEqPointsShow = false;
+    // },
 
     // 跳转至指挥大屏
     navigateToVisualization(thisEq) {
@@ -717,10 +622,10 @@ export default {
       window.open(path, '_blank');
     },
 
-    hidden(hidden) {
-      this.isHistoryEqPointsShow = hidden;
-      this.isShow = true;
-    },
+    // hidden(hidden) {
+    //   this.isHistoryEqPointsShow = hidden;
+    //   this.isShow = true;
+    // },
 
     // 时间戳转换
     timestampToTime(timestamp, format = "full") {
