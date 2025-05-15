@@ -144,13 +144,7 @@
       <div class="eqPanel" v-if="isPanelShow.thematicMap || isPanelShow.report
       || isPanelShow.instrument||isPanelShow.AssistantDecision
       || isPanelShow.InstrumentIntensity">
-<!--      <span style="display: flex; align-items: center;justify-content: space-between; width: 100%;">-->
-      <h2>{{ this.outputData.themeName }}</h2>
-<!--        <div v-if="this.outputData.type === `thematicMap`">-->
-<!--          <button class="handleEveryDownload download" @click="handleEveryDownloadMap">一键下载</button>-->
-<!--        </div>-->
-<!--      </span>-->
-
+        <h2>{{ this.outputData.themeName }}</h2>
         <div style="width: 100%;height: calc(100% - 120px);text-align: center;color: #fff;font-size: 16px" v-if="isNoData">
           该地震暂无评估图件产出
         </div>
@@ -669,6 +663,18 @@ export default {
         });
       }
       else if (this.isPanelShow.thematicMap || this.isPanelShow.report) {
+        getEqOutputMaps(this.eqid, this.eqqueueId).then((res) => {
+          console.log("专题图", res.data)
+        })
+
+        getEqOutputReports(this.eqid, this.eqqueueId).then((res) => {
+          console.log("灾情报告", res.data)
+        })
+
+        // getEqOutPutJueCes(this.eqid, this.eqqueueId).then((res)=>{
+        //   console.log("决策报告",res.data)
+        // })
+
         console.log("开始进行评估------------------------")
 
         handleOutputData(this.eqid, this.eqqueueId, this.earthquakeFullName, type).then((res) => {

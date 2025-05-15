@@ -16,14 +16,6 @@ export function getEqTownResult(eqTownResultDTO) {
     })
 }
 
-export function getEqOutputMap(eqOutputMapDTO) {
-  return request({
-        url: '/tp/api/open/eq/output/map',
-        method: 'get',
-        params: eqOutputMapDTO
-    })
-}
-
 export function getEqOutputReport(eqOutputReportDTO) {
   return request({
     url: '/tp/api/open/eq/output/report',
@@ -31,6 +23,14 @@ export function getEqOutputReport(eqOutputReportDTO) {
 
     params: eqOutputReportDTO
   })
+}
+
+export function getEqOutputMap(eqOutputMapDTO) {
+    return request({
+        url: '/tp/api/open/eq/output/map',
+        method: 'get',
+        params: eqOutputMapDTO
+    })
 }
 export function getEqOutPutJueCe(eqOutputJueCeDTO) {
     return request({

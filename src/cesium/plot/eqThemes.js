@@ -1024,6 +1024,7 @@ export function handleOutputData(eqid, eqqueueId, eqFullName, type) {
 
         returnData.themeName = themeName;
         returnData.themeData = thematicMapData;
+        console.log("返回专题图数据：", returnData)
 
         resolve(returnData); // 返回更新后的数据
       }).catch(err => {
@@ -1047,6 +1048,7 @@ export function handleOutputData(eqid, eqqueueId, eqFullName, type) {
 
         returnData.themeName = themeName;
         returnData.themeData = reportData;
+        console.log("返回报告数据：", returnData)
         resolve(returnData); // 这里也是异步，所以也需要 resolve
       }).catch(err => {
         reject(err);
