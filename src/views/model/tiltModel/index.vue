@@ -262,6 +262,7 @@ function init() {
   }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
   layer.loadYaAnVillageLayer();
   window.viewer.camera.changed.addEventListener(handleCameraChange);
+}
 function handleCameraChange() {
   // 定义相机高度阈值
   let CITY_LAYER_HEIGHT = 1000000; // 市级图层的高度阈值

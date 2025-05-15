@@ -571,7 +571,6 @@ export default {
     // 生成实体点击事件的handler
     this.entitiesClickPonpHandler()
     this.watchTerrainProviderChanged()
-    // this.addYaanRegion()
     // 干四件事获取地震列表、获取最新地震的eqid、设置websocket的eqid、渲染已有的标绘
     this.getEq()
     // 获取标绘图片
