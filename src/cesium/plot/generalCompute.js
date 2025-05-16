@@ -16,7 +16,8 @@ let generalCompute = {
             // console.log(response,"response")
             return response.data.result.addressComponent;
         } catch (error) {
-            console.error("逆地理编码失败:", error);
+            // console.error("逆地理编码失败:", error);
+            console.error("逆地理编码失败");
             return null;
         }
     },

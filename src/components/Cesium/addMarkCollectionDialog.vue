@@ -141,8 +141,30 @@ export default {
           }
         }
       }
+
+
       //逆地址接续位置信息
-      const locationInfo= await generalCompute.getReverseGeocode(this.form.geom.coordinates[0], this.form.geom.coordinates[1]);
+      let locationInfo={}
+      let locationInfotmp = await generalCompute.getReverseGeocode(this.form.geom.coordinates[0], this.form.geom.coordinates[1]);
+      console.log(locationInfotmp,"locationInfotmp")
+      if(locationInfotmp===null){
+        locationInfo={province:null,
+          city:null,
+          county:null,
+          town:null,
+          address:null,
+          address_distance:null,
+          address_position:null,
+          poi:null,
+          poi_distance:null,
+          road:null,
+          road_distance:null,}
+        console.log("逆地址解析失败1111");
+      }
+      else{
+        locationInfo=locationInfotmp
+      }
+      // console.log("locationInfo111",locationInfo)
       let data = this.assembleData(this.form,typeInfoValues,locationInfo,this.starttime,this.endtime)
       insertPlotAndInfo(data).then(res=>{
         let bool = true
