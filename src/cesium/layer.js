@@ -55,6 +55,7 @@ let layer = {
                             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
                             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
                             pixelOffset: new Cesium.Cartesian2(0, 0),
+                            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
                         }
                     });
                     siChuanCityRegionLabels.push(labelentity)
@@ -100,6 +101,7 @@ let layer = {
                             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
                             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
                             pixelOffset: new Cesium.Cartesian2(0, 0),
+                            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
                         }
                     });
                     sichuanCountyRegionLabels.push(entity)
@@ -148,6 +150,7 @@ let layer = {
                             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
                             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
                             pixelOffset: new Cesium.Cartesian2(0, 0),
+                            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
                         }
                     });
                     yaAnVillageRegionLabels.push(labelentity)
