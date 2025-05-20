@@ -106,7 +106,7 @@
             <div style="height: 10px;background-color: #054576"></div>
 
             <div class="eqTheme" style="margin-top: -15px">
-              <a class="button themes" href="http://172.26.86.31:18100" target="_blank">
+              <a class="button themes" href="http://59.213.183.83:18100" target="_blank">
                 产出图件管理
               </a>
             </div>

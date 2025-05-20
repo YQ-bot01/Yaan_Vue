@@ -21,6 +21,7 @@
           <div style="width: 55px">
             <div class="eqMagnitude">
               <img width="30px" height="30px" :src="'http://localhost:8080'+'/uploads/PlotsPic/' +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">
+<!--              <img width="30px" height="30px" :src="'http://59.213.183.7:8080'+'/uploads/PlotsPic/' +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">-->
             </div>
           </div>
 
