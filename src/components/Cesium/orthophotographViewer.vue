@@ -6,6 +6,11 @@ import layer from "@/cesium/layer.js";
 
 export default {
   name: "orthophotographViewer",
+  data(){
+    return{
+      LRDLStatus: true, // 路网
+    }
+  },
   mounted() {
     this.init();
   },
@@ -57,6 +62,7 @@ export default {
       this.addOrthophotographViewer()
       layer.loadYaAnVillageLayer();
       window.viewer.camera.changed.addEventListener(this.handleCameraChange);
+      layer.addTrafficLayer()
     },
     handleCameraChange() {
       // 定义相机高度阈值
@@ -89,6 +95,7 @@ export default {
     addOrthophotographViewer(){
       let url = this.$route.query.url
       let layers = this.$route.query.layers
+      console.log(url,layer,"url,layer")
       let lon = parseFloat(this.$route.query.lon )
       let lat = parseFloat(this.$route.query.lat )
       window.viewer.imageryLayers.addImageryProvider(
@@ -106,19 +113,54 @@ export default {
         destination: Cesium.Cartesian3.fromDegrees(lon, lat, 5000), // 设置经度、纬度和高度
         duration:1
       });
-    }
-
+    },
+    TrafficLayer(){
+      if(this.LRDLStatus){
+        layer.removeTrafficLayer()
+      }
+      else{
+        layer.addTrafficLayer()
+      }
+      this.LRDLStatus=!this.LRDLStatus
+    },
+    addAllOrthophotographViewer(){
+      let url = this.$route.query.url
+      let layers = "yaan:yaan_dom"
+      window.viewer.imageryLayers.addImageryProvider(
+          new Cesium.WebMapServiceImageryProvider({
+            url,
+            layers,
+            parameters: {
+              service: 'WMS', // 指定服务类型为WMS
+              format: 'image/png', // 指定返回的图像格式为PNG
+              transparent: true // 启用透明背景
+            }
+          })
+      );
+    },
   }
 }
 </script>
 
 <template>
-  <div id="cesiumContainer"></div>
+  <div>
+    <div id="cesiumContainer"></div>
+    <div class="modelAdj">
+      <el-button type="primary" @click="TrafficLayer">交通网络</el-button>
+      <el-button type="primary" @click="addAllOrthophotographViewer">雅安市高精度正射影像一键加载</el-button>
+
+    </div>
+  </div>
 </template>
 
 <style scoped>
 #cesiumContainer{
   width: 100%;
   height: 100%;
+}
+.modelAdj {
+  position: absolute;
+  top:3vh;
+  left: 1vb;
 }
 </style>

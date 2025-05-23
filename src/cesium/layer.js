@@ -7,21 +7,23 @@ import yaAnVillage from "@/assets/geoJson/yaan.json";
 import yaAn from "@/assets/geoJson/yaan1.json";
 import {getModelData} from "@/api/system/tiltPhotography.js";
 import modelicon from "@/assets/icons/png/3D.png";
+import {TianDiTuToken} from "@/cesium/tool/config.js";
+import {tianditu} from "@/utils/server.js";
 
 
 let modelEntities = [];
 let siChuanCityRegionLabels = [];
 let sichuanCountyRegionLabels = [];
 let yaAnVillageRegionLabels = [];
-let sichuanCityStroke=[]
-let siChuanCountyStroke=[]
-let yaAnVillageStroke=[]
+let sichuanCityStroke = []
+let siChuanCountyStroke = []
+let yaAnVillageStroke = []
 
 let layer = {
     // 四川省-雅安市三级行政区划
     // 加载四川省市级图层
     loadSichuanCityLayer() {
-        if (sichuanCityStroke.length===0) {
+        if (sichuanCityStroke.length === 0) {
             console.log("loadCityLayer 加载市级图层")
             // viewer.terrainProvider = Cesium.createWorldTerrain();
 
@@ -59,15 +61,14 @@ let layer = {
                     });
                     siChuanCityRegionLabels.push(labelentity)
                 })
-            }
-            catch(error ) {
+            } catch (error) {
                 console.error("加载市级图层失败:", error);
             }
         }
     },
     // 加载四川省区县级图层
     loadSiChuanCountyLayer() {
-        if (siChuanCountyStroke.length===0) {
+        if (siChuanCountyStroke.length === 0) {
             console.log(" 加载区县级图层")
             // viewer.terrainProvider = Cesium.createWorldTerrain();
             try {
@@ -104,8 +105,7 @@ let layer = {
                     });
                     sichuanCountyRegionLabels.push(entity)
                 })
-            }
-            catch(error){
+            } catch (error) {
                 console.error("加载区县级图层失败:", error);
             }
         }
@@ -113,7 +113,7 @@ let layer = {
     // 加载雅安市乡镇级图层
     loadYaAnVillageLayer() {
         // console.log(yaAnVillageStroke,"yaAnVillageStroke")
-        if (yaAnVillageStroke.length===0) {
+        if (yaAnVillageStroke.length === 0) {
             console.log("loadYaAnVillageLayer add")
             // 确保地形提供者已加载
             // viewer.terrainProvider = Cesium.createWorldTerrain();
@@ -124,7 +124,7 @@ let layer = {
                     const firstPolygon = feature.geometry.coordinates[0][0];
                     const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
                     // 创建边界线部分
-                    let strokeentity=viewer.entities.add({
+                    let strokeentity = viewer.entities.add({
                         polyline: {
                             positions: positions,
                             material: Cesium.Color.fromCssColorString('#ff1e00'),
@@ -153,8 +153,7 @@ let layer = {
                     yaAnVillageRegionLabels.push(labelentity)
                     console.log("雅安市乡镇级图层加载成功！");
                 })
-            }
-            catch(error) {
+            } catch (error) {
                 console.error("加载市级图层失败:", error);
             }
         }
@@ -166,8 +165,7 @@ let layer = {
             centroid = Cesium.Cartesian3.add(centroid, pos, new Cesium.Cartesian3());
         });
         return Cesium.Cartesian3.divideByScalar(centroid, positions.length, new Cesium.Cartesian3());
-    }
-    ,
+    },
 
     removeSichuanCityLayer() {
         // 移除标签
@@ -177,10 +175,9 @@ let layer = {
         sichuanCityStroke.forEach((item) => {
             window.viewer.entities.remove(item)
         })
-        siChuanCityRegionLabels=[]
-        sichuanCityStroke=[]
-    }
-    ,
+        siChuanCityRegionLabels = []
+        sichuanCityStroke = []
+    },
     removeSiChuanCountyLayer() {
         // 移除标签
         sichuanCountyRegionLabels.forEach((item) => {
@@ -190,25 +187,23 @@ let layer = {
             window.viewer.entities.remove(item)
         })
         //移除图层
-        sichuanCountyRegionLabels=[]
-        siChuanCountyStroke=[]
-    }
-    ,
+        sichuanCountyRegionLabels = []
+        siChuanCountyStroke = []
+    },
     removeYaAnVillageLayer() {
         // 移除标签
         yaAnVillageRegionLabels.forEach((item) => {
             window.viewer.entities.remove(item)
         })
-        yaAnVillageRegionLabels=[]
+        yaAnVillageRegionLabels = []
         yaAnVillageStroke.forEach((item) => {
             window.viewer.entities.remove(item)
         })
-        yaAnVillageStroke=[]
-    }
-    ,
-//四川省-雅安市三级行政区划 end
+        yaAnVillageStroke = []
+    },
+    //四川省-雅安市三级行政区划 end
 
-//视角跳转-加载雅安市
+    //视角跳转-加载雅安市
     addYaanCityDistrict() {
         let geoPromise = Cesium.GeoJsonDataSource.load(yaAn, {
             clampToGround: true, //贴地显示
@@ -244,9 +239,8 @@ let layer = {
                 pixelOffset: new Cesium.Cartesian2(0, -60)
             })
         }));
-    }
-    ,
-//视角跳转-加载雅安区县
+    },
+    //视角跳转-加载雅安区县
     addCountyLayerJump(district) {
         // 根据区县代码过滤GeoJSON数据
         let filteredFeatures = sichuanCounty.features.filter(feature => {
@@ -308,9 +302,8 @@ let layer = {
         } else {
             // console.error("未找到对应的区县:", adcode);
         }
-    }
-    ,
-//视角跳转-取消视角跳转图层
+    },
+    //视角跳转-取消视角跳转图层
     removeRegionLayerJump() {
         if (window.regionLayerJump) {
             // 从viewer的数据源中移除图层，第二个参数为true表示强制移除
@@ -323,10 +316,9 @@ let layer = {
         if (labelEntity) {
             window.viewer.entities.remove(labelEntity)
         }
-    }
-    ,
+    },
 
-//多源要素图层-加载三维模型图层
+    //多源要素图层-加载三维模型图层
     addModelLayer() {
         getModelData().then(res => {
             console.log("倾斜模型数据，新加的点，", res)
@@ -359,8 +351,7 @@ let layer = {
                 modelEntities.push(alltiltPhotography);
             }
         })
-    }
-    ,
+    },
     removeModelLayer() {
         if (window.modelObject) {
             window.modelObject.show = false
@@ -368,8 +359,69 @@ let layer = {
         modelEntities.forEach((item) => {
             window.viewer.entities.remove(item)
         })
-    }
-    ,
+    },
+
+    //交通路网
+    addTrafficLayer() {
+        // 获取天地图API令牌
+        let token = TianDiTuToken;
+
+        let trafficLayerexists =false;
+        let trafficTxtLayerExists =false;
+        const layers = viewer.imageryLayers;
+        // 遍历所有图层，检查是否存在指定名称的图层
+        for (let i = 0; i < layers.length; i++) {
+            if (layers.get(i).name === 'TrafficLayer') {
+                // 如果找到指定名称的图层，返回true
+                trafficLayerexists=true;
+            }
+            if (layers.get(i).name === 'TrafficLayer') {
+                // 如果找到指定名称的图层，返回true
+                trafficTxtLayerExists=true;
+            }
+        }
+        if (!trafficLayerexists) {
+            // 创建并添加交通图层
+            let trafficLayer = viewer.imageryLayers.addImageryProvider(
+                new Cesium.WebMapTileServiceImageryProvider({
+                    // 天地图交通图层的URL模板
+                    url: `${tianditu}/cva_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cva&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&tk=${token}`,
+                    layer: "tdtAnnoLayer",
+                    style: "default",
+                    format: "image/jpeg", // 根据实际返回的图像格式调整
+                    tileMatrixSetID: "w", // 如果URL中已经指定了tileMatrixSet，则此参数可能不是必需的
+                    show: true
+                })
+            );
+            trafficLayer.name = "TrafficLayer"; // 设置名称
+        }
+
+        if (!trafficTxtLayerExists) {
+            // 创建并添加交通注记图层
+            let traffictxtLayer = viewer.imageryLayers.addImageryProvider(
+                new Cesium.WebMapTileServiceImageryProvider({
+                    // 天地图交通注记图层的URL模板
+                    url: `${tianditu}/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&tk=${TianDiTuToken}`,
+                    layer: "tdtAnnoLayer",
+                    style: "default",
+                    format: "image/jpeg",
+                    tileMatrixSetID: "GoogleMapsCompatible",
+                    show: false // 初始状态下不显示图层
+                })
+            )
+            traffictxtLayer.name = "TrafficTxtLayer"
+        }
+    },
+    removeTrafficLayer() {
+        // 获取当前 viewer 的所有影像图层
+        //移除多个图层的时候需要从后往前遍历
+        const layers = window.viewer.imageryLayers;
+        for (let i = layers.length - 1; i >= 0; i--) {
+            if (layers.get(i).name === 'TrafficLayer' || layers.get(i).name === 'TrafficTxtLayer') {
+                layers.remove(layers.get(i));
+            }
+        }
+    },
 
 }
 export default layer;

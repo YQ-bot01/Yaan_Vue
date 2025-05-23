@@ -1273,7 +1273,7 @@ export default {
       isMarkingLayer: true,
       showlayers: [],
       timeoutlayerActions: null,
-      LRDLStatus: false, // 路网
+
 
       //------------------按钮下拉框------
       selectedDistrict: '', // 用于追踪选中的复选框
@@ -3950,10 +3950,9 @@ export default {
         },
         {
           name: '交通网络要素图层',
-          add: this.addTrafficLayer,
+          add: layer.addTrafficLayer,
           remove: () => {
-            this.removeImageryLayer('TrafficLayer');
-            this.removeImageryLayer('TrafficTxtLayer');
+            layer.removeTrafficLayer
           }
         },
         {
@@ -4289,46 +4288,46 @@ export default {
      * 该方法首先检查是否已经存在名为'TrafficLayer'的图层，如果不存在，则从天地图服务添加交通图层
      * 同样，如果不存在名为'TrafficTxtLayer'的图层，则添加交通注记图层
      */
-    addTrafficLayer() {
-      // 获取天地图API令牌
-      let token = TianDiTuToken;
-
-      // 检查是否存在'TrafficLayer'图层
-      let trafficLayerexists = this.imageryLayersExists('TrafficLayer')
-      if (!trafficLayerexists) {
-        // 创建并添加交通图层
-        let trafficLayer = viewer.imageryLayers.addImageryProvider(
-            new Cesium.WebMapTileServiceImageryProvider({
-              // 天地图交通图层的URL模板
-              url: `${tianditu}/cva_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cva&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&tk=${token}`,
-              layer: "tdtAnnoLayer",
-              style: "default",
-              format: "image/jpeg", // 根据实际返回的图像格式调整
-              tileMatrixSetID: "w", // 如果URL中已经指定了tileMatrixSet，则此参数可能不是必需的
-              show: true
-            })
-        );
-        trafficLayer.name = "TrafficLayer"; // 设置名称
-      }
-
-      // 检查是否存在'TrafficTxtLayer'图层
-      let trafficTxtLayerExists = this.imageryLayersExists('TrafficTxtLayer')
-      if (!trafficTxtLayerExists) {
-        // 创建并添加交通注记图层
-        let traffictxtLayer = viewer.imageryLayers.addImageryProvider(
-            new Cesium.WebMapTileServiceImageryProvider({
-              // 天地图交通注记图层的URL模板
-              url: `${tianditu}/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&tk=${TianDiTuToken}`,
-              layer: "tdtAnnoLayer",
-              style: "default",
-              format: "image/jpeg",
-              tileMatrixSetID: "GoogleMapsCompatible",
-              show: false // 初始状态下不显示图层
-            })
-        )
-        traffictxtLayer.name = "TrafficTxtLayer"
-      }
-    }
+    // addTrafficLayer() {
+    //   // 获取天地图API令牌
+    //   let token = TianDiTuToken;
+    //
+    //   // 检查是否存在'TrafficLayer'图层
+    //   let trafficLayerexists = this.imageryLayersExists('TrafficLayer')
+    //   if (!trafficLayerexists) {
+    //     // 创建并添加交通图层
+    //     let trafficLayer = viewer.imageryLayers.addImageryProvider(
+    //         new Cesium.WebMapTileServiceImageryProvider({
+    //           // 天地图交通图层的URL模板
+    //           url: `${tianditu}/cva_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cva&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&tk=${token}`,
+    //           layer: "tdtAnnoLayer",
+    //           style: "default",
+    //           format: "image/jpeg", // 根据实际返回的图像格式调整
+    //           tileMatrixSetID: "w", // 如果URL中已经指定了tileMatrixSet，则此参数可能不是必需的
+    //           show: true
+    //         })
+    //     );
+    //     trafficLayer.name = "TrafficLayer"; // 设置名称
+    //   }
+    //
+    //   // 检查是否存在'TrafficTxtLayer'图层
+    //   let trafficTxtLayerExists = this.imageryLayersExists('TrafficTxtLayer')
+    //   if (!trafficTxtLayerExists) {
+    //     // 创建并添加交通注记图层
+    //     let traffictxtLayer = viewer.imageryLayers.addImageryProvider(
+    //         new Cesium.WebMapTileServiceImageryProvider({
+    //           // 天地图交通注记图层的URL模板
+    //           url: `${tianditu}/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&tk=${TianDiTuToken}`,
+    //           layer: "tdtAnnoLayer",
+    //           style: "default",
+    //           format: "image/jpeg",
+    //           tileMatrixSetID: "GoogleMapsCompatible",
+    //           show: false // 初始状态下不显示图层
+    //         })
+    //     )
+    //     traffictxtLayer.name = "TrafficTxtLayer"
+    //   }
+    // }
     ,
 
     /**
