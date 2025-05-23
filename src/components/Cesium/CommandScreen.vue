@@ -4280,7 +4280,6 @@ export default {
         popLayer.name = "PopLayer"; // 设置图层名称为"PopLayer"
       }
     }
-    ,
 
 
     /**
