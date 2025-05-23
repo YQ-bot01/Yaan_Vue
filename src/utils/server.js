@@ -15,5 +15,3 @@ export const SystemIPLocal = "http://localhost:8080"
 // export const SystemIP = "http://59.213.183.7/prod-api"
 export const zaiSunFuZhuJueCe = "http://localhost:8080/juece"
 // export const zaiSunFuZhuJueCe = "http://59.213.183.7/image"
-
-

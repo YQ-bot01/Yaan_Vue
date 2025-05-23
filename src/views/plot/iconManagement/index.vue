@@ -376,6 +376,7 @@ export default {
           // let string = {name: row.name + '.jpeg', url: this.dialogContent.img};
           // {name: '中等破坏建筑物.jpeg', url: '中等破坏建筑物'}
           this.fileList.push({name: row.name + '.jpeg', url: 'http://localhost:8080'+'/uploads/PlotsPic/' +this.dialogContent.img+ '.png?t=' + new Date().getTime()});
+          // this.fileList.push({name: row.name + '.jpeg', url: 'http://59.213.183.7:8080'+'/uploads/PlotsPic/' +this.dialogContent.img+ '.png?t=' + new Date().getTime()});
         }
         console.log(this.dialogShow, this.dialogTitle, this.dialogContent)
       }

@@ -57,6 +57,7 @@ let layer = {
                             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
                             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
                             pixelOffset: new Cesium.Cartesian2(0, 0),
+                            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
                         }
                     });
                     siChuanCityRegionLabels.push(labelentity)
@@ -101,6 +102,7 @@ let layer = {
                             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
                             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
                             pixelOffset: new Cesium.Cartesian2(0, 0),
+                            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
                         }
                     });
                     sichuanCountyRegionLabels.push(entity)
@@ -148,6 +150,7 @@ let layer = {
                             horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
                             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
                             pixelOffset: new Cesium.Cartesian2(0, 0),
+                            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
                         }
                     });
                     yaAnVillageRegionLabels.push(labelentity)
@@ -336,16 +339,15 @@ let layer = {
                         image: modelicon,
                         width: 30,
                         height: 30,
+                        eyeOffset: new Cesium.Cartesian3(0, 0, 0), // 与坐标位置的偏移距离
+                        scaleByDistance: new Cesium.NearFarScalar(500, 1, 5e5, 0.1), // 近大远小
+                        depthTest: false, // 禁止深度测试
                         // eyeOffset: new Cesium.Cartesian3(0, 0, 0),
                         // color: Cesium.Color.WHITE.withAlpha(1),
                         // scale: 0.8,
                         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 禁用，导致图标在高度计算或与地形交互时出现闪烁。 原作用：绑定到地形高度,让billboard贴地
                         disableDepthTestDistance: Number.POSITIVE_INFINITY
                     },
-                    // 自定义属性，保存对应的数据
-                    data: res[i],
-                    // 添加名称属性
-                    name: res[i].name + "倾斜模型"
                 });
                 // 将实体保存到数组中
                 modelEntities.push(alltiltPhotography);
