@@ -296,7 +296,7 @@ onBeforeUnmount(() => {
   function switchToLocalDEM() {
     // 切换地形提供者
     if (true) {
-      // window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand(); // 切换到第三方地形
+      // window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand(); // 切换到DEM地形
       window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand(); // 切换到第三方地形
     } else {
       window.viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand(); // 切换到仅底图
