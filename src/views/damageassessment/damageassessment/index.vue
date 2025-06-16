@@ -395,7 +395,7 @@ export default {
   mounted() {
     this.init();
     this.getEq();
-    this.viewer = new Cesium.Viewer("cesiumContainer");
+    // this.viewer = new Cesium.Viewer("cesiumContainer");
   },
 
   computed: {
