@@ -2135,7 +2135,7 @@ export default {
             }
             // 获取实体的自定义属性
 
-            let row = entity.data;
+            let row = entity.properties.data._value;
             this.modelInfo.name = row.name
             this.modelInfo.path = row.path
             this.modelInfo.tz = row.tz

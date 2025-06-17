@@ -348,6 +348,9 @@ let layer = {
                         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 禁用，导致图标在高度计算或与地形交互时出现闪烁。 原作用：绑定到地形高度,让billboard贴地
                         disableDepthTestDistance: Number.POSITIVE_INFINITY
                     },
+                    properties: {
+                        data:res[i]
+                    }
                 });
                 // 将实体保存到数组中
                 modelEntities.push(alltiltPhotography);
