@@ -735,7 +735,7 @@
         <template #default="{ node, data }">
           <!-- 根节点，显示图标和文字 -->
           <div class="tree-node-content">
-                <span v-if="data.name === '图层要素'" class="node-icon">
+            <span v-if="data.name === '图层要素'" class="node-icon">
                 <!-- 图层要素的 SVG 图标 -->
                   <svg t="1730574016632" class="icon" viewBox="0 0 1024 1024" version="1.1"
                        xmlns="http://www.w3.org/2000/svg" p-id="6181" width="28" height="28" style="margin-right: 8px;">
@@ -3874,7 +3874,23 @@ export default {
     },
 
     updateMapLayers() {
-      console.log(this.selectedlayersLocal, "selectedlayersLocal")
+      console.log("======================================================",this.selectedlayersLocal, "selectedlayersLocal")
+
+      const currentSelected = [
+        ...this.selectedlayersLocal,
+        ...this.selectedResourceScheduling,
+        ...this.selectedDisasterEstimate,
+      ];
+
+      // 计算图层差异
+      const previouslySelected = this.prevSelectedLayers || [];
+
+      const newlyChecked = currentSelected.filter(name => !previouslySelected.includes(name));
+      const newlyUnchecked = previouslySelected.filter(name => !currentSelected.includes(name));
+
+      // 更新记录（保存为下一次比对）
+      this.prevSelectedLayers = [...currentSelected];
+
 
       // 图层映射：添加与移除图层逻辑
       // name: 图层名；add：添加图层；remove：移除图层
@@ -3928,7 +3944,6 @@ export default {
             }, 1000);
           }
         },
-
         {
           name: '行政区划要素图层',
           add: () => {
@@ -3971,6 +3986,21 @@ export default {
           remove: () => this.removeEntitiesByType('emergencyShelters')
         },
         {
+          name: '医院要素图层',
+          add: addHospitalLayer,
+          remove: () => this.removeDataSourcesLayer('hospital')
+        },
+        {
+          name: '村庄要素图层',
+          add: addVillageLayer,
+          remove: () => this.removeDataSourcesLayer('village')
+        },
+        {
+          name: '学校要素图层',
+          add: addSchoolLayer,
+          remove: () => this.removeDataSourcesLayer('school')
+        },
+        {
           name: '历史地震要素图层',
           add: this.addHistoryEqPoints,
           remove: () => this.removeEntitiesByType('historyEq')
@@ -3987,21 +4017,6 @@ export default {
             this.removeDataSourcesLayer('faultZone');
             window.duanliedai = null;
           }
-        },
-        {
-          name: '医院要素图层',
-          add: addHospitalLayer,
-          remove: () => this.removeDataSourcesLayer('hospital')
-        },
-        {
-          name: '村庄要素图层',
-          add: addVillageLayer,
-          remove: () => this.removeDataSourcesLayer('village')
-        },
-        {
-          name: '学校要素图层',
-          add: addSchoolLayer,
-          remove: () => this.removeDataSourcesLayer('school')
         },
         {
           name: '烈度圈要素图层',
@@ -4051,13 +4066,35 @@ export default {
           }
         },
       ];
-      layerActions.forEach(layer => {
-        if (this.selectedlayersLocal.includes(layer.name) || this.selectedResourceScheduling.includes(layer.name) || this.selectedDisasterEstimate.includes(layer.name)) {
+      // layerActions.forEach(layer => {
+      //   if (this.selectedlayersLocal.includes(layer.name) || this.selectedResourceScheduling.includes(layer.name) || this.selectedDisasterEstimate.includes(layer.name)) {
+      //     layer.add();
+      //   } else {
+      //     layer.remove();
+      //   }
+      // });
+
+      // 构建 map 提升查找效率
+      const layerMap = new Map(layerActions.map(layer => [layer.name, layer]));
+
+      // 执行 add 操作
+      newlyChecked.forEach(name => {
+        const layer = layerMap.get(name);
+        if (layer && typeof layer.add === 'function') {
           layer.add();
-        } else {
+        }
+      });
+
+      // 执行 remove 操作
+      newlyUnchecked.forEach(name => {
+        const layer = layerMap.get(name);
+        if (layer && typeof layer.remove === 'function') {
           layer.remove();
         }
       });
+
+
+
     }
     ,
     /**
