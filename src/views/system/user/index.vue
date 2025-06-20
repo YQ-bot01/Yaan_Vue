@@ -158,7 +158,7 @@
             </template>
           </el-table-column>
           <el-table-column
-              label="隶属工作组"
+              label="隶属部门"
               align="center"
               key="deptName"
               prop="dept.deptName"
@@ -237,13 +237,13 @@
         </el-row>
         <el-row>
           <el-col :span="11">
-            <el-form-item label="隶属工作组" prop="deptId">
+            <el-form-item label="隶属部门" prop="deptId">
               <el-tree-select
                   v-model="form.deptId"
                   :data="deptOptions"
                   :props="{ value: 'id', label: 'label', children: 'children' }"
                   value-key="id"
-                  placeholder="请选择工作组"
+                  placeholder="请选择部门"
                   check-strictly
               />
             </el-form-item>
