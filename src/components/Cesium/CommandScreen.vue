@@ -2121,31 +2121,7 @@ export default {
             this.PanelData = this.extractDataForRouter(entity)
             console.log("PanelData 震中", this.PanelData)
           } else if (entity._layer === "倾斜模型") {
-            const terrainProviderViewModels = getTerrainProviderViewModelsArr()
-            window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand();
-            window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[1];
-            const currentLayer = document.querySelector(`[title="${true ? '第三方地形' : 'WGS84标准球体'}"]`);
-
-            /**切换三维DEM地形**/
-            // window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand();
-            // window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[2];
-            // const currentLayer = document.querySelector(`[title="${true ? '本地DEM地形' : 'WGS84标准球体'}"]`);
-            if (currentLayer) {
-              currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
-            }
-            // 获取实体的自定义属性
-
-            let row = entity.properties.data._value;
-            this.modelInfo.name = row.name
-            this.modelInfo.path = row.path
-            this.modelInfo.tz = row.tz
-            this.modelInfo.rz = row.rz
-            this.modelInfo.time = row.time
-            this.modelInfo.modelid = row.modelid
-            this.modelInfo.tze = row.tze
-            this.modelInfo.rze = row.rze
-            this.tiltphotographymodel(row);
-            goModel(row)
+            this.goModel(entity.properties.data._value)
           } else if (entity._layer === "标绘点") {
             this.eqCenterPanelVisible = false;
             pointLabelDiv.style.display = 'none';
@@ -4098,9 +4074,6 @@ export default {
           layer.remove();
         }
       });
-
-
-
     },
     /**
      * 处理并添加点数据为实体
@@ -4555,47 +4528,7 @@ export default {
         this.ModelTotal = res.length
         this.modelTableData = this.getPageArr(this.modelList)
       })
-    }
-    ,
-    tiltphotographymodel(row) {
-      this.$message({
-        showClose: true,
-        message: "当前正在浏览 " + row.name + " 倾斜模型",
-        duration: 10000,
-        offset: 200
-      });
-    }
-    ,
-    goModel(row) {
-      this.modelInfo.name = row.name
-      this.modelInfo.path = row.path
-      this.modelInfo.tz = row.tz
-      this.modelInfo.rz = row.rz
-      this.modelInfo.time = row.time
-      this.modelInfo.modelid = row.modelid
-      this.modelInfo.tze = row.tze
-      this.modelInfo.rze = row.rze
-      goModel(row)
-    }
-    ,
-    watchTerrainProviderChanged() {
-      window.viewer.scene.terrainProviderChanged.addEventListener(terrainProvider => {
-        if (isTerrainLoaded()) {
-          transferModel(window.modelObject, 0, 0, this.modelInfo.tze, 100)
-          rotationModel(window.modelObject, this.modelInfo.rze)
-          findModel()
-        } else {
-          transferModel(window.modelObject, 0, 0, this.modelInfo.tz, 100)
-          rotationModel(window.modelObject, this.modelInfo.rz)
-          findModel()
-        }
-      });
-    }
-    ,
-    findModel() {
-      findModel()
-    }
-    ,
+    },
     // 修改table的header的样式
     tableHeaderColor() {
       return {
@@ -4606,8 +4539,7 @@ export default {
         'padding': '0',
         'margin': '0'
       }
-    }
-    ,
+    },
     // 修改table 中每行的样式
     tableColor({row, column, rowIndex, columnIndex}) {
       if (rowIndex % 2 == 1) {
@@ -4625,8 +4557,7 @@ export default {
           'textAlign': 'center'
         }
       }
-    }
-    ,
+    },
     //数组切片
     getPageArr(data) {
       console.log("🚀 getPageArr() 调用：", data);
@@ -4654,8 +4585,7 @@ export default {
 
       console.log("✅ 最终分页结果：", arr);
       return arr;
-    }
-    ,
+    },
 
     //`每页 ${val} 条`
     handleSizeChange(val) {
@@ -4663,16 +4593,66 @@ export default {
       this.modelTableData = this.getPageArr(this.modelList)
       this.pageSize = val;
       this.showSuppliesList = this.getPageArr(this.selectedSuppliesList);
-    }
-    ,
+    },
     // `当前页: ${val}`
     handleCurrentChange(val) {
       this.modelCurrentPage = val
       this.modelTableData = this.getPageArr(this.modelList)
       this.currentPage = val;
       this.showSuppliesList = this.getPageArr(this.selectedSuppliesList);
-    }
-    ,
+    },
+
+    goModel(row) {
+      const terrainProviderViewModels = getTerrainProviderViewModelsArr()
+      window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand();
+      window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[2];
+      const currentLayer = document.querySelector(`[title="${true ? '本地DEM地形' : 'WGS84标准球体'}"]`);
+      if (currentLayer) {
+        currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
+      }
+
+      console.log(row,"goModel")
+      this.modelInfo.name = row.name
+      this.modelInfo.path = row.path
+      this.modelInfo.tz = row.tz
+      this.modelInfo.rz = row.rz
+      this.modelInfo.time = row.time
+      this.modelInfo.modelid = row.modelid
+      this.modelInfo.tze = row.tze
+      this.modelInfo.rze = row.rze
+      this.tiltphotographymodel(row);
+      window.viewer.scene.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(
+            parseFloat(row.geom.coordinates[0]),
+            parseFloat(row.geom.coordinates[1]),
+            5000),
+      });
+      goModel(row)
+    },
+    tiltphotographymodel(row) {
+      this.$message({
+        showClose: true,
+        message: "当前正在浏览 " + row.name + " 倾斜模型",
+        duration: 10000,
+        offset: 200
+      });
+    },
+    watchTerrainProviderChanged() {
+      window.viewer.scene.terrainProviderChanged.addEventListener(terrainProvider => {
+        if (isTerrainLoaded()) {
+          transferModel(window.modelObject, 0, 0, this.modelInfo.tze, 100)
+          rotationModel(window.modelObject, this.modelInfo.rze)
+          findModel()
+        } else {
+          transferModel(window.modelObject, 0, 0, this.modelInfo.tz, 100)
+          rotationModel(window.modelObject, this.modelInfo.rz)
+          findModel()
+        }
+      });
+    },
+    findModel() {
+      findModel()
+    },
 
     handleCheckChange(data, checked, indeterminate) {
       console.log('handleCheckChange triggered', {data, checked, indeterminate});
