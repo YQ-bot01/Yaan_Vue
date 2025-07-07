@@ -4604,9 +4604,12 @@ export default {
 
     goModel(row) {
       const terrainProviderViewModels = getTerrainProviderViewModelsArr()
-      window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand();
-      window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[2];
-      const currentLayer = document.querySelector(`[title="${true ? '本地DEM地形' : 'WGS84标准球体'}"]`);
+      // window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand();
+      // window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[2];
+      // const currentLayer = document.querySelector(`[title="${true ? '本地DEM地形' : 'WGS84标准球体'}"]`);
+      window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand();
+      window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[1];
+      const currentLayer = document.querySelector(`[title="${true ? '第三方地形' : 'WGS84标准球体'}"]`);
       if (currentLayer) {
         currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
       }
