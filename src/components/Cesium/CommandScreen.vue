@@ -735,7 +735,7 @@
         <template #default="{ node, data }">
           <!-- 根节点，显示图标和文字 -->
           <div class="tree-node-content">
-            <span v-if="data.name === '图层要素'" class="node-icon">
+                <span v-if="data.name === '图层要素'" class="node-icon">
                 <!-- 图层要素的 SVG 图标 -->
                   <svg t="1730574016632" class="icon" viewBox="0 0 1024 1024" version="1.1"
                        xmlns="http://www.w3.org/2000/svg" p-id="6181" width="28" height="28" style="margin-right: 8px;">
@@ -3589,7 +3589,13 @@ export default {
      */
     addFaultZone() {
       // 移除当前所有故障区域实体
-      this.removeDataSourcesLayer('duanliedai');
+      if (window.duanliedai) {
+        let removeDuanliedai = window.viewer.dataSources.remove(window.duanliedai, true);
+        console.log(removeDuanliedai, "removeDuanliedai")
+        window.duanliedai = null;
+      }
+      this.removeDataSourcesLayer('faultZone');
+      window.duanliedai = null;
       // 在中心点位置添加新的故障区域
       addFaultZones(this.centerPoint)
     }
@@ -3624,7 +3630,7 @@ export default {
 
       // 移除所有已存在的椭圆圈实体，以避免重复添加
       this.removeEntitiesByType("ovalCircleTest")
-
+      this.removeDataSourcesLayer('ovalCircleTest');
       // 地震震中位置(经纬度)
       let centerPosition = [this.centerPoint.longitude, this.centerPoint.latitude]
 
@@ -4095,8 +4101,7 @@ export default {
 
 
 
-    }
-    ,
+    },
     /**
      * 处理并添加点数据为实体
      *
@@ -4880,6 +4885,10 @@ export default {
     },
     // 10.6 渲染图层
     addThemeLayer(layerData, type) {
+      const dataSource = window.viewer.dataSources.getByName(type)[0];
+      if (dataSource) {
+        return;
+      }
       this.renderLayer("");
       if (layerData) {
         const entries = Object.entries(layerData);

@@ -458,7 +458,7 @@ const data = reactive({
       message: "用户名称长度必须介于 2 和 20 之间",
       trigger: "blur"
     }],
-    deptId: [{required: true, message: "隶属工作组不能为空", trigger: "blur"}],
+    deptId: [{required: true, message: "隶属部门不能为空", trigger: "blur"}],
     nickName: [{required: true, message: "用户昵称不能为空", trigger: "blur"}],
     roleIds: [{required: true, message: "角色不能为空", trigger: "blur"}],
     password: [
