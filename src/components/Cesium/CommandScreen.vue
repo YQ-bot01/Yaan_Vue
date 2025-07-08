@@ -1185,6 +1185,7 @@ export default {
   },
   data: function () {
     return {
+      isThirdParty: true, // 标记当前是否为第三方地形
       siChuanCityEntity: [],
       siChuanCountyEntity: [],
       siChuanVillageEntity: [],
@@ -1765,36 +1766,13 @@ export default {
         viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(
             Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
         );
-        const terrainProviderViewModels = getTerrainProviderViewModelsArr();
-        let isThirdParty = true; // 标记当前是否为第三方地形
-
 
         // 设置cesium的指南针、比例尺、放大缩小重置
         this.init_cesium_navigation(this.centerPoint.longitude, this.centerPoint.latitude, viewer)
 
         // 坡度分析绑定地形自动加载地形
-        const switchToLocalDEM = () => {
-          // 切换地形提供者
-          if (isThirdParty) {
-            viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand(); // 切换到DEM地形
-            // viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand(); // 切换到第三方地形
-          } else {
-            viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand(); // 切换到仅底图
-          }
-          // viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[isThirdParty ? 1 : 0];
-          // //设置高亮
-          // const currentLayer = document.querySelector(`[title="${isThirdParty ? '第三方地形' : 'WGS84标准球体'}"]`);
 
-          viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[isThirdParty ? 2 : 0];
-          const currentLayer = document.querySelector(`[title="${isThirdParty ? '本地DEM地形' : 'WGS84标准球体'}"]`);
-          if (currentLayer) {
-            currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
-          }
-
-          // 切换标记，准备下次切换
-          isThirdParty = !isThirdParty;
-        };
-        document.getElementById('slope').addEventListener('click', switchToLocalDEM);
+        // document.getElementById('slope').addEventListener('click', switchToLocalDEM);
 
         // 绑定按钮点击事件
         document.getElementsByClassName('cesium-geocoder-input')[0].placeholder = '请输入地名进行搜索'
@@ -1989,6 +1967,28 @@ export default {
     handleStartTimePlay() {
       this.stopTimePlay = false;
     },
+    switchToLocalDEM() {
+      const terrainProviderViewModels = getTerrainProviderViewModelsArr()
+      // 切换地形提供者
+      if (this.isThirdParty) {
+        viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand(); // 切换到DEM地形
+        // viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand(); // 切换到第三方地形
+      } else {
+        viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand(); // 切换到仅底图
+      }
+      // viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[this.isThirdParty ? 1 : 0];
+      // //设置高亮
+      // const currentLayer = document.querySelector(`[title="${this.isThirdParty ? '第三方地形' : 'WGS84标准球体'}"]`);
+
+      viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[this.isThirdParty ? 2 : 0];
+      const currentLayer = document.querySelector(`[title="${this.isThirdParty ? '本地DEM地形' : 'WGS84标准球体'}"]`);
+      if (currentLayer) {
+        currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
+      }
+
+      // 切换标记，准备下次切换
+      this.isThirdParty = !this.isThirdParty;
+    },
     //-----------------地图初始化end------------------
 
     //-----------------数据请求与传值---------------
@@ -2013,14 +2013,6 @@ export default {
         this.supplyList = disasterReliefSupplies
         this.all.push(disasterReliefSupplies, emergencyRescueEquipment, rescueTeamsInfo)
         this.suppliesList.push(disasterReliefSupplies, emergencyRescueEquipment, rescueTeamsInfo);
-
-
-        // 调用 `processPoints` 并传递不同的 `tableName`
-        // this.processPoints(emergencyRescueEquipment, 'reserves', emergencyRescueEquipmentLogo, "抢险救灾装备");
-        // this.processPoints(disasterReliefSupplies, 'supplies', disasterReliefSuppliesLogo, "救灾物资储备");
-        // this.processPoints(rescueTeamsInfo, 'emergencyTeam', rescueTeamsInfoLogo, "应急救援力量");
-
-
         this.listField = 'supplies'
         this.selectedSuppliesList = this.suppliesList[0]
         this.showIcon = this.selectedSuppliesList;
@@ -2121,31 +2113,7 @@ export default {
             this.PanelData = this.extractDataForRouter(entity)
             console.log("PanelData 震中", this.PanelData)
           } else if (entity._layer === "倾斜模型") {
-            const terrainProviderViewModels = getTerrainProviderViewModelsArr()
-            // window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand();
-            // window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[1];
-            // const currentLayer = document.querySelector(`[title="${true ? '第三方地形' : 'WGS84标准球体'}"]`);
-
-            /**切换三维DEM地形**/
-            window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand();
-            window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[2];
-            const currentLayer = document.querySelector(`[title="${true ? '本地DEM地形' : 'WGS84标准球体'}"]`);
-            if (currentLayer) {
-              currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
-            }
-            // 获取实体的自定义属性
-
-            let row = entity.properties.data._value;
-            this.modelInfo.name = row.name
-            this.modelInfo.path = row.path
-            this.modelInfo.tz = row.tz
-            this.modelInfo.rz = row.rz
-            this.modelInfo.time = row.time
-            this.modelInfo.modelid = row.modelid
-            this.modelInfo.tze = row.tze
-            this.modelInfo.rze = row.rze
-            this.tiltphotographymodel(row);
-            goModel(row)
+            this.goModel(entity.properties.data._value)
           } else if (entity._layer === "标绘点") {
             this.eqCenterPanelVisible = false;
             pointLabelDiv.style.display = 'none';
@@ -2210,11 +2178,7 @@ export default {
               this.routerPopupVisible = false;
               pointLabelDiv.style.display = 'none';
             } else {
-
-              //----
-
               let popupPanelDatatmp = entity.filter(item => item.plottype !== undefined);
-
               const drawTypes = popupPanelDatatmp.map(obj => obj.plottype);
               console.log(drawTypes)
               this.data = drawTypes.reduce((acc, type) => {
@@ -2223,7 +2187,6 @@ export default {
                 } else {
                   acc[type] = 1;
                 }
-
                 return acc;
               }, {});
 
@@ -2231,8 +2194,6 @@ export default {
                 type: key,
                 count: value
               }));
-
-              // this.dataSourcePopupData = entity
               this.dataSourcePopupVisible = true
               this.eqCenterPanelVisible = false;
               this.plotShowOnlyPanelVisible = false
@@ -2273,23 +2234,14 @@ export default {
                 "地理位置": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
               }
               console.log(this.eqThemeData)
-            }
-                // 如果是村庄点
-                // else if (sourceName === "village") {
-                //   this.tableName = "村庄信息";
-                //   this.eqThemeData = {
-                //     "名称": properties._NAME._value,
-                //     "经纬度": "经度: " + longitude.toFixed(2) + "°E, 纬度: " + latitude.toFixed(2) + "°N",
-                //   }
-            // }
-            else if (sourceName === "village") {
+            } else if (sourceName === "village") {
               console.log(properties, "properties 村庄")
               this.tableName = "村庄信息";
               this.eqThemeData = {
                 "名称": properties._O_Name._value,
                 "地理位置": "经度: " + properties._O_Lng._value.toFixed(2) + "°E, 纬度: " + properties._O_Lat._value.toFixed(2) + "°N",
               }
-              // console.log()
+
               const lines = properties._O_Com._value.split("\n");
               lines.forEach((line) => {
                 const [key, value] = line.split("：");
@@ -2430,7 +2382,6 @@ export default {
     //-------信息面板弹框end-----
 
     //----视角跳转----
-
     viewJumpSelectedDistrict(selectedDistrict) {
       this.selectedDistrict = selectedDistrict
     },
@@ -2438,9 +2389,6 @@ export default {
       this.positionFlyTo = positionFlyTo
     },
 
-    // viewJumpEndFlag(flag){
-    //   this.endFlag=flag
-    // },
     //----视角跳转end----
     //------------------未重构----------------------
 
@@ -2909,11 +2857,6 @@ export default {
           confirmButtonText: '确认',
         });
       }
-      // this.selectedDataBySupplies.supplies = countResult
-      // this.selectedDataBySupplies.emergencyTeam = []
-      // this.selectedDataBySupplies.reserves = []
-      // this.listField = 'supplies'
-      // this.changeDataList('supplies')
       this.panels.marchSupplyDialog = false
     },
 
@@ -3066,8 +3009,6 @@ export default {
       if (this.ifDrawEllipse) {
         selectPoints(radius, this.addSupplyPointCurrently.lng, this.addSupplyPointCurrently.lat);
       }
-      // }
-
     },
 
     // 添加物资点
@@ -4441,7 +4382,6 @@ export default {
     },
 
     showThematicMapDialog(item) {
-
       console.log("专题图item-> ", item)
 
       // 显示专题图弹框逻辑
@@ -4482,41 +4422,6 @@ export default {
         this.ModelTotal = res.length
         this.modelTableData = this.getPageArr(this.modelList)
       })
-    },
-    tiltphotographymodel(row) {
-      this.$message({
-        showClose: true,
-        message: "当前正在浏览 " + row.name + " 倾斜模型",
-        duration: 10000,
-        offset: 200
-      });
-    },
-    goModel(row) {
-      this.modelInfo.name = row.name
-      this.modelInfo.path = row.path
-      this.modelInfo.tz = row.tz
-      this.modelInfo.rz = row.rz
-      this.modelInfo.time = row.time
-      this.modelInfo.modelid = row.modelid
-      this.modelInfo.tze = row.tze
-      this.modelInfo.rze = row.rze
-      goModel(row)
-    },
-    watchTerrainProviderChanged() {
-      window.viewer.scene.terrainProviderChanged.addEventListener(terrainProvider => {
-        if (isTerrainLoaded()) {
-          transferModel(window.modelObject, 0, 0, this.modelInfo.tze, 100)
-          rotationModel(window.modelObject, this.modelInfo.rze)
-          findModel()
-        } else {
-          transferModel(window.modelObject, 0, 0, this.modelInfo.tz, 100)
-          rotationModel(window.modelObject, this.modelInfo.rz)
-          findModel()
-        }
-      });
-    },
-    findModel() {
-      findModel()
     },
     // 修改table的header的样式
     tableHeaderColor() {
@@ -4589,6 +4494,51 @@ export default {
       this.modelTableData = this.getPageArr(this.modelList)
       this.currentPage = val;
       this.showSuppliesList = this.getPageArr(this.selectedSuppliesList);
+    },
+
+    goModel(row) {
+      this.switchToLocalDEM()
+      console.log(row, "goModel")
+      this.modelInfo.name = row.name
+      this.modelInfo.path = row.path
+      this.modelInfo.tz = row.tz
+      this.modelInfo.rz = row.rz
+      this.modelInfo.time = row.time
+      this.modelInfo.modelid = row.modelid
+      this.modelInfo.tze = row.tze
+      this.modelInfo.rze = row.rze
+      this.tiltphotographymodel(row);
+      window.viewer.scene.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(
+            parseFloat(row.geom.coordinates[0]),
+            parseFloat(row.geom.coordinates[1]),
+            5000),
+      });
+      goModel(row)
+    },
+    tiltphotographymodel(row) {
+      this.$message({
+        showClose: true,
+        message: "当前正在浏览 " + row.name + " 倾斜模型",
+        duration: 10000,
+        offset: 200
+      });
+    },
+    watchTerrainProviderChanged() {
+      window.viewer.scene.terrainProviderChanged.addEventListener(terrainProvider => {
+        if (isTerrainLoaded()) {
+          transferModel(window.modelObject, 0, 0, this.modelInfo.tze, 100)
+          rotationModel(window.modelObject, this.modelInfo.rze)
+          findModel()
+        } else {
+          transferModel(window.modelObject, 0, 0, this.modelInfo.tz, 100)
+          rotationModel(window.modelObject, this.modelInfo.rz)
+          findModel()
+        }
+      });
+    },
+    findModel() {
+      findModel()
     },
 
     handleCheckChange(data, checked, indeterminate) {
@@ -4685,7 +4635,7 @@ export default {
       }
     },
     toggleSlopeAnalysis(websock) {
-
+      this.switchToLocalDEM()
       this.showSlopeAnalysis = !this.showSlopeAnalysis;
       if (this.showSlopeAnalysis) {
         // 还原
