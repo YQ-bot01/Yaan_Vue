@@ -197,7 +197,8 @@ export default {
 
     loadELData() {
       this.panelData.economicLossData.sort((a, b) => b.amount - a.amount);
-      this.ELTotal = this.panelData.economicLossData.reduce((acc, cur) => acc + cur.amount, 0).toFixed(2);
+      let ELTotaltmp = this.panelData.economicLossData.reduce((acc, cur) => acc + cur.amount, 0);
+      this.ELTotal=parseFloat(ELTotaltmp).toFixed(2)
       // 提取county:amount对象
       const countyAmountMap = this.panelData.economicLossData.reduce((acc, cur) => {
         acc[cur.county] = cur.amount;
