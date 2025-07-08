@@ -735,7 +735,7 @@
         <template #default="{ node, data }">
           <!-- 根节点，显示图标和文字 -->
           <div class="tree-node-content">
-            <span v-if="data.name === '图层要素'" class="node-icon">
+                <span v-if="data.name === '图层要素'" class="node-icon">
                 <!-- 图层要素的 SVG 图标 -->
                   <svg t="1730574016632" class="icon" viewBox="0 0 1024 1024" version="1.1"
                        xmlns="http://www.w3.org/2000/svg" p-id="6181" width="28" height="28" style="margin-right: 8px;">
@@ -2385,8 +2385,7 @@ export default {
           }
         }
       });
-    }
-    ,
+    },
     /**
      * 更新弹窗位置
      * 该方法用于更新路由和时间线弹窗在地图上的位置
@@ -2411,8 +2410,7 @@ export default {
           }
         }
       });
-    }
-    ,
+    },
     /**
      * 提取实体属性用于路由
      *
@@ -2435,12 +2433,10 @@ export default {
 
     viewJumpSelectedDistrict(selectedDistrict) {
       this.selectedDistrict = selectedDistrict
-    }
-    ,
+    },
     viewJumpPositionFlyTo(positionFlyTo) {
       this.positionFlyTo = positionFlyTo
-    }
-    ,
+    },
 
     // viewJumpEndFlag(flag){
     //   this.endFlag=flag
@@ -2475,8 +2471,7 @@ export default {
         console.log(action);  // 确保 action 的打印是在面板状态更新之后
         this.handleMenuAction(action);  // 在面板状态更新后执行
       });
-    }
-    ,
+    },
 
     handleMenuAction(action) {
       console.log(action);
@@ -2520,16 +2515,14 @@ export default {
       this.panels.searchSupplyDialog = true;
 
 
-    }
-    ,
+    },
     //救援装备查询
     searchRescueEquipment() {
       this.panels.materialMatching = false;
       this.panels.searchEquipmentDialog = true;
 
 
-    }
-    ,
+    },
     // 救援力量查询
     searchRescueForces() {
       this.panels.materialMatching = false;
@@ -2580,8 +2573,7 @@ export default {
         this.showSuppliesList = this.getPageArr(this.selectedSuppliesList);
       });
 
-    }
-    ,
+    },
 
     //-----------附近资源快速匹配----------
     //-----------行政区划匹配-------------
@@ -2595,8 +2587,7 @@ export default {
       } else {
         this.selectedRegions.splice(index, 1); // 取消选中
       }
-    }
-    ,
+    },
 
 
     //清除行政区划
@@ -2606,8 +2597,7 @@ export default {
       this.removeDataSourcesLayer('siChuanCityRegionLayer');
       this.removeDataSourcesLayer('sichuanCountyRegionLayer');
       this.removeDataSourcesLayer('yaAnVillageRegionLayer');
-    }
-    ,
+    },
 
     // 切换数据列表
     changeDataList(param) {
@@ -2669,8 +2659,7 @@ export default {
 
       this.showSuppliesList = this.getPageArr(this.selectedSuppliesList);
       // console.log("最终分页后的数据（this.showSuppliesList）：", this.showSuppliesList);
-    }
-    ,
+    },
 
 
     // 绘制点
@@ -2693,8 +2682,7 @@ export default {
           customType: "emergencySite",
         });
       }
-    }
-    ,
+    },
 
     removeAllEmergencySites() {
       // console.log(window.viewer.entities.values)
@@ -2705,16 +2693,14 @@ export default {
         }
       }
       this.removeSuppliesList();
-    }
-    ,
+    },
 
     // 用于移除物资点
     removeSuppliesList() {
       this.removePoints(this.suppliesList[0]);
       this.removePoints(this.suppliesList[1]);
       this.removePoints(this.suppliesList[2]);
-    }
-    ,
+    },
 
     // 点击列表某行显示对应标绘点
     showSupplyPoint(row) {
@@ -2729,8 +2715,7 @@ export default {
       } else {
         this.processPoints(this.showIcon, 'emergencyTeam', rescueTeamsInfoLogo, "雅安应急队伍");
       }
-    }
-    ,
+    },
 
     // 救援物资查询
     async searchSupply() {
@@ -2783,8 +2768,7 @@ export default {
       // console.log("this.activeMenuIndex--------------------------------",this.activeMenuIndex)
 
       this.panels.tableVisible = true
-    }
-    ,
+    },
 
 
     // 救援装备查询
@@ -2841,8 +2825,7 @@ export default {
       // console.log("this.activeMenuIndex--------------------------------",this.activeMenuIndex)
 
       this.panels.tableVisible = true
-    }
-    ,
+    },
 
     // 救援力量查询
     async searchEmergencyTeam() {
@@ -2884,16 +2867,14 @@ export default {
       }
 
       this.panels.tableVisible = true
-    }
-    ,
+    },
 
     // 物资匹配dialog能打开
     async marchSupply() {
       this.addDisasterPoint()
       this.isShowMessage = true
       this.searchSupplyBy = 'marchSupplyDialog'
-    }
-    ,
+    },
     // 物资匹配
     async marchSupplies() {
       this.removeSuppliesList();
@@ -2934,16 +2915,14 @@ export default {
       // this.listField = 'supplies'
       // this.changeDataList('supplies')
       this.panels.marchSupplyDialog = false
-    }
-    ,
+    },
 
     // 半径查询
     async searchSuppliesByRadius() {
       this.addDisasterPoint()
       this.isShowMessage = true
       this.searchSupplyBy = 'RadiusDialog'
-    }
-    ,
+    },
 
     // 通过半径匹配物资
     async marchSuppliesByRadius() {
@@ -2975,8 +2954,7 @@ export default {
       this.listField = 'supplies'
       this.changeDataList('supplies')
       this.panels.searchSupplyByRadiusDialog = false
-    }
-    ,
+    },
 
     // 半径匹配
     async marchSupplyByRadius(array, radius) {
@@ -3031,15 +3009,13 @@ export default {
         });
       }
       return result
-    }
-    ,
+    },
 
     cancelRadiusQuery() {
       this.panels.searchSupplyByRadiusDialog = false;
       this.removeSuppliesList();
       this.removeAllEmergencySites();
-    }
-    ,
+    },
 
     drawSupplyPoint(param, radius) {
       this.total = this.selectedSuppliesList.length;
@@ -3092,8 +3068,7 @@ export default {
       }
       // }
 
-    }
-    ,
+    },
 
     // 添加物资点
     addDisasterPoint() {
@@ -3104,33 +3079,26 @@ export default {
         this.isAddingArea = false;
       }
       this.canMarkPoint = true;
-    }
-    ,
+    },
     // 以下方法确保表单字段数据为0时不显示，且初始化时数据不为null，不会报错
     handleDisasterTentsInput(value) {
       this.searchSupplyForm.tents = value === '' ? 0 : Number(value);
-    }
-    ,
+    },
     handleFlashlightsInput(value) {
       this.searchSupplyForm.flashlights = value === '' ? 0 : Number(value);
-    }
-    ,
+    },
     handleRaincoatsInput(value) {
       this.searchSupplyForm.raincoats = value === '' ? 0 : Number(value);
-    }
-    ,
+    },
     handleRainBootsInput(value) {
       this.searchSupplyForm.rainBoots = value === '' ? 0 : Number(value);
-    }
-    ,
+    },
     handleRadiusInput(value) {
       this.searchSupplyForm.radius = value;
-    }
-    ,
+    },
     handleTeamTotalMembersInput() {
       this.searchEmergencyTeamForm.totalMembers = value
-    }
-    ,
+    },
 
     //- ---------------------
 
@@ -3143,8 +3111,7 @@ export default {
       this.RouteWay = "步行";
       this.selectedDrive = "backcolor: red";
       this.selectedWalk = "backcolor: white";
-    }
-    ,
+    },
     driveStyle() {
       this.visibleGuilde = true;
       if (this.cartime.includes("0时0分钟")) {
@@ -3156,8 +3123,7 @@ export default {
         this.RouteTime = "1分钟";
       }
       this.RouteWay = "驾驶";
-    }
-    ,
+    },
 
     route() {
       // console.log("调用了")
@@ -3259,8 +3225,7 @@ export default {
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-    }
-    ,
+    },
 
     // 绘制障碍物点的面与半径的中心点已封装！！！
     // 绘制路径的线
@@ -3271,8 +3236,7 @@ export default {
       polylineD(data, propertiesId, uniqueId);
 
       this.propertiesId.push(uniqueId);
-    }
-    ,
+    },
 
     addArea() {
       if (this.canMarkPoint) {
@@ -3304,8 +3268,7 @@ export default {
         this.isAddingArea = false; // 添加区域完成，设置标志
         this.clearHandler(); // 移除点击事件监听器
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-    }
-    ,
+    },
     // 更新路径的函数
     updateRoute() {
       let that = this;
@@ -3366,29 +3329,25 @@ export default {
       // 显示提示
       that.showTips = true;
       this.isRouting = false;  // 路径规划完成，设置标志
-    }
-    ,
+    },
     clearHandler() {
       // 清除所有之前的 LEFT_CLICK 监听器
       if (this.handler) {
         // console.log("11111111")
         this.handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
       }
-    }
-    ,
+    },
 
     showRemove() {
       panels.showRemove = ture;
-    }
-    ,
+    },
 
 
     //清空地图所有实体（包含标绘点）
     removes() {
       viewer.entities.removeAll();
       this.areas = [];
-    }
-    ,
+    },
 
 
     //--------路径规划清除实体--------------------
@@ -3414,8 +3373,7 @@ export default {
       this.propertiesId = [];
       this.showTips = false;
       this.panels.showRemove = false;
-    }
-    ,
+    },
 
     //删除障碍区域
     removePoint() {
@@ -3427,8 +3385,7 @@ export default {
 
       // 清空障碍物列表
       this.areas = [];
-    }
-    ,
+    },
 
     //移除路径规划
     removePolyline() {
@@ -3439,8 +3396,7 @@ export default {
         }
       }
       this.showTips = false;
-    }
-    ,
+    },
 
     // ------------------------------路径规划+物资匹配---------------------------
 
@@ -3454,8 +3410,7 @@ export default {
       viewer.destroy()
       gl.getExtension("WEBGL_lose_context").loseContext();
       gl = null
-    }
-    ,
+    },
 
     /**
      * 计算复选框列表的高度
@@ -3473,8 +3428,7 @@ export default {
       //console.log(((parseInt(this.layeritems.length / 2) + this.layeritems.length % 2) * checkboxHeight) + ((parseInt(this.layeritems.length / 2) + this.layeritems.length % 2) - 1) * margin)
       // 返回复选框列表的总高度，包括所有复选框的高度和它们之间的间距
       return ((parseInt(this.layeritems.length / 2) + this.layeritems.length % 2) * checkboxHeight) + ((parseInt(this.layeritems.length / 2) + this.layeritems.length % 2) - 1) * margin;
-    }
-    ,
+    },
 
     /**
      * 图层要素 切换展开状态
@@ -3486,8 +3440,7 @@ export default {
     toggleExpand() {
       //console.log("Toggle expand clicked");
       this.isExpanded = !this.isExpanded;
-    }
-    ,
+    },
 
     /**
      * 设置组件展开的面板互斥,避免堆叠
@@ -3554,8 +3507,7 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }
-    ,
+    },
 
     /*
     * 添加地震点
@@ -3589,11 +3541,16 @@ export default {
      */
     addFaultZone() {
       // 移除当前所有故障区域实体
-      this.removeDataSourcesLayer('duanliedai');
+      if (window.duanliedai) {
+        let removeDuanliedai = window.viewer.dataSources.remove(window.duanliedai, true);
+        console.log(removeDuanliedai, "removeDuanliedai")
+        window.duanliedai = null;
+      }
+      this.removeDataSourcesLayer('faultZone');
+      window.duanliedai = null;
       // 在中心点位置添加新的故障区域
       addFaultZones(this.centerPoint)
-    }
-    ,
+    },
 
     /**
      * 检查并确定是否添加烈度圈要素图层
@@ -3608,8 +3565,7 @@ export default {
       if (Math.floor(longAxis) >= 6) {
         this.layeritems.push({id: '9', name: '烈度圈要素图层'});
       }
-    }
-    ,
+    },
 
     /**
      * 添加椭圆圈
@@ -3624,14 +3580,13 @@ export default {
 
       // 移除所有已存在的椭圆圈实体，以避免重复添加
       this.removeEntitiesByType("ovalCircleTest")
-
+      this.removeDataSourcesLayer('ovalCircleTest');
       // 地震震中位置(经纬度)
       let centerPosition = [this.centerPoint.longitude, this.centerPoint.latitude]
 
       // 在指定的中心点位置添加新的椭圆圈
       addOCTest(this.eqid, this.eqqueueId, centerPosition)
-    }
-    ,
+    },
 
     /**
      * 检查地形是否已加载
@@ -3657,8 +3612,7 @@ export default {
       }
       // //console.log("地形未加载")
       return false;
-    }
-    ,
+    },
 
 
     /**
@@ -3709,8 +3663,7 @@ export default {
           }, {});
         });
       })
-    }
-    ,
+    },
 
 
     /**
@@ -3724,8 +3677,7 @@ export default {
       window.viewer.entities.removeAll(); // 清空当前视图中的所有实体，准备显示新的设备数据
       this.eqid = row.eqid // 更新Vue实例中的设备ID
       this.websock.eqid = this.eqid // 更新WebSocket连接中的设备ID，以便正确地发送和接收数据
-    }
-    ,
+    },
 
 
     /**
@@ -3844,8 +3796,7 @@ export default {
       }
       this.selectedRegions = []
       this.panels.marchRegionsDialog = false
-    }
-    ,
+    },
 
     // **改进的清除方法**
     removeOldLabels() {
@@ -3854,8 +3805,7 @@ export default {
           viewer.entities.remove(entity);  // **只删除区域标签**
         }
       });
-    }
-    ,
+    },
 
     /**
      * 移除区域图层和相关标签
@@ -3874,7 +3824,7 @@ export default {
     },
 
     updateMapLayers() {
-      console.log("======================================================",this.selectedlayersLocal, "selectedlayersLocal")
+      console.log("======================================================", this.selectedlayersLocal, "selectedlayersLocal")
 
       const currentSelected = [
         ...this.selectedlayersLocal,
@@ -4092,11 +4042,7 @@ export default {
           layer.remove();
         }
       });
-
-
-
-    }
-    ,
+    },
     /**
      * 处理并添加点数据为实体
      *
@@ -4141,8 +4087,7 @@ export default {
         // 添加实体
         this.addEntity(element, icon, tableName, longitude, latitude, bool);
       });
-    }
-    ,
+    },
 
 
     /**
@@ -4177,8 +4122,7 @@ export default {
           latitude: element.latitude
         }
       });
-    }
-    ,
+    },
 
     /**
      * 移除地图上的标绘点
@@ -4193,8 +4137,7 @@ export default {
           }
         });
       });
-    }
-    ,
+    },
 
     /**
      * 根据类型删除实体
@@ -4217,8 +4160,7 @@ export default {
           window.viewer.entities.remove(entities[i]);
         }
       }
-    }
-    ,
+    },
 
     /**
      * 检查指定名称的图层是否存在于地图中
@@ -4240,8 +4182,8 @@ export default {
       return false;
     },
 
-    addTieredAdministrativeBundaries(){
-      if (!window.viewer.dataSources.getByName('siChuanCityRegionLayer')[0]&&!window.viewer.dataSources.getByName('sichuanCountyRegionLayer')[0]&&!window.viewer.dataSources.getByName('yaAnVillageRegionLayer')[0]) {
+    addTieredAdministrativeBundaries() {
+      if (!window.viewer.dataSources.getByName('siChuanCityRegionLayer')[0] && !window.viewer.dataSources.getByName('sichuanCountyRegionLayer')[0] && !window.viewer.dataSources.getByName('yaAnVillageRegionLayer')[0]) {
         let height = window.viewer.camera.positionCartographic.height;
         let CITY_LAYER_HEIGHT = 1000000; // 市级图层的高度阈值
         let COUNTY_LAYER_HEIGHT = 100000; // 区县级图层的高度阈值
@@ -4249,12 +4191,10 @@ export default {
         if (height > CITY_LAYER_HEIGHT) {
           // 加载市级图层
           layer.loadSichuanCityLayer();
-        }
-        else if (height > COUNTY_LAYER_HEIGHT) {
+        } else if (height > COUNTY_LAYER_HEIGHT) {
           // 加载区县级图层
           layer.loadSiChuanCountyLayer();
-        }
-        else {
+        } else {
           // 加载乡镇级图层
           layer.loadYaAnVillageLayer();
         }
@@ -4283,8 +4223,7 @@ export default {
         layer.removeYaAnVillageLayer()
         // 加载区县级图层
         layer.loadSiChuanCountyLayer();
-      }
-      else {
+      } else {
         layer.removeSichuanCityLayer()
         layer.removeSiChuanCountyLayer()
         // 加载乡镇级图层
@@ -4387,8 +4326,7 @@ export default {
           return;
         }
       }
-    }
-    ,
+    },
 
     /**
      * 移除数据源图层
@@ -4404,8 +4342,7 @@ export default {
       if (dataSource) {
         window.viewer.dataSources.remove(dataSource);
       }
-    }
-    ,
+    },
     //标绘图层清除-->
 
     /**
@@ -4478,8 +4415,7 @@ export default {
         // 错误处理，打印错误信息
         // console.error('There was an error!', error);
       });
-    }
-    ,
+    },
 
 
     /**
@@ -4502,8 +4438,7 @@ export default {
         this.ifShowMapPreview = false
       }
 
-    }
-    ,
+    },
 
     showThematicMapDialog(item) {
 
@@ -4513,16 +4448,14 @@ export default {
       this.ifShowMapPreview = true;
       this.imgName = item.theme;
       this.imgshowURL = item.imgUrl;
-    }
-    ,
+    },
     ifShowThematicMapDialog(val) {
       this.ifShowMapPreview = val;
       if (!val) {
         this.imgName = "";
         this.imgshowURL = "";
       }
-    }
-    ,
+    },
     //专题图 end
 
     //报告产出
@@ -4540,8 +4473,7 @@ export default {
           this.selectReportItem = null;
         }, 1000); // 1000 毫秒后执行
       }
-    }
-    ,
+    },
 
     //模型调整
     initModelTable() {
@@ -4550,8 +4482,7 @@ export default {
         this.ModelTotal = res.length
         this.modelTableData = this.getPageArr(this.modelList)
       })
-    }
-    ,
+    },
     tiltphotographymodel(row) {
       this.$message({
         showClose: true,
@@ -4559,8 +4490,7 @@ export default {
         duration: 10000,
         offset: 200
       });
-    }
-    ,
+    },
     goModel(row) {
       this.modelInfo.name = row.name
       this.modelInfo.path = row.path
@@ -4571,8 +4501,7 @@ export default {
       this.modelInfo.tze = row.tze
       this.modelInfo.rze = row.rze
       goModel(row)
-    }
-    ,
+    },
     watchTerrainProviderChanged() {
       window.viewer.scene.terrainProviderChanged.addEventListener(terrainProvider => {
         if (isTerrainLoaded()) {
@@ -4585,12 +4514,10 @@ export default {
           findModel()
         }
       });
-    }
-    ,
+    },
     findModel() {
       findModel()
-    }
-    ,
+    },
     // 修改table的header的样式
     tableHeaderColor() {
       return {
@@ -4601,8 +4528,7 @@ export default {
         'padding': '0',
         'margin': '0'
       }
-    }
-    ,
+    },
     // 修改table 中每行的样式
     tableColor({row, column, rowIndex, columnIndex}) {
       if (rowIndex % 2 == 1) {
@@ -4620,8 +4546,7 @@ export default {
           'textAlign': 'center'
         }
       }
-    }
-    ,
+    },
     //数组切片
     getPageArr(data) {
       console.log("🚀 getPageArr() 调用：", data);
@@ -4649,8 +4574,7 @@ export default {
 
       console.log("✅ 最终分页结果：", arr);
       return arr;
-    }
-    ,
+    },
 
     //`每页 ${val} 条`
     handleSizeChange(val) {
@@ -4658,16 +4582,14 @@ export default {
       this.modelTableData = this.getPageArr(this.modelList)
       this.pageSize = val;
       this.showSuppliesList = this.getPageArr(this.selectedSuppliesList);
-    }
-    ,
+    },
     // `当前页: ${val}`
     handleCurrentChange(val) {
       this.modelCurrentPage = val
       this.modelTableData = this.getPageArr(this.modelList)
       this.currentPage = val;
       this.showSuppliesList = this.getPageArr(this.selectedSuppliesList);
-    }
-    ,
+    },
 
     handleCheckChange(data, checked, indeterminate) {
       console.log('handleCheckChange triggered', {data, checked, indeterminate});
@@ -4685,8 +4607,7 @@ export default {
         this.updateMapLayers(); // 更新地图图层
       }
 
-    }
-    ,
+    },
     loadNode(node, resolve) {
       // 根节点层
       if (node.level === 0) {
@@ -4717,8 +4638,7 @@ export default {
       }
 
       resolve(data);
-    }
-    ,
+    },
     // 弹框不同时出现
     togglePositionFlyTo() {
       // console.log('1.------------------------------')
@@ -4730,8 +4650,7 @@ export default {
         this.showModelPanel = false; // 关闭其他弹框
         this.showSlopeAnalysis = false; // 关闭其他弹框
       }
-    }
-    ,
+    },
     toggleLayerFeatures() {
       // console.log('2.------------------------------')
       // console.log(this.showLayerFeatures)
@@ -4743,8 +4662,7 @@ export default {
         this.showModelPanel = false; // 关闭其他弹框
         this.showSlopeAnalysis = false; // 关闭其他弹框
       }
-    }
-    ,
+    },
     // 控制地震列表显隐
     toggleEqListPanel() {
       this.showEqListPanel = !this.showEqListPanel;
@@ -4755,8 +4673,7 @@ export default {
         this.showModelPanel = false; // 关闭其他弹框
         this.showSlopeAnalysis = false; // 关闭其他弹框
       }
-    }
-    ,
+    },
     toggleModelPanel() {
       this.showModelPanel = !this.showModelPanel;
       if (this.showModelPanel) {
@@ -4766,8 +4683,7 @@ export default {
         this.showEqListPanel = false; // 关闭其他弹框
         this.showSlopeAnalysis = false; // 关闭其他弹框
       }
-    }
-    ,
+    },
     toggleSlopeAnalysis(websock) {
 
       this.showSlopeAnalysis = !this.showSlopeAnalysis;
@@ -4815,8 +4731,7 @@ export default {
         // 删除所有坡面分析实体与图层
         deleteSlopeEntities();
       }
-    }
-    ,
+    },
     emergencyClick(contentItem) {
       // 设置选中效果
       this.emergencyTitleProperty.forEach(title => {
@@ -4828,8 +4743,7 @@ export default {
 
       // 触发事件
       this.toggleClick(contentItem.action);
-    }
-    ,
+    },
     toggleClick(action) {
 
       console.log("事件：", action)
@@ -4880,6 +4794,10 @@ export default {
     },
     // 10.6 渲染图层
     addThemeLayer(layerData, type) {
+      const dataSource = window.viewer.dataSources.getByName(type)[0];
+      if (dataSource) {
+        return;
+      }
       this.renderLayer("");
       if (layerData) {
         const entries = Object.entries(layerData);
@@ -4933,8 +4851,7 @@ export default {
           this.renderLayer(type);
         });
       }
-    }
-    ,
+    },
 
     // 专门用来移除指定图层
     removeLayers(layersToRemove) {
@@ -4947,8 +4864,7 @@ export default {
           window.viewer.dataSources.remove(layer);
         });
       });
-    }
-    ,
+    },
 
     // 专门用来渲染指定图层，同时去掉（隐藏/销毁）其他图层
     renderLayer(layerToRender) {
@@ -4956,8 +4872,7 @@ export default {
       const layersToRemove = this.eqThemes.layers.filter(layer => layer !== layerToRender);
       this.removeLayers(layersToRemove)
       this.removeEntitiesByType(layersToRemove)
-    }
-    ,
+    },
 
     // 设置填充颜色和边框
     setPolygonColor(entity, colorString) {
@@ -4965,8 +4880,7 @@ export default {
       entity.polygon.material = Cesium.Color.fromBytes(rgb[0], rgb[1], rgb[2], 200);
       entity.polygon.outline = true;
       entity.polygon.outlineColor = Cesium.Color.WHITE;
-    }
-    ,
+    },
 
     // 获取颜色索引
     getColorIndex(number, legendColor, threshold) {
@@ -4975,15 +4889,13 @@ export default {
       }
       // 超过最大阈值，使用最后一个颜色
       return legendColor.length - 1;
-    }
-    ,
+    },
 
     // 设置为透明
     setPolygonTransparent(entity) {
       entity.polygon.material = Cesium.Color.fromAlpha(Cesium.Color.WHITE, 0);
       entity.polygon.outline = false;
-    }
-    ,
+    },
 
     // 将字符串颜色解析为 RGB 数组
     getRgbFromColorString(colorString) {
@@ -4992,27 +4904,23 @@ export default {
           .replace(')', '')
           .split(',')
           .map((c) => parseInt(c.trim()));
-    }
-    ,
+    },
 
     convertColor(colorString) {
       return colorString.replace(/[()]/g, '').split(',').map(c => parseInt(c.trim())).join(', ');
-    }
-    ,
+    },
 
     removeRegionLabels() {
       this.RegionLabels.forEach((label) => {
         viewer.entities.remove(label);
       });
       this.RegionLabels = []; // 清空数组，防止重复删除
-    }
-    ,
+    },
 
     closePanel() {
       this.panels.tableVisible = false; // 隐藏面板
 
-    }
-    ,
+    },
 
     // 单选框自定义点击选中逻辑，实现单选框可取消选中（组件默认中不包含此功能，所以自定义）
     toggleRadio(value) {
@@ -5023,8 +4931,7 @@ export default {
         // 否则选中当前值
         this.selectedDisasterEstimate = value;
       }
-    }
-    ,
+    },
   },
   watch: {
     selectedDisasterEstimate(newVal, oldVal) {
