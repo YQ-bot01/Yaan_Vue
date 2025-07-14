@@ -102,8 +102,7 @@
           <el-col :span="11">
           <span class="plotTreeItem" v-for="(item,index) in plotTreeClassification" @click="treeItemClick(item)">
             <el-tooltip class="plottreetooltip" effect="dark" :content="item.name" placement="top-start">
-<!--              <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"  width="17%" height="43.3px">-->
-              <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()" width="17%" height="43.3px">
+              <img :src="iconRoad +item.img+ '.png?t=' + new Date().getTime()" width="17%" height="43.3px">
             </el-tooltip>
           </span>
           </el-col>
@@ -243,8 +242,7 @@
                 style="width: 100%">
         <el-table-column label="图标" width="50">
           <template v-slot="scope">
-<!--                    <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>-->
-            <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>
+           <img :src="iconRoad+scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>
           </template>
         </el-table-column>
         <el-table-column prop="plotType" label="类型" width="180"></el-table-column>
@@ -345,6 +343,7 @@ export default {
   },
   data: function () {
     return {
+      iconRoad: '', // 初始化为空字符串
       siChuanCityEntity: [],
       siChuanCountyEntity: [],
       siChuanVillageEntity: [],
@@ -564,6 +563,9 @@ export default {
   },
 
   mounted() {
+    import('@/utils/server.js').then((module) => {
+      this.iconRoad = module.iconRoad;
+    });
     // 初始化地图
     this.init()
     // 生成实体点击事件的handler
@@ -2619,7 +2621,7 @@ export default {
       // 删除全局视角锁定（解决箭头标绘绘制时双击会聚焦在点上）
       window.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
       this.isShowMessageIcon = true
-      this.messageIcon = import.meta.env.VITE_APP_BASE_API + '/uploads/PlotsPic/' + item.img + '.png?t=' + new Date().getTime()
+      this.messageIcon = this.iconRoad + item.img + '.png?t=' + new Date().getTime()
 
       if (item.plottype === '点图层') {
         console.log("点图层")

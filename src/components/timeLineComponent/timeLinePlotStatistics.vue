@@ -52,6 +52,8 @@ export default {
       this.showZoomStatistic()
     },
     plots(newVal, oldVal) {
+      this.updateTimeStatistic()
+      // this.showZoomStatistic()
     },
     currentTime(newVal) {
       let currentTimeLocaltmp=timeTransfer.timestampToTimeChina(this.currentTime)
@@ -75,6 +77,7 @@ export default {
         // console.log("viewCenterCoordinate watch", newVal)
         if (this.typeIsYaan) {
           let belongCounty = await this.getPlotBelongCounty(newVal.lon, newVal.lat)
+          // console.log(belongCounty,"belongCounty")
           if (belongCounty != this.viewCenterCountyNew) {
             this.viewCenterCountyNew = belongCounty
             this.viewCenterCityNew=  "雅安市"

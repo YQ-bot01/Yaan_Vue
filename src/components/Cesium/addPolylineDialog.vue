@@ -56,11 +56,10 @@
 import {ElMessage} from 'element-plus'
 import {plotType} from '@/cesium/plot/plotType.js'
 import {useCesiumStore} from "@/store/modules/cesium.js";
-import {insertPlotAndInfo} from '@/api/system/plot.js'
+import {getPlotBelongCounty, insertPlotAndInfo} from '@/api/system/plot.js'
 import generalCompute from "@/cesium/plot/generalCompute.js";
 import dayjs from "dayjs";
 import timeTransfer from "@/cesium/tool/timeTransfer.js";
-
 export default {
   name: "addMarkDialog",
   data() {
@@ -114,6 +113,9 @@ export default {
       this.endtime = null
       this.$emit('clearMarkDialogForm')// 调用父组件中clearPolyline对应的方法，重置标绘信息填写框里的信息
     },
+    async getPlotBelongCounty(lon, lat) {
+      return getPlotBelongCounty({lon: lon, lat: lat}); // 直接返回Promise
+    },
     //确认添加标注
     async commitAddNote() {
       let that = this
@@ -131,19 +133,40 @@ export default {
       let locationInfo={}
       let locationInfotmp = await generalCompute.getReverseGeocode(this.form.situationPlotData[0].geom.coordinates[0][0],this.form.situationPlotData[0].geom.coordinates[0][1]);
       console.log(locationInfotmp,"locationInfotmp")
-      if(locationInfotmp===null){
-        locationInfo={province:null,
-          city:null,
-          county:null,
-          town:null,
-          address:null,
-          address_distance:null,
-          address_position:null,
-          poi:null,
-          poi_distance:null,
-          road:null,
-          road_distance:null,}
-        console.log("逆地址解析失败1111");
+      if (locationInfotmp === null) {
+        let belongCountytmp = await this.getPlotBelongCounty(this.form.situationPlotData[0].geom.coordinates[0][0],this.form.situationPlotData[0].geom.coordinates[0][1])
+        if (belongCountytmp === "雨城区" || belongCountytmp === "名山区" || belongCountytmp === "荥经县" || belongCountytmp === "汉源县" || belongCountytmp === "石棉县" || belongCountytmp === "天全县" || belongCountytmp === "芦山县" || belongCountytmp === "宝兴县") {
+          locationInfo = {
+            province: "四川省",
+            city: "雅安市",
+            county: belongCountytmp,
+            town: null,
+            address: null,
+            address_distance: null,
+            address_position: null,
+            poi: null,
+            poi_distance: null,
+            road: null,
+            road_distance: null,
+          }
+          console.log("逆地址解析失败,本地坐标匹配");
+        }
+        else {
+          locationInfo = {
+            province: null,
+            city: null,
+            county: null,
+            town: null,
+            address: null,
+            address_distance: null,
+            address_position: null,
+            poi: null,
+            poi_distance: null,
+            road: null,
+            road_distance: null,
+          }
+          console.log("逆地址解析失败1111");
+        }
       }
       else{
         locationInfo=locationInfotmp
