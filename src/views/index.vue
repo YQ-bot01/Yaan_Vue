@@ -97,7 +97,6 @@
 
             <div class="right-bottom public-bg" ref="rightBottom">
               <img src="@/assets/historyEarthquake.png" alt="历史地震" style="width: 80%; height: auto;">
-              <!--              <div class="public-title">历史地震统计(次)</div>-->
               <chart1 :eq-data="EqAll"/>
             </div>
           </div>

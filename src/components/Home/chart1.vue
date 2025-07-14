@@ -21,28 +21,33 @@ const calculateMagnitudeData = (data, years) => {
     const currentYear = new Date().getFullYear();
     const startYear = currentYear - years;
     const magnitudeCounts = {
-      '<3': Array(years + 1).fill(0),
-      '3-4.5': Array(years + 1).fill(0),
-      '4.5-6': Array(years + 1).fill(0),
-      '≥6': Array(years + 1).fill(0),
+      '<3': Array(years).fill(0),
+      '3-4.5': Array(years).fill(0),
+      '4.5-6': Array(years).fill(0),
+      '≥6': Array(years).fill(0),
     };
+
     data.forEach(item => {
       const year = new Date(item.occurrenceTime).getFullYear();
       const yearIndex = currentYear - year;
 
-    if (year >= startYear && yearIndex >= 0 && yearIndex <= years) {
-      if (item.magnitude < 3) {
-        magnitudeCounts['<3'][yearIndex]++;
-      } else if (item.magnitude < 4.5) {
-        magnitudeCounts['3-4.5'][yearIndex]++;
-      } else if (item.magnitude < 6) {
-        magnitudeCounts['4.5-6'][yearIndex]++;
-      } else {
-        magnitudeCounts['≥6'][yearIndex]++;
+      const mag = parseFloat(item.magnitude); // 转为数字
+
+      if (!isNaN(mag) && year >= startYear && yearIndex >= 0 && yearIndex <= years) {
+        if (mag < 3) {
+          magnitudeCounts['<3'][yearIndex]++;
+        } else if (mag < 4.5) {
+          magnitudeCounts['3-4.5'][yearIndex]++;
+        } else if (mag < 6) {
+          magnitudeCounts['4.5-6'][yearIndex]++;
+        } else if (mag>=6){
+          magnitudeCounts['≥6'][yearIndex]++;
+        }
       }
-    }
-  });
-    return magnitudeCounts;
+    });
+  console.log("谁干的好事")
+  console.log(magnitudeCounts)
+  return magnitudeCounts;
 };
 
 const initChart = async () => {
