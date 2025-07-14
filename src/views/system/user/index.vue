@@ -412,6 +412,14 @@ const excelOptions = ref([]);
 const roleOptions = ref([]);
 const firstLevelKeys = ref([])
 const oldPassword = ref([])
+
+import useUserStore from '@/store/modules/user'
+
+const userStore = useUserStore()
+console.log(userStore, "userStore")
+const currentUserId = userStore.id   // 这就是当前登录用户的 ID
+const currentUserName = userStore.name   // 这就是当前登录用户的 ID
+const currentDeptName = userStore.deptName
 const indexMethod = (index) => {
   return index + 1 + (queryParams.value.pageNum - 1) * queryParams.value.pageSize;
 }
@@ -458,7 +466,7 @@ const data = reactive({
       message: "用户名称长度必须介于 2 和 20 之间",
       trigger: "blur"
     }],
-    deptId: [{required: true, message: "隶属部门不能为空", trigger: "blur"}],
+    deptId: [{required: true, message: "隶属工作组不能为空", trigger: "blur"}],
     nickName: [{required: true, message: "用户昵称不能为空", trigger: "blur"}],
     roleIds: [{required: true, message: "角色不能为空", trigger: "blur"}],
     password: [
@@ -468,8 +476,7 @@ const data = reactive({
           if (value === oldPassword.value) {
             callback(); // 如果密码与之前的一样，校验通过
           } else if (
-              !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,25}$/.test(value))
-          {
+              !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,25}$/.test(value)) {
             callback(
                 new Error(
                     '密码需包含大小写字母、数字和特殊字符，长度8-25位'
@@ -479,7 +486,7 @@ const data = reactive({
             callback(); // 其他符合规则的情况，校验通过
           }
         },
-        trigger: ['blur','change'],
+        trigger: ['blur', 'change'],
       },
     ],
     email: [{type: "email", message: "请输入正确的邮箱地址", trigger: ["blur", "change"]}],
@@ -507,10 +514,15 @@ watch(deptName, val => {
 /** 查询部门下拉树结构 */
 function getDeptTree() {
   deptTreeSelect().then(response => {
-    deptOptions.value = response.data;
-
-    firstLevelKeys.value = [response.data[0].id, response.data[0].children[0].id]
+    // console.log("deptTreeSelect response",response)
+    if (response.data && response.data[0]) {
+      deptOptions.value = response.data;
+      firstLevelKeys.value = [response.data[0].id, response.data[0].children[0].id]
+    } else {
+      deptOptions.value = [{label: currentDeptName}]
+    }
   });
+
 }
 
 /** 查询用户列表 */
@@ -518,9 +530,29 @@ function getList() {
   loading.value = true;
   listUser(proxy.addDateRange(queryParams.value, dateRange.value)).then(res => {
     loading.value = false;
-    userList.value = res.rows;
-    total.value = res.total;
+    if (res.total != 0) {
+
+      userList.value = res.rows;
+      total.value = res.total;
+      console.log(userList.value, "userList.value")
+    } else {
+      userList.value = [
+        {
+          dept: {deptName: currentDeptName},
+          nickName: currentDeptName,
+          password: null,
+          phonenumber: "",
+          status: "0",
+          userId: currentUserId,
+          userName: currentUserName
+        }]
+      total.value = 1
+    }
+
+    // console.log("userList,:",userList.value)
+    // console.log("total,:",total.value)
   });
+
 }
 
 /** 节点单击事件 */
@@ -609,11 +641,12 @@ function handleResetPwd(row) {
         return "不能包含非法字符：< > \" ' \\ |";
       }
     },
-  }).then(({ value }) => {
+  }).then(({value}) => {
     resetUserPwd(row.userId, value).then(response => {
       proxy.$modal.msgSuccess("修改成功，新密码是：" + value);
     });
-  }).catch(() => {});
+  }).catch(() => {
+  });
 }
 
 
