@@ -60,7 +60,6 @@ import {getPlotBelongCounty, insertPlotAndInfo} from '@/api/system/plot.js'
 import generalCompute from "@/cesium/plot/generalCompute.js";
 import dayjs from "dayjs";
 import timeTransfer from "@/cesium/tool/timeTransfer.js";
-import {getPlotBelongCounty} from '@/api/system/plot'
 export default {
   name: "addMarkDialog",
   data() {
