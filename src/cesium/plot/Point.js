@@ -186,13 +186,13 @@ export default class Point {
                 // window.pointDataSource.entities.add(entityDonghua)//加到点聚合图层
               }
               let entityDonghua = window.viewer.entities.getById(data.plotId);
-              let entityDonghuaBase = window.viewer.entities.getById(data.plotId+ '_base');
+              // let entityDonghuaBase = window.viewer.entities.getById(data.plotId+ '_base');
               if (entityDonghua) {
                 window.viewer.entities.remove(entityDonghua); // 移除点
               }
-              if (entityDonghuaBase) {
-                window.viewer.entities.remove(entityDonghuaBase); // 移除点下面一个
-              }
+              // if (entityDonghuaBase) {
+              //   window.viewer.entities.remove(entityDonghuaBase); // 移除点下面一个
+              // }
               if (plotType === "失踪人员" || plotType === "轻伤人员" || plotType === "重伤人员" || plotType === "危重伤人员" || plotType === "死亡人员" || plotType === "已出发队伍" || plotType === "正在参与队伍" || plotType === "待命队伍") {
               } else {
                 let entitylabel = window.labeldataSource.entities.getById(data.plotId + "_label");
@@ -221,20 +221,20 @@ export default class Point {
       if (entityToRemove) {
         window.pointDataSource.entities.remove(entityToRemove); // 移除点
       }
-      let entityToRemoveBase = window.pointDataSource.entities.getById(plotId+ '_base');
-      if (entityToRemoveBase) {
-        window.pointDataSource.entities.remove(entityToRemoveBase); // 移除点
-      }
+      // let entityToRemoveBase = window.pointDataSource.entities.getById(plotId+ '_base');
+      // if (entityToRemoveBase) {
+      //   window.pointDataSource.entities.remove(entityToRemoveBase); // 移除点
+      // }
     }
     //非聚合的点
     let entityDonghua = window.viewer.entities.getById(plotId);
     if (entityDonghua) {
       window.viewer.entities.remove(entityDonghua); // 移除点
     }
-    let entityDonghuaBase = window.viewer.entities.getById(plotId+ '_base');
-    if (entityDonghuaBase) {
-      window.viewer.entities.remove(entityDonghuaBase); // 移除点下面一个
-    }
+    // let entityDonghuaBase = window.viewer.entities.getById(plotId+ '_base');
+    // if (entityDonghuaBase) {
+    //   window.viewer.entities.remove(entityDonghuaBase); // 移除点下面一个
+    // }
     //信息框
     if (window.labeldataSource) {
       let entitylabel = window.labeldataSource.entities.getById(plotId + '_label');
@@ -283,7 +283,7 @@ export default class Point {
         let dataSourcePromise = window.viewer.dataSources.add(pointDataSource)
         dataSourcePromise.then(function (pointDataSource) {
           let pixelRange = 10;
-          let minimumClusterSize = 6;
+          let minimumClusterSize = 3;
           let enabled = true;
           pointDataSource.clustering.enabled = enabled; //是否聚合
           pointDataSource.clustering.pixelRange = pixelRange;
@@ -318,7 +318,8 @@ export default class Point {
           for (let i = 0; i < singleDigitPins.length; ++i) {
             singleDigitPins[i] = pinBuilder
                 // .fromText(`${Math.floor((i + 2)/2)}`, Cesium.Color.VIOLET, 48)
-                .fromText(`${Math.floor(i /2)}`, Cesium.Color.VIOLET, 48)
+                // .fromText(`${Math.floor(i /2)}`, Cesium.Color.VIOLET, 48)
+                .fromText(`${i}`, Cesium.Color.VIOLET, 48)
                 .toDataURL();
           }
           let removeListener
@@ -683,24 +684,24 @@ export default class Point {
         data
       }
     });
-    viewer.entities.add({
-      id: data.plotId + '_base',
-      layer: "标绘点_base",
-      position: Cesium.Cartesian3.fromDegrees(Number(data.longitude), Number(data.latitude), Number(data.elevation || 0)),
-      billboard: {
-        image: '/images/图标外框.png', // 圆形底座图片
-        width: 110, // 底座宽度
-        height: 110, // 底座高度
-        eyeOffset: new Cesium.Cartesian3(0, 0, 0), // 与坐标位置的偏移距离
-        color: new Cesium.CallbackProperty(() => {
-          return Cesium.Color.fromCssColorString(`rgba(255, 255, 255, ${colorFactor})`); // 动态改变颜色
-        }, false),
-        scaleByDistance: new Cesium.NearFarScalar(500, 1, 5e5, 0.1), // 近大远小
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 绑定到地形高度
-        depthTest: false, // 禁止深度测试
-        disableDepthTestDistance: Number.POSITIVE_INFINITY // 不再进行深度测试
-      },
-    });
+    // viewer.entities.add({
+    //   id: data.plotId + '_base',
+    //   layer: "标绘点_base",
+    //   position: Cesium.Cartesian3.fromDegrees(Number(data.longitude), Number(data.latitude), Number(data.elevation || 0)),
+    //   billboard: {
+    //     image: '/images/图标外框.png', // 圆形底座图片
+    //     width: 110, // 底座宽度
+    //     height: 110, // 底座高度
+    //     eyeOffset: new Cesium.Cartesian3(0, 0, 0), // 与坐标位置的偏移距离
+    //     color: new Cesium.CallbackProperty(() => {
+    //       return Cesium.Color.fromCssColorString(`rgba(255, 255, 255, ${colorFactor})`); // 动态改变颜色
+    //     }, false),
+    //     scaleByDistance: new Cesium.NearFarScalar(500, 1, 5e5, 0.1), // 近大远小
+    //     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 绑定到地形高度
+    //     depthTest: false, // 禁止深度测试
+    //     disableDepthTestDistance: Number.POSITIVE_INFINITY // 不再进行深度测试
+    //   },
+    // });
     setTimeout(() => {
       clearInterval(intervalId1);
       colorFactor = 1.0;
@@ -730,21 +731,21 @@ export default class Point {
         data
       }
     })
-    window.pointDataSource.entities.add({
-      id: data.plotId + '_base',
-      layer: "标绘点_base",
-      position: Cesium.Cartesian3.fromDegrees(Number(data.longitude), Number(data.latitude), Number(data.elevation || 0)),
-      billboard: {
-        image: '/images/图标外框.png', // 圆形底座图片
-        width: 110, // 底座宽度
-        height: 110, // 底座高度
-        eyeOffset: new Cesium.Cartesian3(0, 0, 0), // 与坐标位置的偏移距离
-        scaleByDistance: new Cesium.NearFarScalar(500, 1, 5e5, 0.1), // 近大远小
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 绑定到地形高度
-        depthTest: false, // 禁止深度测试
-        disableDepthTestDistance: Number.POSITIVE_INFINITY // 不再进行深度测试
-      },
-    });
+    // window.pointDataSource.entities.add({
+    //   id: data.plotId + '_base',
+    //   layer: "标绘点_base",
+    //   position: Cesium.Cartesian3.fromDegrees(Number(data.longitude), Number(data.latitude), Number(data.elevation || 0)),
+    //   billboard: {
+    //     image: '/images/图标外框.png', // 圆形底座图片
+    //     width: 110, // 底座宽度
+    //     height: 110, // 底座高度
+    //     eyeOffset: new Cesium.Cartesian3(0, 0, 0), // 与坐标位置的偏移距离
+    //     scaleByDistance: new Cesium.NearFarScalar(500, 1, 5e5, 0.1), // 近大远小
+    //     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 绑定到地形高度
+    //     depthTest: false, // 禁止深度测试
+    //     disableDepthTestDistance: Number.POSITIVE_INFINITY // 不再进行深度测试
+    //   },
+    // });
   }
 
 //标签图层

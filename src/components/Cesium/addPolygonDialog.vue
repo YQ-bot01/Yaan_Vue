@@ -63,7 +63,7 @@ import cesiumPlot from '@/cesium/plot/cesiumPlot'
 import generalCompute from "@/cesium/plot/generalCompute.js";
 import dayjs from "dayjs";
 import timeTransfer from "@/cesium/tool/timeTransfer.js";
-
+import {getPlotBelongCounty} from '@/api/system/plot'
 export default {
   name: "addPolygonDialog",
   data() {
@@ -122,6 +122,9 @@ export default {
       this.endtime = null
       this.$emit('clearMarkDialogForm')// 调用父组件中clearPolygon对应的方法，重置标绘信息填写框里的信息
     },
+    async getPlotBelongCounty(lon, lat) {
+      return getPlotBelongCounty({lon: lon, lat: lat}); // 直接返回Promise
+    },
     //确认添加标注
     async commitAddNote() {
 
@@ -139,27 +142,87 @@ export default {
       let locationInfotmp={}
       if (this.form.plotType === "直线箭头" || this.form.plotType === "钳击箭头" || this.form.plotType === "攻击箭头") {
         locationInfotmp = await generalCompute.getReverseGeocode(this.form.situationPlotData.geom.coordinates[0][0], this.form.situationPlotData.geom.coordinates[0][1]);
+        if (locationInfotmp === null) {
+          let belongCountytmp = await this.getPlotBelongCounty(this.form.situationPlotData.geom.coordinates[0][0], this.form.situationPlotData.geom.coordinates[0][1])
+          if (belongCountytmp === "雨城区" || belongCountytmp === "名山区" || belongCountytmp === "荥经县" || belongCountytmp === "汉源县" || belongCountytmp === "石棉县" || belongCountytmp === "天全县" || belongCountytmp === "芦山县" || belongCountytmp === "宝兴县") {
+            locationInfo = {
+              province: "四川省",
+              city: "雅安市",
+              county: belongCountytmp,
+              town: null,
+              address: null,
+              address_distance: null,
+              address_position: null,
+              poi: null,
+              poi_distance: null,
+              road: null,
+              road_distance: null,
+            }
+            console.log("逆地址解析失败,本地坐标匹配");
+          }
+          else {
+            locationInfo = {
+              province: null,
+              city: null,
+              county: null,
+              town: null,
+              address: null,
+              address_distance: null,
+              address_position: null,
+              poi: null,
+              poi_distance: null,
+              road: null,
+              road_distance: null,
+            }
+            console.log("逆地址解析失败1111");
+          }
+        }
+        else{
+          locationInfo=locationInfotmp
+        }
       } else {
         locationInfotmp = await generalCompute.getReverseGeocode(this.form.situationPlotData[0].geom.coordinates[0][0][0], this.form.situationPlotData[0].geom.coordinates[0][0][1]);
+        if (locationInfotmp === null) {
+          let belongCountytmp = await this.getPlotBelongCounty(this.form.situationPlotData[0].geom.coordinates[0][0][0], this.form.situationPlotData[0].geom.coordinates[0][0][1])
+          if (belongCountytmp === "雨城区" || belongCountytmp === "名山区" || belongCountytmp === "荥经县" || belongCountytmp === "汉源县" || belongCountytmp === "石棉县" || belongCountytmp === "天全县" || belongCountytmp === "芦山县" || belongCountytmp === "宝兴县") {
+            locationInfo = {
+              province: "四川省",
+              city: "雅安市",
+              county: belongCountytmp,
+              town: null,
+              address: null,
+              address_distance: null,
+              address_position: null,
+              poi: null,
+              poi_distance: null,
+              road: null,
+              road_distance: null,
+            }
+            console.log("逆地址解析失败,本地坐标匹配");
+          }
+          else {
+            locationInfo = {
+              province: null,
+              city: null,
+              county: null,
+              town: null,
+              address: null,
+              address_distance: null,
+              address_position: null,
+              poi: null,
+              poi_distance: null,
+              road: null,
+              road_distance: null,
+            }
+            console.log("逆地址解析失败1111");
+          }
+        }
+        else{
+          locationInfo=locationInfotmp
+        }
       }
       console.log(locationInfotmp,"locationInfotmp")
-      if(locationInfotmp===null){
-        locationInfo={province:null,
-          city:null,
-          county:null,
-          town:null,
-          address:null,
-          address_distance:null,
-          address_position:null,
-          poi:null,
-          poi_distance:null,
-          road:null,
-          road_distance:null,}
-        console.log("逆地址解析失败1111");
-      }
-      else{
-        locationInfo=locationInfotmp
-      }
+
       let data = this.assembleData(this.form, typeInfoValues, locationInfo, this.starttime, this.endtime)
       console.log("面插入数据库得数据", data)
       insertPlotAndInfo(data).then(res => {

@@ -1,6 +1,6 @@
 import axios from "axios";
 import {tianDitulocalApi} from "@/utils/server.js";
-
+import {TianDiTuToken} from "@/cesium/tool/config.js";
 let generalCompute = {
     async getReverseGeocode(lon, lat) {
         try {
@@ -9,8 +9,7 @@ let generalCompute = {
                 params: {
                     postStr: JSON.stringify({lon, lat, ver: 1}),
                     type: 'geocode',
-                    // tk: '31f4628fd3dd7fa4d98dd14042665db1'
-                    tk: '5977634187c7e8866476add35ace55d0'
+                    tk: TianDiTuToken
                 }
             });
             // console.log(response,"response")
