@@ -63,14 +63,11 @@ export default {
       Object.keys(this.plotflaglocal).forEach(key => {
         this.plotflaglocal[key] = 0;
       });
-      // console.log( " this.plotisshow",this.plotisshow)
-      // console.log("this.plotflaglocal",this.plotflaglocal)
       this.$emit('updatePlot',time,this.viewerthematic, this.plotflaglocal); // 通知父组件
       // 等待地图渲染
       await this.waitForMapToRender();
       // 截图
       html2canvas(this.hiddenElement).then(canvas => {
-        // console.log("111111111111111")
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/png');
         link.download = 'screenshot.png';

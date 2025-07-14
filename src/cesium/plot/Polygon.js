@@ -300,7 +300,6 @@ export default class Polygon {
    */
   _leftClickEventForSmallPolygon(){
     this.handler.setInputAction((click) => {
-    console.log("11111")
     let ray = this.viewer.camera.getPickRay(click.position);
     let position = this.viewer.scene.globe.pick(ray, this.viewer.scene);
     if (position) {

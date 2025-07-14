@@ -26,59 +26,59 @@
         </div>
       </el-carousel-item>
 
-<!--      <el-carousel-item>-->
-<!--        <div class="chart-container">-->
-<!--          <img src="@/assets/隐患点.png" alt="隐患点" style="width: 127%; height: auto;">-->
+      <el-carousel-item>
+        <div class="chart-container">
+          <img src="@/assets/隐患点.png" alt="隐患点" style="width: 127%; height: auto;">
 
-<!--          &lt;!&ndash; 风险点信息 &ndash;&gt;-->
-<!--          <div v-if="riskPointData.length > 0" class="riskPoint" @mouseenter="pauseSlide" @mouseleave="resumeSlide" style="margin-top: -20px">-->
-<!--            <div class="button-top" style="margin-bottom: 5px;">-->
-<!--              <span @click="slideUp" class="white-text">▲</span>-->
-<!--            </div>-->
+          <!-- 风险点信息 -->
+          <div v-if="riskPointData.length > 0" class="riskPoint" @mouseenter="pauseSlide" @mouseleave="resumeSlide" style="margin-top: -20px">
+            <div class="button-top" style="margin-bottom: 5px;">
+              <span @click="slideUp" class="white-text">▲</span>
+            </div>
 
-<!--            <div class="container" :style="{ transform: `translateY(${translateY.value}px)`, transition: 'transform 0.5s ease' }">-->
-<!--              <el-col>-->
-<!--                <div class="newColCommon">-->
-<!--                  <span class="label">隐患点地点：</span>{{ location || '暂无数据' }}-->
-<!--                </div>-->
-<!--              </el-col>-->
-<!--              <el-col>-->
-<!--                <div class="newColCommon">-->
-<!--                  <span class="label">隐患点类型：</span>{{ riskPointType || '暂无数据' }}-->
-<!--                </div>-->
-<!--              </el-col>-->
-<!--              <el-col>-->
-<!--                <div class="newColCommon">-->
-<!--                  <span class="label">与震中距离：</span>{{ distance ? distance + ' 千米' : '暂无数据' }}-->
-<!--                </div>-->
-<!--              </el-col>-->
-<!--              <el-col>-->
-<!--                <div class="newColCommon">-->
-<!--                  <span class="label">险情等级：</span>{{ riskLevel || '暂无数据' }}-->
-<!--                </div>-->
-<!--              </el-col>-->
-<!--              <el-col>-->
-<!--                <div class="newColCommon">-->
-<!--                  <span class="label">稳定性：</span>{{ stability || '暂无数据' }}-->
-<!--                </div>-->
-<!--              </el-col>-->
-<!--            </div>-->
+            <div class="container" :style="{ transform: `translateY(${translateY.value}px)`, transition: 'transform 0.5s ease' }">
+              <el-col>
+                <div class="newColCommon">
+                  <span class="label">隐患点地点：</span>{{ location || '暂无数据' }}
+                </div>
+              </el-col>
+              <el-col>
+                <div class="newColCommon">
+                  <span class="label">隐患点类型：</span>{{ riskPointType || '暂无数据' }}
+                </div>
+              </el-col>
+              <el-col>
+                <div class="newColCommon">
+                  <span class="label">与震中距离：</span>{{ distance ? distance + ' 千米' : '暂无数据' }}
+                </div>
+              </el-col>
+              <el-col>
+                <div class="newColCommon">
+                  <span class="label">险情等级：</span>{{ riskLevel || '暂无数据' }}
+                </div>
+              </el-col>
+              <el-col>
+                <div class="newColCommon">
+                  <span class="label">稳定性：</span>{{ stability || '暂无数据' }}
+                </div>
+              </el-col>
+            </div>
 
-<!--            <div class="button-bottom" style="margin-top: 5px;">-->
-<!--              <span @click="slideDown" class="white-text">▼</span>-->
-<!--            </div>-->
-<!--          </div>-->
+            <div class="button-bottom" style="margin-top: 5px;">
+              <span @click="slideDown" class="white-text">▼</span>
+            </div>
+          </div>
 
-<!--          &lt;!&ndash; 如果没有数据，显示暂无数据 &ndash;&gt;-->
-<!--          <div v-else class="no-data">-->
-<!--            <div>与震中距离：暂无数据</div>-->
-<!--            <div>隐患点地点：暂无数据</div>-->
-<!--            <div>隐患点类型：暂无数据</div>-->
-<!--            <div>险情等级：暂无数据</div>-->
-<!--            <div>稳定性：暂无数据</div>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </el-carousel-item>-->
+          <!-- 如果没有数据，显示暂无数据 -->
+          <div v-else class="no-data">
+            <div>与震中距离：暂无数据</div>
+            <div>隐患点地点：暂无数据</div>
+            <div>隐患点类型：暂无数据</div>
+            <div>险情等级：暂无数据</div>
+            <div>稳定性：暂无数据</div>
+          </div>
+        </div>
+      </el-carousel-item>
 
 
     </el-carousel>

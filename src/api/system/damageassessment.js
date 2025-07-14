@@ -1,18 +1,18 @@
 import request from '@/utils/request'
 
-export function getEqList(eqListDTO) {
-    return request({
-        url: '/tp/api/open/eq/list',
-        method: 'get',
-        params: eqListDTO
-    })
-}
-
 export function getEqTownResult(eqTownResultDTO) {
     return request({
         url: '/tp/api/open/eq/assessment',
         method: 'get',
         params: eqTownResultDTO
+    })
+}
+
+export function getEqList(eqListDTO) {
+    return request({
+        url: '/tp/api/open/eq/list',
+        method: 'get',
+        params: eqListDTO
     })
 }
 

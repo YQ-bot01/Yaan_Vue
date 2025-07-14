@@ -302,7 +302,7 @@ const formValue = reactive({
 
 //筛选
 const onSubmit = () => {
-  if (formValue.occurrenceTime !== '') {
+  if (formValue.occurrenceTime) {
     const [startTime, endTime] = formValue.occurrenceTime;
     const startDate = new Date(startTime).toISOString();
     const endDate = new Date(endTime).toISOString();

@@ -318,7 +318,6 @@ export default {
               link.download = `${this.imgName}.png`; // 设置下载文件名
               link.href = finalImage; // 设置图片来源
               link.click(); // 触发下载
-              console.log("1111111111111111")
             })
             .catch(error => {
               console.error('Error capturing the screenshot:', error);
