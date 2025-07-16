@@ -104,11 +104,11 @@
                      @click="handlePanel(`instrument`);">台网数据
                 </div>
               </div>
-              <div class="button themes"
-                   style="width: 95%;height: 50px"
-                   :class="{ active: isPanelShow.rain }"
-                   @click="handlePanel(`rain`);">暴雨灾害防范应对救援力量前置分布图
-              </div>
+<!--              <div class="button themes"-->
+<!--                   style="width: 95%;height: 50px"-->
+<!--                   :class="{ active: isPanelShow.rain }"-->
+<!--                   @click="handlePanel(`rain`);">暴雨灾害防范应对救援力量前置分布图-->
+<!--              </div>-->
             </div>
 
             <div style="height: 10px;background-color: #054576"></div>
