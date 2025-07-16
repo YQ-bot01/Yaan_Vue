@@ -2730,13 +2730,13 @@ export default {
       }
     },
     // 画点
-    drawPoint(pointInfo) {
-      if (this.ifPointAnimate) {
-        cesiumPlot.drawPoint(pointInfo, true)
-      } else {
-        cesiumPlot.drawPoint(pointInfo)
-      }
-    },
+    // drawPoint(pointInfo) {
+    //   if (this.ifPointAnimate) {
+    //     cesiumPlot.drawPoint(pointInfo, true)
+    //   } else {
+    //     cesiumPlot.drawPoint(pointInfo)
+    //   }
+    // },
     drawPoints(pointInfo, bool) {
       cesiumPlot.drawPoints(pointInfo, bool, 5000);
     },

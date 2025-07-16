@@ -989,6 +989,7 @@ let timeLine = {
                 resolve();
                 return;
             }
+            console.log(entity,"blinkMarker entity")
             const interval = 200; // 每次闪烁的时间间隔
             let count = 0;
             const blinkInterval = setInterval(() => {
