@@ -129,7 +129,7 @@ export default class Point {
 
     }
 
-    async drawPoints(points, bool, stoptime) {
+    async drawPoints(points, bool) {
         // 判断 points 是否为数组，不是数组则将它包装为数组
         if (!Array.isArray(points)) {
             let data = {}
@@ -161,29 +161,23 @@ export default class Point {
             //标签
             let labeltext = this.labeltext(plotType, res)
             if (bool) {
-                if (!viewer.entities.getById(data.plotId)) {
-
+                if (!viewer.entities.getById(data.plotId+"_theOne")) {
                     this.addPointToLabel(data, labeltext)
-                    await this.addMakerPointActive(data)
-                    // if (!window.pointDataSource.entities.getById(data.plotId)) {
-                    //     this.addPointToPointData(data)
-                    // }
-
-                    // console.log(plot,"plot addMakerPointActive")
-                    // await this.blinkMarker(plot)
-                    // window.viewer.entities.remove(plot); // 移除点
-                    //
-                    // if (plotType === "失踪人员" || plotType === "轻伤人员" || plotType === "重伤人员" || plotType === "危重伤人员" || plotType === "死亡人员" || plotType === "已出发队伍" || plotType === "正在参与队伍" || plotType === "待命队伍") {
-                    // }
-                    // else {
-                    //     let entitylabel = window.labeldataSource.entities.getById(data.plotId + "_label");
-                    //     if (entitylabel) {
-                    //         window.labeldataSource.entities.remove(entitylabel); // 移除点
-                    //     }
-                    // }
+                    let plot=await this.addMakerPointActive(data)
+                    await this.blinkMarker(plot)
+                    if (plot.plotType === "失踪人员" || plot.plotType === "轻伤人员" || plot.plotType === "重伤人员" || plot.plotType === "危重伤人员" || plot.plotType === "死亡人员" || plot.plotType === "已出发队伍" || plot.plotType === "正在参与队伍" || plot.plotType === "待命队伍") {
+                    } else {
+                        let entitylabel = window.labeldataSource.entities.getById(plot.plotId + "_label");
+                        if (entitylabel) {
+                            window.labeldataSource.entities.remove(entitylabel); // 移除点
+                        }
+                    }
+                    if (!window.pointDataSource.entities.getById(data.plotId)) {
+                        window.viewer.entities.remove(plot);
+                        this.addPointToPointData(data)
+                    }
                 }
-            }
-            else {
+            } else {
                 if (!window.pointDataSource.entities.getById(data.plotId)) {
                     this.addPointToPointData(data)
                 }
@@ -194,7 +188,56 @@ export default class Point {
         }
     }
 
+    async addMakerPointActive(data) {
+        // return new Promise((resolve) => {
+            let plot = window.viewer.entities.getById(data.plotId);
+            if (!plot) {
+                plot = window.viewer.entities.add({
+                    drawtype: "drawPoint",
+                    id: data.plotId + "_theOne",
+                    plottype: data.plotType,
+                    layer: "标绘点",
+                    position: Cesium.Cartesian3.fromDegrees(Number(data.longitude), Number(data.latitude), Number(data.elevation || 0)),
+                    // labeltext: labeltext,
+                    billboard: {
+                        image: import.meta.env.VITE_APP_BASE_API + '/uploads/PlotsPic/' + data.icon + '.png?t=' + new Date().getTime(),
+                        width: 50, // 图片宽度,单位px
+                        height: 50, // 图片高度，单位px
+                        eyeOffset: new Cesium.Cartesian3(0, 0, 0), // 与坐标位置的偏移距离
+                        color: Cesium.Color.WHITE.withAlpha(1),
+                        scaleByDistance: new Cesium.NearFarScalar(500, 1, 5e5, 0.1), // 近大远小
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 绑定到地形高度
+                        depthTest: false, // 禁止深度测试
+                        disableDepthTestDistance: Number.POSITIVE_INFINITY, // 不再进行深度测试
+                        clampToGround: true,
+                    },
+                    properties: {
+                        data
+                    }
+                });
+            }
+            return plot
+    }
 
+    blinkMarker(plot) {
+        return new Promise((resolve) => {
+            let entity = null
+            entity = window.viewer.entities.getById(plot.id);
+            console.log(entity, "entity blinkMaker")
+            const interval = 500; // 每次闪烁的时间间隔
+            let count = 0;
+            // entity.show = false;
+            const blinkInterval = setInterval(() => {
+                entity.show = !entity.show
+                count++;
+                if (count >= 10) {
+                    clearInterval(blinkInterval);
+                    entity.show = false;
+                    resolve(); // 完成闪烁，继续后续操作
+                }
+            }, interval);
+        });
+    }
     deletePointById(plotId) {
         //集合图层 图表和底层蓝色圈
         if (window.pointDataSource) {
@@ -251,8 +294,7 @@ export default class Point {
             let pointDataSource = null
             if (window.viewer.dataSources._dataSources[0] && window.viewer.dataSources._dataSources.find(ds => ds.name === 'pointData')) {
                 pointDataSource = window.pointDataSource
-            }
-            else {
+            } else {
                 pointDataSource = new Cesium.CustomDataSource("pointData");
                 let dataSourcePromise = window.viewer.dataSources.add(pointDataSource)
                 dataSourcePromise.then(function (pointDataSource) {
@@ -567,6 +609,7 @@ export default class Point {
                             );
                         }
                     }
+
                     customStyle();
                 })
                 window.labeldataSource = labeldataSource;
@@ -611,75 +654,12 @@ export default class Point {
         return labeltext
     }
 
-    async addMakerPointActive(data) {
-        let plot=window.viewer.entities.getById(data.plotId);
-        if(!plot){
-            plot = window.viewer.entities.add({
-                drawtype:"drawPoint",
-                id: data.plotId+"_theOne",
-                plottype: data.plotType,
-                layer: "标绘点",
-                position: Cesium.Cartesian3.fromDegrees(Number(data.longitude), Number(data.latitude), Number(data.elevation || 0)),
-                // labeltext: labeltext,
-                billboard: {
-                    image: import.meta.env.VITE_APP_BASE_API + '/uploads/PlotsPic/' + data.icon + '.png?t=' + new Date().getTime(),
-                    width: 50, // 图片宽度,单位px
-                    height: 50, // 图片高度，单位px
-                    eyeOffset: new Cesium.Cartesian3(0, 0, 0), // 与坐标位置的偏移距离
-                    //标绘点闪烁
-                    // color: new Cesium.CallbackProperty(() => {
-                    //   return Cesium.Color.fromCssColorString(`rgba(255, 255, 255, ${colorFactor})`); // 动态改变颜色
-                    // }, false),
-                    //标绘点不闪烁
-                    color: Cesium.Color.WHITE.withAlpha(1),
-                    scaleByDistance: new Cesium.NearFarScalar(500, 1, 5e5, 0.1), // 近大远小
-                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 绑定到地形高度
-                    depthTest: false, // 禁止深度测试
-                    disableDepthTestDistance: Number.POSITIVE_INFINITY, // 不再进行深度测试
-                    clampToGround: true,
-                },
-                properties: {
-                    data
-                }
-            });
-        }
-        await this.blinkMarker(plot)
 
-    }
-    blinkMarker(plot) {
-        return new Promise((resolve) => {
-            let entity = null
-            entity = window.viewer.entities.getById(plot.id);
-            console.log(entity,"entity blinkMaker")
-            const interval = 500; // 每次闪烁的时间间隔
-            let count = 0;
-            const blinkInterval = setInterval(() => {
-                entity.show = !entity.show
-                count++;
-                if (count >= 10) {
-                    clearInterval(blinkInterval);
-                    entity.show = false;
-                    window.viewer.entities.remove(entity); // 移除点
-                    if (plot.plotType === "失踪人员" || plot.plotType === "轻伤人员" || plot.plotType === "重伤人员" || plot.plotType === "危重伤人员" || plot.plotType === "死亡人员" || plot.plotType === "已出发队伍" || plot.plotType === "正在参与队伍" || plot.plotType === "待命队伍") {
-                    }
-                    else {
-                        let entitylabel = window.labeldataSource.entities.getById(plot.plotId + "_label");
-                        if (entitylabel) {
-                            window.labeldataSource.entities.remove(entitylabel); // 移除点
-                        }
-                    }
-                    if (!window.pointDataSource.entities.getById(data.plotId)) {
-                        this.addPointToPointData(data)
-                    }
-                    resolve(); // 完成闪烁，继续后续操作
-                }
-            }, interval);
-        });
-    }
+
 //pointData聚合图层
     addPointToPointData(data) {
-        let plot=window.pointDataSource.entities.getById(data.plotId)
-        if(!plot){
+        let plot = window.pointDataSource.entities.getById(data.plotId)
+        if (!plot) {
             window.pointDataSource.entities.add({
                 id: data.plotId,
                 plottype: data.plotType,
@@ -706,8 +686,8 @@ export default class Point {
 
 //标签图层
     addPointToLabel(data, labeltext) {
-        let plot=window.labeldataSource.entities.getById(data.plotId + '_label');
-        if(!plot){
+        let plot = window.labeldataSource.entities.getById(data.plotId + '_label');
+        if (!plot) {
             labeldataSource.entities.add({
                 id: data.plotId + '_label',
                 plottype: data.plotType,
@@ -733,20 +713,20 @@ export default class Point {
         }
     }
 
-    flyTo(data) {
-        viewer.scene.camera.flyTo({
-            destination: Cesium.Cartesian3.fromDegrees(
-                Number(data.longitude),
-                Number(data.latitude),
-                20000),
-            orientation: {
-                // 指向
-                heading: 6.283185307179581,
-                // 视角
-                pitch: -1.5688168484696687,
-                roll: 0.0
-            },
-            duration: 2 // 飞行动画持续时间（秒）
-        });
-    }
+    // flyTo(data) {
+    //     viewer.scene.camera.flyTo({
+    //         destination: Cesium.Cartesian3.fromDegrees(
+    //             Number(data.longitude),
+    //             Number(data.latitude),
+    //             20000),
+    //         orientation: {
+    //             // 指向
+    //             heading: 6.283185307179581,
+    //             // 视角
+    //             pitch: -1.5688168484696687,
+    //             roll: 0.0
+    //         },
+    //         duration: 2 // 飞行动画持续时间（秒）
+    //     });
+    // }
 }

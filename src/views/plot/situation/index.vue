@@ -112,7 +112,6 @@
           :eqOccurrenceTime="eqOccurrenceTime"
           :addMarkDialogFormVisible="addMarkDialogFormVisible"
           @wsSendPoint="wsSendPoint"
-          @drawPoints="drawPoints"
           @ifPointAnimate="ifPointAnimation"
           @clearMarkDialogForm="resetAddMarkCollection"
           @sendPlot="sendPlot"
@@ -812,7 +811,8 @@ export default {
             that.renderedPlotIds.add(item.plotId);
           }
         })
-        that.drawPoints(points, false)
+        // that.drawPoints(points, false)
+        cesiumPlot.drawPoints(points, false);
         let polylineArr = data.filter(e => e.drawtype === 'polyline');
         console.log("pointArr", pointArr)
         console.log("polylineArr", polylineArr)
@@ -1623,7 +1623,7 @@ export default {
 
       flattenedResult.forEach(data => {
         this.wsSendPoint(JSON.stringify(data)); // 将 data 转换为 JSON 字符串发送
-        this.drawPoints(data.data.plot, true)
+        // this.drawPoints(data.data.plot, false)
       });
 
       return flattenedResult;
@@ -2737,9 +2737,9 @@ export default {
     //     cesiumPlot.drawPoint(pointInfo)
     //   }
     // },
-    drawPoints(pointInfo, bool) {
-      cesiumPlot.drawPoints(pointInfo, bool, 5000);
-    },
+    // drawPoints(pointInfo, bool) {
+    //   // cesiumPlot.drawPoints(pointInfo, bool);
+    // },
 
     ifPointAnimation(val) {
       this.ifPointAnimate = val
@@ -2763,7 +2763,8 @@ export default {
       if (JSON.parse(data).operate === "delete") {
         this.plots = this.plots.filter(plot => plot.plotId !== JSON.parse(data).id);
         console.log(this.plots, "this.plots wsSendPoint")
-      } else if (JSON.parse(data).operate === "add") {
+      }
+      else if (JSON.parse(data).operate === "add") {
         let markData = JSON.parse(data).data
         markData.plot.longitude = Number(markData.plot.geom.coordinates[0])
         markData.plot.latitude = Number(markData.plot.geom.coordinates[1])
