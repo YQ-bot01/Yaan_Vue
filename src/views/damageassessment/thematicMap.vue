@@ -218,7 +218,7 @@
 
 
 <!--      <div v-if="this.isPanelShow['rain']" style="height: 30vh;width: 200%" @rainMapMessage="handleRainMapMessage">-->
-<!--        &lt;!&ndash;      <div class="eqPanel">&ndash;&gt;-->
+<!--      <div style="height: 80vh;width: 60%" @rainMapMessage="handleRainMapMessage">-->
 <!--        <floodRescueForceMapMake/>-->
 <!--      </div>-->
     </div>

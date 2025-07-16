@@ -368,14 +368,12 @@ export default {
       });
       timeLine.addDataSourceLayer("pointData")
       timeLine.addCenterPoint(this.centerPoint)
-    }
-    ,
+},
 
     toggleComponent(component) {
       // 如果点击的是当前活动组件，则关闭它，否则打开新组件
       this.activeComponent = this.activeComponent === component ? null : component;
-    }
-    ,
+},
     updatePlots(plots) {
       console.log(this.plots, "plots updatePlots")
       this.plots = plots
@@ -398,10 +396,6 @@ export default {
         if (Cesium.defined(pickedEntity)) {
           let entity = window.selectedEntity;
           console.log(entity, "拾取entity")
-
-
-
-
           // 计算图标的世界坐标
           this.selectedEntityPosition = this.calculatePosition(click.position);
           this.updatePopupPosition(); // 确保位置已更新
