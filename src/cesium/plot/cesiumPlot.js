@@ -173,19 +173,21 @@ let cesiumPlot= {
     console.log(item)
     const items = Array.isArray(item) ? item : [item];
     items.forEach(onlyDrawIdItem => {
-      console.log(item,"addArrow timeline")
+      console.log(onlyDrawIdItem,"addArrow timeline")
       if (onlyDrawIdItem.drawtype === 'straight') {
-        this.addStraightArrow(item)
+        this.addStraightArrow(onlyDrawIdItem)
       } else if (onlyDrawIdItem.drawtype === 'attack') {
-        this.addAttackArrow(item)
+        this.addAttackArrow(onlyDrawIdItem)
       } else {
-        this.addPincerArrow(item)
+        this.addPincerArrow(onlyDrawIdItem)
       }
     })
   },
   addStraightArrow(item) {
     if (window.viewer && window.viewer.entities) {
       let arrowPoints = []
+      console.log(item,"item")
+      console.log(item.geom.coordinates,"item.geom.coordinates")
       item.geom.coordinates.forEach(e => {
         arrowPoints.push(Cesium.Cartesian3.fromDegrees(parseFloat(e[0]), parseFloat(e[1]), parseFloat(0)))
       })
