@@ -169,17 +169,21 @@ let cesiumPlot= {
   //----------------------------------------------------------------
 
   //箭头
-  addArrow(item, type) {
-    console.log(item,type,"addArrow timeline")
-    if (item.drawtype === 'straight') {
-      this.addStraightArrow(item, type)
-    } else if (item.drawtype === 'attack') {
-      this.addAttackArrow(item, type)
-    } else {
-      this.addPincerArrow(item, type)
-    }
+  addArrow(item) {
+    console.log(item)
+    const items = Array.isArray(item) ? item : [item];
+    items.forEach(onlyDrawIdItem => {
+      console.log(item,"addArrow timeline")
+      if (onlyDrawIdItem.drawtype === 'straight') {
+        this.addStraightArrow(item)
+      } else if (onlyDrawIdItem.drawtype === 'attack') {
+        this.addAttackArrow(item)
+      } else {
+        this.addPincerArrow(item)
+      }
+    })
   },
-  addStraightArrow(item, type) {
+  addStraightArrow(item) {
     if (window.viewer && window.viewer.entities) {
       let arrowPoints = []
       item.geom.coordinates.forEach(e => {
@@ -213,7 +217,6 @@ let cesiumPlot= {
             fill: true,
             material: Cesium.Color.BLUE  // 蓝色，透明度0.5
           }),
-          layer: type,
           properties: {
             data:item
           }
@@ -222,7 +225,7 @@ let cesiumPlot= {
 
     }
   },
-  addAttackArrow(item, type) {
+  addAttackArrow(item) {
     if (window.viewer && window.viewer.entities) {
       let arrowPoints = []
       item.geom.coordinates.forEach(e => {
@@ -254,7 +257,6 @@ let cesiumPlot= {
             fill: true,
             material: Cesium.Color.RED
           }),
-          layer: type,
           properties: {
             data:item
           }
@@ -263,7 +265,7 @@ let cesiumPlot= {
 
     }
   },
-  addPincerArrow(item, type) {
+  addPincerArrow(item) {
     if (window.viewer && window.viewer.entities) {
       let arrowPoints = []
       item.geom.coordinates.forEach(e => {
@@ -295,7 +297,6 @@ let cesiumPlot= {
             fill: true,
             material: Cesium.Color.YELLOW
           }),
-          layer: type,
           properties: {
             data:item
           }
@@ -304,6 +305,5 @@ let cesiumPlot= {
 
     }
   },
-
 }
 export default cesiumPlot;

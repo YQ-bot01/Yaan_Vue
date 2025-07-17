@@ -880,21 +880,6 @@ export default {
         arrowArr.forEach(item => {
           cesiumPlot.addArrow(item, "标绘点")
         })
-        // let straightArr = data.filter(e => e.drawtype === 'straight');
-        // Arrow.showStraightArrow(straightArr)
-        // console.log("straightArr----------------", straightArr)
-        // timeLine.addArrow(straightArr, "标绘点")
-        // let attackArr = data.filter(e => e.drawtype === 'attack');
-        // // Arrow.showAttackArrow(attackArr)
-        // timeLine.addArrow(attackArr ,"标绘点")
-        //
-        // let pincerArr = data.filter(e => e.drawtype === 'pincer');
-        // // Arrow.showPincerArrow(pincerArr)
-        // timeLine.addArrow(pincerArr, "标绘点")
-        // // 长轮询逻辑：等待一段时间后继续请求
-        // setTimeout(() => {
-        //   fetchData(); // 递归调用以实现长轮询
-        // }, 5000); // 设置 5 秒的轮询间隔（可以根据需求调整）
       })
     },
 
