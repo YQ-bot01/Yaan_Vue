@@ -210,7 +210,9 @@ StraightArrow.prototype = {
         this.arrowEntity = this.showArrowOnMap(this.positions, data);
         this.firstPoint.show = false;
         this.floatPoint.show = false;
+
         this.arrowEntity.objId = this.objId;
+
     },
     clear: function () { //清除绘制箭头
         this.state = 0;
@@ -457,6 +459,7 @@ AttackArrow.prototype = {
             this.pointArr.push(point);
         }
         this.arrowEntity = this.showArrowOnMap(this.positions, data);
+
         this.arrowEntity.objId = this.objId;
     },
     startModify: function () { //修改箭头
