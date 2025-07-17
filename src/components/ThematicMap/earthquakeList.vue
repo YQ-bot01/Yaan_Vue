@@ -75,7 +75,7 @@
 
         <div style="height: 10px;background-color: #054576"></div>
 
-        <el-divider content-position="left"> 专题图</el-divider>
+        <el-divider content-position="left"> 灾情专题图</el-divider>
 
         <div :style="{height: ((thematicMapData.length+1)/2 * 80) + 'px' }">
           <div class="eqTheme">
@@ -87,17 +87,18 @@
             </div>
           </div>
         </div>
-
-        <div style="height: 10px;background-color: #054576"></div>
-        <el-divider content-position="left"> 灾情报告</el-divider>
-        <div class="eqTheme">
-          <div class="button themes history"
-               v-for="(item,index) in reportData"
-               style="width: 120px;font-size: 14px;"
-               @click="handleDownloadReport(item.docxUrl)"
-          >{{ item.theme }}
+        <template v-if="isAdmin">
+          <div style="height: 10px;background-color: #054576"></div>
+          <el-divider content-position="left"> 灾情报告</el-divider>
+          <div class="eqTheme">
+            <div class="button themes history"
+                 v-for="(item,index) in reportData"
+                 style="width: 120px;font-size: 14px;"
+                 @click="handleDownloadReport(item.docxUrl)">
+              {{ item.theme }}
+            </div>
           </div>
-        </div>
+        </template>
       </div>
     </div>
   </div>
@@ -114,6 +115,7 @@ import eqMark from '@/assets/images/DamageAssessment/eqMark.png';
 // import yaan from "@/assets/geoJson/yaan1.json";
 import {handleOutputData} from "../../cesium/plot/eqThemes.js";
 import {getEqList} from "@/api/system/damageassessment.js";
+import useUserStore from "@/store/modules/user.js";
 
 export default {
   name: "earthquakeList",
@@ -148,6 +150,17 @@ export default {
   mounted() {
     this.getEq()
   },
+
+  setup() {
+    const userStore = useUserStore()
+    const isAdmin = computed(() => userStore.name === 'admin')
+
+    return {
+      userStore,
+      isAdmin
+    }
+  },
+
   methods: {
     handlePanel(type) {
       console.log(this.selectedTabData, "this.selectedEqData")

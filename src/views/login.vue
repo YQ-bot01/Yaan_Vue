@@ -56,6 +56,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
+      <span>运维单位:雅安市应急管理局&nbsp;&nbsp;&nbsp;&nbsp;运维人员:周文涛&nbsp;&nbsp;&nbsp;&nbsp;联系方式:18237697278</span><br>
       <span>Copyright © 2024-2025 {{useTitleStore().pageTitle}}</span>
     </div>
   </div>
@@ -220,7 +221,7 @@ getCookie();
   }
 }
 .el-login-footer {
-  height: 40px;
+  height: 90px;
   line-height: 40px;
   position: fixed;
   bottom: 0;

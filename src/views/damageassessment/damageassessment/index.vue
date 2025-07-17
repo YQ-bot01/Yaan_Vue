@@ -103,7 +103,7 @@
               <div class="button themes economicLoss" :class="{ active: eqThemes.show.isshowEconomicLoss }"
                    @click="showEconomicLoss()"> 经济损失
               </div>
-              <div class="button themes hospital" :class="{ active: eqThemes.show.isshowHospital }"
+              <div v-if="isAdmin" class="button themes hospital" :class="{ active: eqThemes.show.isshowHospital }"
                    @click="showHospital"> 医院
               </div>
               <div class="button themes school" :class="{ active: eqThemes.show.isshowVillage }"
@@ -226,6 +226,10 @@ import plotInfoOnlyShowPanel from "@/components/Panel/plotInfoOnlyShowPanel.vue"
 
 import timeLine from "@/cesium/timeLine.js";
 import layer from "@/cesium/layer.js";
+import useUserStore from "@/store/modules/user.js";
+
+
+
 export default {
   components: {
     plotInfoOnlyShowPanel,
@@ -233,6 +237,15 @@ export default {
     EconomicLossPanel,
     BuildingDamagePanel,
     HistoryEqPanel,
+  },
+  setup() {
+    const userStore = useUserStore()
+    const isAdmin = computed(() => userStore.name === 'admin')
+
+    return {
+      userStore,
+      isAdmin
+    }
   },
 
   data() {

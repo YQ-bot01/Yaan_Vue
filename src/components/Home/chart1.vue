@@ -48,7 +48,6 @@ const calculateMagnitudeData = (data, years) => {
     }
   });
 
-  console.log("谁干的好事");
   console.log(magnitudeCounts);
   return magnitudeCounts;
 };

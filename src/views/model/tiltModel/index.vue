@@ -1,7 +1,7 @@
 <template>
   <div>
     <div id="cesiumContainer" v-if="pageStatus">
-      <el-form class="tool-container-1">
+      <el-form class="tool-container-1" :style="toolContainerStyle">
         <el-row>
           <div class="modelAdj" style="margin-top: 5px">模型调整</div>
           <el-button type="primary" @click="showSelectModel=!showSelectModel">
@@ -17,7 +17,7 @@
           <!--        <el-button class="el-button--primary" @click="isTerrainLoaded">地形是否加载</el-button>-->
           <el-button type="primary" @click="hideModel">{{ modelStatusContent }}</el-button>
           <!--        <el-button type="primary" @click="openDialog('新增')">新增模型</el-button>-->
-          <el-button type="primary" @click="updataPosition">更新位置</el-button>
+          <el-button v-if="isAdmin" type="primary" @click="updataPosition">更新位置</el-button>
         </el-row>
       </el-form>
       <el-form class="button-container" v-show="showSelectModel" style="display: flex; flex-direction: column;">
@@ -146,6 +146,7 @@ import {
 } from '@/cesium/model.js';
 import layer from "@/cesium/layer.js";
 import Point from "@/cesium/plot/Point.js";
+import useUserStore from "@/store/modules/user.js";
 
 
 let pageStatus = ref(true)
@@ -196,6 +197,24 @@ onBeforeUnmount(() => {
     window.viewer = null;
   }
 })
+// 获取用户名
+const userStore = useUserStore()
+console.log("隐藏",userStore)
+// 计算属性判断是否admin
+// 判断是否是 admin
+const isAdmin = computed(() => userStore.name === 'admin')
+
+// 根据角色设置容器宽度
+const toolContainerStyle = computed(() => ({
+  position: 'absolute',
+  padding: '10px',
+  borderRadius: '5px',
+  top: '10px',
+  left: '10px',
+  zIndex: 10,
+  backgroundColor: 'rgba(40, 40, 40, 0.7)',
+  width: isAdmin.value ? '625px' : '560px'
+}))
 
 
 // 初始化控件等
@@ -672,15 +691,6 @@ onBeforeUnmount(() => {
         }
       })
     }
-    // else{
-    //   updataModel(data).then(res=>{
-    //     initModelTable()
-    //     for(let key in modelInfo){
-    //       modelInfo[key] = null
-    //     }
-    //     console.log(res,'编辑')
-    //   })
-    // }
     dialogFormVisible.value = false
   }
 
