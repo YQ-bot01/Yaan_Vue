@@ -404,11 +404,11 @@ export default class Polygon {
     this.polygonPointEntity = [];
     this.polygonEntity = null
     // 向 WebSocket 发送删除多边形的消息
-    this.ws.send(JSON.stringify({
-      type: "polygon",
-      operate: "delete",
-      id: polygon.id
-    }));
+    // this.ws.send(JSON.stringify({
+    //   type: "polygon",
+    //   operate: "delete",
+    //   id: polygon.id
+    // }));
 
     // 获取多边形的顶点坐标
     let polygonPosition = polygon.properties.pointPosition;
@@ -492,7 +492,8 @@ export default class Polygon {
           });
         }
       })
-    }else {
+    }
+    else {
       // 1-2根据Plotid来画面
       onlyPlotid.forEach(onlyPlotidItem => {
         const existingEntity = window.viewer.entities.getById(onlyPlotidItem + "_polygon");

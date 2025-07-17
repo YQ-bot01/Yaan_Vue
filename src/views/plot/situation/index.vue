@@ -112,10 +112,10 @@
           :eqOccurrenceTime="eqOccurrenceTime"
           :addMarkDialogFormVisible="addMarkDialogFormVisible"
           @wsSendPoint="wsSendPoint"
-          @ifPointAnimate="ifPointAnimation"
           @clearMarkDialogForm="resetAddMarkCollection"
           @sendPlot="sendPlot"
       />
+<!--      @ifPointAnimate="ifPointAnimation"-->
       <addPolylineDialog
           :eqOccurrenceTime="eqOccurrenceTime"
           :addPolylineDialogFormVisible="addPolylineDialogFormVisible"
@@ -306,7 +306,8 @@ import {ElMessage} from 'element-plus'
 import {initCesium} from '@/cesium/tool/initCesium.js'
 import {getExcelPlotInfo, getPlot, getPlotIcon} from '@/api/system/plot'
 import {getAllEq, getAllEqList, getEqById, getEqListById} from '@/api/system/eqlist'
-import {initWebSocket, websocketonmessage} from '@/cesium/WS.js'
+// import {initWebSocket, websocketonmessage} from '@/cesium/WS.js'
+import {initWebSocket,wsAdd} from '@/cesium/WS.js'
 import cesiumPlot from '@/cesium/plot/cesiumPlot'
 import addMarkCollectionDialog from "@/components/Cesium/addMarkCollectionDialog"
 import addPolylineDialog from "@/components/Cesium/addPolylineDialog.vue"
@@ -389,7 +390,7 @@ export default {
       addPolygonDialogFormVisible: false,// mian标绘信息填写对话框的显示和隐藏
       showMarkCollection: false, // 点标绘控件的显示和隐藏
       openAddStatus: true, // 用来控制添加billboard按钮的状态，点一次后只有添加完点才能再点击
-      ifPointAnimate: false, // 说明是否为新标绘的点
+      // ifPointAnimate: false, // 说明是否为新标绘的点
       //-----------弹窗部分--------------
       selectedEntityHighDiy: null,
       popupPosition: {x: 0, y: 0}, // 弹窗显示位置，传值给子组件
@@ -778,9 +779,40 @@ export default {
     },
     // 初始化ws
     initWebsocket() {
+      let that=this
       // console.log("this.eqid---------------------", this.eqid)
       this.websock = initWebSocket(this.eqid)
-      this.websock.onmessage = websocketonmessage;//涉及功能导入功能
+      this.websock.onmessage = function (e) {
+        // message=e
+        console.log("e",e)
+        try {
+          console.log("socketmessage",JSON.parse(e.data))
+          const msg = JSON.parse(e.data);
+          let markType = msg.type
+          let markOperate = msg.operate // 标绘的（add、delete）
+          if (markOperate === "add") {
+            if (that.eqid === msg.data.plot.earthquakeId) {
+              let markData = msg.data
+              wsAdd(markType, markData)
+              console.log(that.plots,"that.plots add")
+              console.log(msg.data.plot,"push msg.plot")
+              that.plots = that.plots.filter(plot => plot.plotId !== msg.data.plot.plotId);
+              that.plots.push(msg.data.plot);
+            }
+
+          }
+          else if (markOperate === "delete") {
+            let id = msg.id
+            console.log(that.plots,"that.plots delete")
+            that.plots = that.plots.filter(plot => plot.plotId !== id);
+            console.log(id,markType)
+            timeLine.deletePointById(id, markType)
+          }
+        }
+        catch (err) {
+          console.log(err, 'ws中catch到错误');
+        }
+      };
     },
     // 获取本次地震数据库中的数据渲染到地图上
     initPlot(eqid) {
@@ -790,7 +822,7 @@ export default {
 
         that.plotList = data
         that.plots = data
-        console.log("数据：", data)
+        console.log("initPlot 数据：", data)
 
         let pointArr = data.filter(e => e.drawtype === 'point')
         let points = []
@@ -843,15 +875,22 @@ export default {
           let polygonData = polygonMap[plotId];
           that.getDrawPolygonInfo(polygonData);
         });
-        let straightArr = data.filter(e => e.drawtype === 'straight');
-        Arrow.showStraightArrow(straightArr)
-        console.log("straightArr----------------", straightArr)
 
-        let attackArr = data.filter(e => e.drawtype === 'attack');
-        Arrow.showAttackArrow(attackArr)
-
-        let pincerArr = data.filter(e => e.drawtype === 'pincer');
-        Arrow.showPincerArrow(pincerArr)
+        let arrowArr = this.plots.filter(e => e.drawtype === 'straight' || e.drawtype === 'attack' || e.drawtype === 'pincer');
+        arrowArr.forEach(item => {
+          cesiumPlot.addArrow(item, "标绘点")
+        })
+        // let straightArr = data.filter(e => e.drawtype === 'straight');
+        // Arrow.showStraightArrow(straightArr)
+        // console.log("straightArr----------------", straightArr)
+        // timeLine.addArrow(straightArr, "标绘点")
+        // let attackArr = data.filter(e => e.drawtype === 'attack');
+        // // Arrow.showAttackArrow(attackArr)
+        // timeLine.addArrow(attackArr ,"标绘点")
+        //
+        // let pincerArr = data.filter(e => e.drawtype === 'pincer');
+        // // Arrow.showPincerArrow(pincerArr)
+        // timeLine.addArrow(pincerArr, "标绘点")
         // // 长轮询逻辑：等待一段时间后继续请求
         // setTimeout(() => {
         //   fetchData(); // 递归调用以实现长轮询
@@ -1969,7 +2008,7 @@ export default {
           this.popupData = {}
         }
 
-        console.log(window.selectedEntity)
+        console.log("window.selectedEntity",window.selectedEntity)
 
         if (Object.prototype.toString.call(window.selectedEntity) === '[object Array]' && window.selectedEntity[0]._layers !== "聚合标绘点") {
 
@@ -2251,61 +2290,6 @@ export default {
     plotAdj(row) {
 
       console.log("所有信息", row)
-      // {
-      //   "eqid": "69b02afc-9aa8-4c32-8272-d5672d845c3c",
-      //     "eqqueueId": "69b02afc-9aa8-4c32-8272-d5672d845c3c01",
-      //     "earthquakeName": "四川省雅安市名山区",
-      //     "earthquakeFullName": "2025年03月14日四川省雅安市名山区前进镇6.5级地震",
-      //     "eqAddr": "四川省雅安市名山区前进镇",
-      //     "magnitude": "6.5",
-      //     "intensity": "",
-      //     "depth": "12.0",
-      //     "occurrenceTime": "2025-03-14T12:55:51",
-      //     "eqType": "T",
-      //     "source": "2",
-      //     "eqAddrCode": "511803",
-      //     "townCode": "51180311800000",
-      //     "pac": "",
-      //     "type": "",
-      //     "longitude": "103.20",
-      //     "latitude": "30.04",
-      //     "geom": null,
-      //     "time": "2025-03-14 12:55:51"
-      // }
-
-      // {
-      //   "eqid": "69b02afc-9aa8-4c32-8272-d5672d845c3c",
-      //     "eqqueueId": "69b02afc-9aa8-4c32-8272-d5672d845c3c01",
-      //     "earthquakeName": "四川省雅安市名山区",
-      //     "earthquakeFullName": "2025年03月14日四川省雅安市名山区前进镇6.5级地震",
-      //     "eqAddr": "四川省雅安市名山区前进镇",
-      //     "geom": {
-      //   "type": "Point",
-      //       "coordinates": [
-      //     103.2,
-      //     30.04
-      //   ]
-      // },
-      //   "intensity": "",
-      //     "magnitude": "6.5",
-      //     "depth": "12.0",
-      //     "occurrenceTime": "2025-03-14T12:55:51",
-      //     "eqType": "T",
-      //     "source": "2",
-      //     "eqAddrCode": "511803",
-      //     "townCode": "51180311800000",
-      //     "pac": "",
-      //     "type": "",
-      //     "isDeleted": 0,
-      //     "district": "名山区",
-      //     "province": "四川省",
-      //     "city": "雅安市",
-      //     "time": "2025-03-14 12:55:51",
-      //     "latitude": "NaN",
-      //     "longitude": "NaN"
-      // }
-
-
       this.eqInfo = row
       // console.log("剩余1：", window.pointDataSource.entities)
       window.viewer.entities.removeAll();
@@ -2356,8 +2340,8 @@ export default {
     getEq() {
       let that = this
       getAllEqList().then(res => {
-        console.log("********************************************************")
-        console.log("res", res)
+        // console.log("********************************************************")
+        console.log("getEq res", res)
         let resData = res.data.filter(item => item.magnitude >= 5)
         let data = []
         for (let i = 0; i < resData.length; i++) {
@@ -2738,12 +2722,12 @@ export default {
     //   }
     // },
     // drawPoints(pointInfo, bool) {
-    //   // cesiumPlot.drawPoints(pointInfo, bool);
+    //   cesiumPlot.drawPoints(pointInfo, bool);
     // },
 
-    ifPointAnimation(val) {
-      this.ifPointAnimate = val
-    },
+    // ifPointAnimation(val) {
+    //   this.ifPointAnimate = val
+    // },
     // 重置标绘信息填写的绑定数据
     resetAddMarkCollection() {
       let cesiumStore = useCesiumStore()
@@ -2760,24 +2744,25 @@ export default {
     },
     // ws发送数据（只有点的是在这里）
     wsSendPoint(data) {
-      if (JSON.parse(data).operate === "delete") {
-        this.plots = this.plots.filter(plot => plot.plotId !== JSON.parse(data).id);
-        console.log(this.plots, "this.plots wsSendPoint")
-      }
-      else if (JSON.parse(data).operate === "add") {
-        let markData = JSON.parse(data).data
-        markData.plot.longitude = Number(markData.plot.geom.coordinates[0])
-        markData.plot.latitude = Number(markData.plot.geom.coordinates[1])
-
-        this.plots.push(markData.plot);
-        console.log(this.plots, "this.plots wsSendPoint existingPlot");
-
-        if (this.loadingupdate === true) {
-          this.loadingupdate = false
-        }
-      }
-      console.log(this.websock, "websock:")
-      console.log(data, "wsSendPoint(data)")
+      // if (JSON.parse(data).operate === "delete") {
+      //   this.plots = this.plots.filter(plot => plot.plotId !== JSON.parse(data).id);
+      //   console.log(this.plots, "this.plots wsSendPoint")
+      // }
+      // else if (JSON.parse(data).operate === "add") {
+      //   let markData = JSON.parse(data).data
+      //   markData.plot.longitude = Number(markData.plot.geom.coordinates[0])
+      //   markData.plot.latitude = Number(markData.plot.geom.coordinates[1])
+      //
+      //   this.plots.push(markData.plot);
+      //   this.plots = this.plots.filter(plot => plot.plotId !== JSON.parse(data).id);
+      //   console.log(this.plots, "this.plots wsSendPoint existingPlot");
+      //
+      //   if (this.loadingupdate === true) {
+      //     this.loadingupdate = false
+      //   }
+      // }
+      // console.log(this.websock, "websock:")
+      // console.log(data, "wsSendPoint(data)")
       // this.websock.onopen = () => {
       this.websock.send(data)
     },

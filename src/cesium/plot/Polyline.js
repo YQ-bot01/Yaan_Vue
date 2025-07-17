@@ -1,4 +1,5 @@
 import * as Cesium from 'cesium'
+import cesiumPlot from "@/cesium/plot/cesiumPlot.js";
 
 export default class Polyline {
     constructor(viewer, ws) {
@@ -338,18 +339,21 @@ export default class Polyline {
 
     // 删除线图层
     deletePolyline(polyline) {
-        this.ws.send(JSON.stringify({
-            type: "polyline",
-            operate: "delete",
-            id: polyline.id
-        }))
+        // this.ws.send(JSON.stringify({
+        //     type: "polyline",
+        //     operate: "delete",
+        //     id: polyline.id
+        // }))
         let polylinePosition = polyline.properties.getValue(Cesium.JulianDate.now())//用getvalue时添加时间是不是用来当日志的？
         polylinePosition.pointPosition.forEach((item, index) => {
             window.viewer.entities.remove(item)
         })
         window.viewer.entities.remove(polyline)
     }
-
+    deletePolylineById(id){
+        let polyline =window.viewer.entities.getById(id)
+        this.deletePolyline(polyline)
+    }
     // 根据数据库中数据绘制线
     getDrawPolyline(polylineArr, getmaterial) {
         // 1-1 根据线的drawid记录有多少条线

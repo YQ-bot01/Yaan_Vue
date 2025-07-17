@@ -4,6 +4,8 @@ import Point from "./Point"
 import * as Cesium from 'cesium'
 import Arrow from "@/cesium/drawArrow/drawPlot.js";
 import {getPlotInfos} from "@/api/system/plot.js";
+import plotCompute from "@/cesium/plot/plotCompute.js";
+import {xp} from "@/cesium/drawArrow/algorithm.js";
 
 let cesiumPlot= {
   viewer:null,
@@ -70,6 +72,9 @@ let cesiumPlot= {
   },
   deletePolyline(polyline){
     this.polyline.deletePolyline(polyline)
+  },
+  deletePolylineById(id){
+    this.polyline.deletePolylineById(id)
   },
   getDrawPolyline(polylineArr){
     this.polyline.getDrawPolyline(polylineArr,this.getMaterial)
@@ -162,5 +167,143 @@ let cesiumPlot= {
   },
 
   //----------------------------------------------------------------
+
+  //箭头
+  addArrow(item, type) {
+    console.log(item,type,"addArrow timeline")
+    if (item.drawtype === 'straight') {
+      this.addStraightArrow(item, type)
+    } else if (item.drawtype === 'attack') {
+      this.addAttackArrow(item, type)
+    } else {
+      this.addPincerArrow(item, type)
+    }
+  },
+  addStraightArrow(item, type) {
+    if (window.viewer && window.viewer.entities) {
+      let arrowPoints = []
+      item.geom.coordinates.forEach(e => {
+        arrowPoints.push(Cesium.Cartesian3.fromDegrees(parseFloat(e[0]), parseFloat(e[1]), parseFloat(0)))
+      })
+      var update = function () {
+        if (arrowPoints.length < 2) {
+          return null;
+        }
+        var p1 = arrowPoints[1];
+        var p2 = arrowPoints[2];
+        var firstPoint = plotCompute.cartesianToLatlng(p1);
+        var endPoints = plotCompute.cartesianToLatlng(p2);
+        var arrow = [];
+        var res = xp.algorithm.fineArrow([firstPoint[0], firstPoint[1]], [endPoints[0], endPoints[1]]);
+        var index = JSON.stringify(res).indexOf("null");
+        if (index != -1) return [];
+        for (var i = 0; i < res.length; i++) {
+          var c3 = new Cesium.Cartesian3(res[i].x, res[i].y, res[i].z);
+          arrow.push(c3);
+        }
+        return new Cesium.PolygonHierarchy(arrow);
+      }
+      if (!window.viewer.entities.getById(item.plotId)) {
+        window.viewer.entities.add({
+          drawtype:item.drawtype,
+          id: item.plotId,
+          polygon: new Cesium.PolygonGraphics({
+            hierarchy: new Cesium.CallbackProperty(update, false),
+            show: true,
+            fill: true,
+            material: Cesium.Color.BLUE  // 蓝色，透明度0.5
+          }),
+          layer: type,
+          properties: {
+            data:item
+          }
+        })
+      }
+
+    }
+  },
+  addAttackArrow(item, type) {
+    if (window.viewer && window.viewer.entities) {
+      let arrowPoints = []
+      item.geom.coordinates.forEach(e => {
+        arrowPoints.push(Cesium.Cartesian3.fromDegrees(parseFloat(e[0]), parseFloat(e[1]), parseFloat(0)))
+      })
+      var update = function () {
+        //计算面
+        if (arrowPoints.length < 3) {
+          return null;
+        }
+        var lnglatArr = [];
+        for (var i = 0; i < arrowPoints.length; i++) {
+          var lnglat = plotCompute.cartesianToLatlng(arrowPoints[i]);
+          lnglatArr.push(lnglat)
+        }
+        var res = xp.algorithm.tailedAttackArrow(lnglatArr);
+        var index = JSON.stringify(res.polygonalPoint).indexOf("null");
+        var returnData = [];
+        if (index == -1) returnData = res.polygonalPoint;
+        return new Cesium.PolygonHierarchy(returnData);
+      }
+      if (!window.viewer.entities.getById(item.plotId)) {
+        window.viewer.entities.add({
+          id: item.plotId,
+          drawtype:item.drawtype,
+          polygon: new Cesium.PolygonGraphics({
+            hierarchy: new Cesium.CallbackProperty(update, false),
+            show: true,
+            fill: true,
+            material: Cesium.Color.RED
+          }),
+          layer: type,
+          properties: {
+            data:item
+          }
+        })
+      }
+
+    }
+  },
+  addPincerArrow(item, type) {
+    if (window.viewer && window.viewer.entities) {
+      let arrowPoints = []
+      item.geom.coordinates.forEach(e => {
+        arrowPoints.push(Cesium.Cartesian3.fromDegrees(parseFloat(e[0]), parseFloat(e[1]), parseFloat(0)))
+      })
+      var update = function () {
+        //计算面
+        if (arrowPoints.length < 3) {
+          return null;
+        }
+        var lnglatArr = [];
+        for (var i = 0; i < arrowPoints.length; i++) {
+          var lnglat = plotCompute.cartesianToLatlng(arrowPoints[i]);
+          lnglatArr.push(lnglat)
+        }
+        var res = xp.algorithm.doubleArrow(lnglatArr);
+        var returnData = [];
+        var index = JSON.stringify(res.polygonalPoint).indexOf("null");
+        if (index == -1) returnData = res.polygonalPoint;
+        return new Cesium.PolygonHierarchy(returnData);
+      }
+      if (!window.viewer.entities.getById(item.plotId)) {
+        window.viewer.entities.add({
+          id: item.plotId,
+          drawtype:item.drawtype,
+          polygon: new Cesium.PolygonGraphics({
+            hierarchy: new Cesium.CallbackProperty(update, false),
+            show: true,
+            fill: true,
+            material: Cesium.Color.YELLOW
+          }),
+          layer: type,
+          properties: {
+            data:item
+          }
+        })
+      }
+
+    }
+  },
+
 }
 export default cesiumPlot;
