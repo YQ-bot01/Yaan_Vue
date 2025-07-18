@@ -3262,6 +3262,13 @@ export default {
 
             // 将新的路径绘制到地图上
             that.polylineD(pathSegments, that.propertiesId);  // 传递路径和 id 更新折线
+            // ✅ 更新文字描述
+            that.RouteGuilde = pathName;
+            that.totalRoute = pathM;
+            that.cartime = (parseFloat(res.data.route.paths[0].duration) / 60).toFixed(2);
+            that.humantime = (pathM * 0.7 / 60).toFixed(2);
+            that.driveStyle();
+            that.walkStyle();
           })
           .catch(error => {
             console.error("路径规划请求失败", error);
