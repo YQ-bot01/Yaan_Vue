@@ -5,7 +5,7 @@ export const CesiumIonDefaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 //  export const TianDiTuToken = '31f4628fd3dd7fa4d98dd14042665db1'
 // export const TianDiTuToken = '5977634187c7e8866476add35ace55d0'
 // export const TianDiTuToken = '34d101b55f6166c49c42aed5a7ed345c'
-export const TianDiTuToken = '4efe059892a4283e04ccaa91e98521b0'
+// export const TianDiTuToken = '4efe059892a4283e04ccaa91e98521b0'
 // export const TianDiTuToken = 'e64cb3f2a11eff8a366abdd692a776bf'
 // export const TianDiTuToken = '0b583bb1e5e6d2a461535ef92d3c23b0'
 //  export const TianDiTuToken = 'a1418113598cd03e04912204871d9459'
@@ -17,7 +17,7 @@ export const TianDiTuToken = '4efe059892a4283e04ccaa91e98521b0'
 // export const TianDiTuToken = '450937d952bcfa9624333a6a8217a3ba'
 // export const TianDiTuToken = 'c5a9207995cd0fcb836ba65985dc1fc1'
 
-// export const TianDiTuToken = '7a1e0e85ab4521b36dad9846114c706a'
+export const TianDiTuToken = '7a1e0e85ab4521b36dad9846114c706a'
 // 杜科新提供的
 // export const TianDiTuToken = '0c15ca6927fhfqnsqeeedc2e84254568'
 

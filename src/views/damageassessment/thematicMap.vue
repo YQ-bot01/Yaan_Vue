@@ -94,12 +94,14 @@
 
                 <div class="button themes"
                      style="width: 30%"
+                     v-if="isAdmin"
                      :class="{ active: isPanelShow.report }"
                      @click="handlePanel(`report`); isPreviewShow = false;">灾情报告
                 </div>
 
                 <div class="button themes"
                      style="width: 30%"
+                     v-if="isAdmin"
                      :class="{ active: isPanelShow.instrument }"
                      @click="handlePanel(`instrument`);">台网数据
                 </div>
@@ -113,18 +115,21 @@
 
             <div style="height: 10px;background-color: #054576"></div>
 
-            <div class="eqTheme" style="margin-top: -15px">
+            <div class="eqTheme" style="margin-top: -15px" v-if="isAdmin">
               <a class="button themes" href="http://59.213.183.83:18100" target="_blank">
                 产出图件管理
               </a>
             </div>
             <div class="button themes"
                  :class="{ active: isPanelShow.AssistantDecision }"
-                 style="height: 45px;margin-top: -15px;margin-bottom: 10px"
+                 :style="isAdmin ?
+                  { height: '45px', marginTop: '-15px', marginBottom: '10px' } :
+                  { height: '45px', marginTop: '20px', marginBottom: '10px' }"
                  @click="handlePanel(`AssistantDecision`); isPreviewShow = false;">辅助决策产出
             </div>
 
             <div class="button themes"
+                 v-if="isAdmin"
                  :class="{ active: isPanelShow.InstrumentIntensity }"
                  style="height: 45px;margin-top: 15px;margin-bottom: 10px"
                  @click="handlePanel(`InstrumentIntensity`); isPreviewShow = false;">仪器烈度数据
@@ -132,6 +137,7 @@
             <div class="button themes"
                  :class="{ active: isPanelShow.DownloadAll }"
                  style="height: 45px;margin-top: 15px;margin-bottom: 10px"
+                 v-if="isAdmin"
                  @click="handlePanel(`DownloadAll`); isPreviewShow = false;">一键下载
             </div>
 
@@ -245,9 +251,20 @@ import timeLine from "@/cesium/timeLine.js";
 import layer from "@/cesium/layer.js";
 import JSZip from 'jszip';
 import FloodRescueForceMapMake from "@/components/ThematicMap/floodRescueForceMapMake.vue";
+import useUserStore from "@/store/modules/user.js";
 
 export default {
   components: {FloodRescueForceMapMake},
+
+  setup() {
+    const userStore = useUserStore()
+    const isAdmin = computed(() => userStore.name === 'admin')
+
+    return {
+      userStore,
+      isAdmin
+    }
+  },
 
   data() {
     return {
@@ -444,43 +461,6 @@ export default {
           },
           id: eq.eqid,
         });
-
-        // Cesium.GeoJsonDataSource.load(yaAnTown, {
-        //   clampToGround: false,
-        //   stroke: Cesium.Color.ORANGE,
-        //   strokeWidth: 4,
-        //   fill: Cesium.Color.TRANSPARENT,
-        // }).then(dataSource => {
-        //   viewer.dataSources.add(dataSource);
-        //   dataSource.name = 'yaAnTownRegionLayer1';
-        //
-        //   // 添加区域标签
-        //   yaAnTown.features.forEach(feature => {
-        //     const firstPolygon = feature.geometry.coordinates[0][0];
-        //     const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
-        //     const centroid = this.calculateCentroid(positions);
-        //
-        //     const regionLabel = viewer.entities.add({
-        //       position: centroid,
-        //       label: {
-        //         text: feature.properties.name || '未命名',
-        //         font: '18px sans-serif',
-        //         fillColor: Cesium.Color.WHITE,
-        //         outlineColor: Cesium.Color.BLACK,
-        //         outlineWidth: 2,
-        //         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-        //         verticalOrigin: Cesium.VerticalOrigin.CENTER,
-        //         horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-        //         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        //         pixelOffset: new Cesium.Cartesian2(0, 0),
-        //       }
-        //     });
-        //     this.RegionLabels.push(regionLabel);
-        //
-        //   });
-        // }).catch(error => {
-        //   console.error("加载市级图层失败:", error);
-        // });
 
         this.listEqPoints.push(entity);
       });

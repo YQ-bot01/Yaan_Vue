@@ -10,7 +10,7 @@
       />
       <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
       <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      <el-button type="primary" plain icon="Plus" @click="handleEdit('新增')">新增</el-button>
+      <el-button  v-if="isAdmin" type="primary" plain icon="Plus" @click="handleEdit('新增')">新增</el-button>
       <el-button type="primary" icon="Filter" @click="openQueryForm">筛选</el-button>
     </el-form-item>
     <el-table
@@ -106,6 +106,7 @@
             浏览
           </el-button>
           <el-button
+              v-if="isAdmin"
               size="mini"
               type="text"
               @click="handleEdit('修改', row)"
@@ -113,6 +114,7 @@
             <el-icon><Edit /></el-icon>修改
           </el-button>
           <el-button
+              v-if="isAdmin"
               size="mini"
               type="text"
               @click="handleDelete(row)"
@@ -264,11 +266,16 @@ import {
   OrthophotoFilterContent,
   list
 } from '@/api/system/orthophotoImage.js';
+
 import { ElMessage, ElMessageBox } from "element-plus";
+import useUserStore from "@/store/modules/user.js";
+
+
 export default {
   name: "index",
   data() {
     return {
+      userStore:'',
       TableData: [],
       filterContent: [],  // 筛选内容
       tableData: [],  //存储 新增 or 编辑 后端返回数据
@@ -299,6 +306,15 @@ export default {
   },
   created() {
     this.fetchData();
+  },
+  setup() {
+    const userStore = useUserStore()
+    const isAdmin = computed(() => userStore.name === 'admin')
+
+    return {
+      userStore,
+      isAdmin
+    }
   },
   methods: {
     fetchData() {
