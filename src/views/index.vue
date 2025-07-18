@@ -51,7 +51,7 @@
 
                 <!-- 输入框和按钮 -->
                 <div
-                    style="position: absolute; top: 5px; left: 120px; display: flex; align-items: center; z-index: 1;"
+                    style="position: absolute; top: 12px; left: 135px; display: flex; align-items: center; z-index: 1;"
                 >
                   <el-input
                       size="small"
@@ -155,7 +155,7 @@ import Chart1 from '@/components/Home/chart1.vue';
 import Chart2 from '@/components/Home/chart2.vue';
 import Chart3 from '@/components/Home/chart3.vue';
 import {fromEq, fromEqList, getAllEq, queryEq, queryEqList} from '@/api/system/eqlist';
-import {getEqList} from "@/api/system/damageassessment.js";
+import {getEqList, getEqListZ} from "@/api/system/damageassessment.js";
 import {useTitleStore} from "../store/index.js";
 
 const nowTime = ref(null);
@@ -166,10 +166,16 @@ const lastValidEqData = ref(null);
 const getEq = () => {
   getEqList().then((res) => {
     console.log("地震数据", res.data)
-    EqAll.value = res.data;
+    // EqAll.value = res.data;
     // console.log("EqAll.value", EqAll.value)
     tableData.value = res.data;
     lastEqData.value = tableData.value[0];
+  });
+};
+const getEqZ = () => {
+  getEqListZ().then((res) => {
+    console.log("地震数据", res.data)
+    EqAll.value = res.data;
   });
 };
 
@@ -433,6 +439,7 @@ onMounted(() => {
   });
   setInterval(updateTime, 500);
   getEq();
+  getEqZ();
 });
 
 </script>

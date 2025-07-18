@@ -15,6 +15,13 @@ export function getEqList(eqListDTO) {
         params: eqListDTO
     })
 }
+export function getEqListZ(eqListDTO) {
+    return request({
+        url: '/tp/api/open/eq/listZ',
+        method: 'get',
+        params: eqListDTO
+    })
+}
 
 export function getEqOutputReport(eqOutputReportDTO) {
   return request({
