@@ -21,6 +21,9 @@ import start from '@/assets/start.svg'
 import end from '@/assets/end.svg'
 import {Entity} from "cesium";
 import {getWay} from "@/api/system/routeplan.js";
+import {gcj02towgs84, wgs84togcj02} from "@/api/tool/wgs_gcj_encrypts.js";
+import axios from "axios";
+import {AmapApiLocal} from "@/utils/server.js";
 
 export default {
   name:'index',
@@ -198,9 +201,82 @@ export default {
         let id = 'area_' + Date.now()
         that.pointD(position, id)
         that.polygonD(ar, id + 'a')
+        // if (that.pos.length > 0) {
+        //   that.updateRoute(); // 调用方法重新计算路径并避开新障碍区域
+        // }
         handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
     },
+    // 更新路径的函数
+    // updateRoute() {
+    //   let that = this;
+    //   let avoidArea = "";
+    //
+    //   // 重新生成障碍区域
+    //   if (that.areas.length > 0) {
+    //     let area = JSON.parse(JSON.stringify(that.areas));
+    //     for (let i = 0; i < area.length; i++) {
+    //       for (let j = 0; j < area[i].area.length; j += 2) {
+    //         avoidArea += wgs84togcj02(area[i].area[j][0], area[i].area[j][1]) + ";";
+    //       }
+    //       avoidArea += "|";
+    //     }
+    //     avoidArea = avoidArea.substring(0, avoidArea.length - 1);
+    //   }
+    //
+    //   // 判断是否已存在第三个数字（ID）
+    //   if (that.propertiesId.length >= 3) {
+    //     // 删除第三个ID
+    //     let thirdId = that.propertiesId[2];
+    //     viewer.entities.removeById(thirdId);  // 移除第三个折线
+    //     that.propertiesId.splice(2, 1);  // 删除 propertiesId 中的第三个 ID
+    //   }
+    //
+    //   console.log("asdasdasd", that.pos)
+    //   // 获取起点和终点
+    //   let from = wgs84togcj02(that.pos[0][0], that.pos[0][1]);
+    //   let end = wgs84togcj02(that.pos[1][0], that.pos[1][1]);
+    //
+    //   // 请求路径规划
+    //   axios.get(`${AmapApiLocal}/direction/driving?origin=${from}&destination=${end}&extensions=base&strategy=0&avoidpolygons=${avoidArea}&key=7b0b64174ef6951cc6ee669de03e4f59`)
+    //       .then(res => {
+    //         // 处理路径返回的数据，更新路径
+    //         let pathM = parseInt(res.data.route.paths[0].distance);
+    //         let pathName = [];
+    //         let path = "";
+    //         res.data.route.paths[0].steps.forEach(step => {
+    //           pathName.push(step.instruction);
+    //           path += step.polyline + ";";
+    //         });
+    //
+    //         // 更新路径
+    //         let pathSegments = path.split(";")
+    //             .map(segment => segment.replace(/"/g, "").split(",").map(Number).filter(seg => !isNaN(seg)))
+    //             .filter(segment => segment.length === 2)
+    //             .map(segment => gcj02towgs84(segment[0], segment[1]));
+    //
+    //         pathSegments.unshift(that.pos[0]);
+    //         pathSegments.push(that.pos[1]);
+    //
+    //         // 将新的路径绘制到地图上
+    //         that.polylineD(pathSegments, that.propertiesId);  // 传递路径和 id 更新折线
+    //
+    //         // ✅ 更新文字描述
+    //         that.RouteGuilde = pathName;
+    //         that.totalRoute = pathM;
+    //         that.cartime = (parseFloat(res.data.route.paths[0].duration) / 60).toFixed(2);
+    //         that.humantime = (pathM * 0.7 / 60).toFixed(2);
+    //         that.driveStyle();
+    //         that.walkStyle();
+    //       })
+    //       .catch(error => {
+    //         console.error("路径规划请求失败", error);
+    //       });
+    //
+    //   // 显示提示
+    //   that.showTips = true;
+    //   this.isRouting = false;  // 路径规划完成，设置标志
+    // },
     removeAll() {
       viewer.entities.removeAll();
       this.areas = []
