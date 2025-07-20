@@ -1315,7 +1315,7 @@ export default {
         {id: '1', name: '行政区划要素图层'},
         {id: '2', name: '人口密度要素图层'},
         {id: '3', name: '交通网络要素图层'},
-        {id: '4', name: '医院要素图层'},
+        // {id: '4', name: '医院要素图层'},
         {id: '5', name: '村庄要素图层'},
         {id: '6', name: '学校要素图层'},
         {id: '7', name: '三维倾斜模型图层'},
@@ -3883,11 +3883,11 @@ export default {
           add: () => this.processPoints(this.emergencyShelters, 'emergencyShelters', emergencySheltersLogo, '避难场所'),
           remove: () => this.removeEntitiesByType('emergencyShelters')
         },
-        {
-          name: '医院要素图层',
-          add: addHospitalLayer,
-          remove: () => this.removeDataSourcesLayer('hospital')
-        },
+        // {
+        //   name: '医院要素图层',
+        //   add: addHospitalLayer,
+        //   remove: () => this.removeDataSourcesLayer('hospital')
+        // },
         {
           name: '村庄要素图层',
           add: addVillageLayer,
