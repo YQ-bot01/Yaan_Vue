@@ -3772,14 +3772,17 @@ export default {
     },
 
     updateMapLayers() {
-      console.log("======================================================", this.selectedlayersLocal, "selectedlayersLocal")
+
 
       const currentSelected = [
         ...this.selectedlayersLocal,
         ...this.selectedResourceScheduling,
-        ...this.selectedDisasterEstimate,
+        ...(Array.isArray(this.selectedDisasterEstimate)
+            ? this.selectedDisasterEstimate
+            : [this.selectedDisasterEstimate]),
       ];
-
+      console.log("======================================================", this.selectedDisasterEstimate, "this.selectedDisasterEstimate")
+      console.log("======================================================", currentSelected, "currentSelected")
       // 计算图层差异
       const previouslySelected = this.prevSelectedLayers || [];
 
@@ -3927,6 +3930,7 @@ export default {
         {
           name: '灾损预估-人员伤亡要素图层',
           add: () => {
+            console.log(" name: '灾损预估-人员伤亡要素图层', add")
             this.removethdRegions();
             this.addThemeLayer(this.layerData.pcData, 'personalCasualty');
             this.showPeopleLegend = true;// 指挥大屏-图层管理-人员伤亡图层图例状态

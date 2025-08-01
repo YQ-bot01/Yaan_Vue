@@ -109,7 +109,7 @@ import DisasterDamageAssessmentImageData
   from "../../assets/images/ThematicMap/DisasterDamageAssessment/LuShan/DisasterDamageAssessmentImageData.json"
 import TwoAndThreeDIntegrationImageData
   from "../../assets/images/ThematicMap/TwoAndThreeDIntegration/LuShan/TwoAndThreeDIntegrationImageData.json"
-import {getAllEq, getAllEqList} from "../../api/system/eqlist.js";
+
 import * as Cesium from "cesium";
 import eqMark from '@/assets/images/DamageAssessment/eqMark.png';
 // import yaan from "@/assets/geoJson/yaan1.json";

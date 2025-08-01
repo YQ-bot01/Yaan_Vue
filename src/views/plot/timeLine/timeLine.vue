@@ -71,7 +71,6 @@
             :isTimeRunning="isTimeRunning"
             :viewCenterCoordinate="viewCenterCoordinate"
             :earthquakeName="centerPoint.earthquakeName"
-            :selectedDistrict="selectedDistrict"
         />
         <timeLineMiniMap
             :viewer="viewer"

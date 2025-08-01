@@ -8,7 +8,7 @@ export const tianDitulocalApi="http://api.tianditu.gov.cn"
 // export const AmapApiLocal="http://59.213.183.7/restapi/v3"
  export const webSocketLocal ="localhost:8080"
 // export const webSocketLocal ="59.213.183.7/websocket"
-// export const zaisunipLocal = "http://10.16.7.69/zaisun"
+export const zaisunipLocal = "http://10.16.7.69/zaisun"
 export const zaisunimageipLocal = "http://10.16.7.69/zaisunimage"
 // export const zaisunimageipLocal = "http://59.213.183.7/jcpt"
 export const SystemIPLocal = "http://localhost:8080"
@@ -18,3 +18,4 @@ export const zaiSunFuZhuJueCe = "http://localhost:8080/juece"
 //
 // export const iconRoad = "http://59.213.183.7/prod-api/uploads/PlotsPic/"
 export const iconRoad = "http://localhost:8080/uploads/PlotsPic/"
+//

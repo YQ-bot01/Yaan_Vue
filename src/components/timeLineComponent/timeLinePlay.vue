@@ -3,9 +3,9 @@
     <div class="topLastRecordTimeLabel">
       {{ this.lastRecordTimeLocal }}
     </div>
-<!--    <div class="topLastRecordContentLabel">-->
-<!--      <span class="marquee">{{ this.lastRecordContent }}</span>-->
-<!--    </div>-->
+    <!--    <div class="topLastRecordContentLabel">-->
+    <!--      <span class="marquee">{{ this.lastRecordContent }}</span>-->
+    <!--    </div>-->
 
     <div class="start-time-info">
       <span class="timelabel">开始时间：{{ this.timestampToTimeChina(this.centerPoint.startTime) }}</span>
@@ -128,13 +128,12 @@ export default {
       this.getPlotwithStartandEndTime(this.eqid)
       window.viewer.timeline.container.onmouseup = (e) => {
         this.findLastRecordTimeAndContent()
-        if(this.isMarkingLayer===false){
+        if (this.isMarkingLayer === false) {
           console.log("11111 isMarkingLayer_viewer ")
           window.viewer.clockViewModel.shouldAnimate = false;
           this.endflag = true; //设置的flag，避免与自动播放的动效暂停播放冲突
           this.selectButton("playEnd")
-        }
-        else {
+        } else {
           console.log("2222 isMarkingLayer_viewer")
           this.playEnd()
         }
@@ -216,12 +215,11 @@ export default {
       window.viewer.clockViewModel.shouldAnimate = true;
       viewer.clock.currentTime = Cesium.JulianDate.fromDate(new Date());
       this.findLastRecordTimeAndContent()
-      if(this.isMarkingLayer===false){
+      if (this.isMarkingLayer === false) {
         window.viewer.clockViewModel.shouldAnimate = false;
         this.endflag = true; //设置的flag，避免与自动播放的动效暂停播放冲突
         this.selectButton("playEnd")
-      }
-      else{
+      } else {
         this.flyflag = false
         this.endflag = false;
         this.$emit('startTimePlay');
@@ -260,12 +258,11 @@ export default {
       } else {
         window.viewer.clock.multiplier = this.currentSpeed
       }
-      if(this.isMarkingLayer===false){
+      if (this.isMarkingLayer === false) {
         window.viewer.clockViewModel.shouldAnimate = false;
         this.endflag = true; //设置的flag，避免与自动播放的动效暂停播放冲突
         this.selectButton("playEnd")
-      }
-      else{
+      } else {
         window.viewer.clockViewModel.shouldAnimate = true;
         this.endflag = false;
         this.$emit('startTimePlay');
@@ -356,7 +353,7 @@ export default {
       }
     },
     ifstopandflash(currentTime, oldCurrentTime) {
-      if(this.isMarkingLayer==false){
+      if (this.isMarkingLayer == false) {
         return;
       }
       if (this.flyflag == false) {
@@ -410,7 +407,7 @@ export default {
     },
     timestampToTimeChina(time) {
       return timeTransfer.timestampToTimeChina(time)
-    }
+    },
   }
 }
 

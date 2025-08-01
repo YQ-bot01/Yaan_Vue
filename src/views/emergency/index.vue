@@ -259,18 +259,7 @@
                     </el-button>
                 </div>
             </div>
-<!--            <el-button type="primary" @click="confirmSelection">确认选择</el-button>-->
         </div>
-
-        <!-- marchRegionSupplies 供应详情 -->
-<!--        <div class="panelContent" style="padding-right: 5px" v-if="marchRegionSupplies">-->
-<!--            <div>-->
-<!--&lt;!&ndash;                <p>当前选择的区域：{{ selectedRegions.map(r => r.name).join(', ') }}</p>&ndash;&gt;-->
-<!--                <h1>11111111111111111111111</h1>-->
-<!--                <el-button type="primary" @click="goBackToRegionSelection">返回重新选择</el-button>-->
-<!--            </div>-->
-<!--        </div>-->
-
       <div style="width: 100%;display: flex;justify-content: center;align-items: center">
         <div class="panelButtons">
           <el-button @click="panels.marchRegionsDialog = false">取消</el-button>
@@ -2324,7 +2313,6 @@ export default {
     clearHandler() {
       // 清除所有之前的 LEFT_CLICK 监听器
       if (this.handler) {
-        console.log("11111111")
         this.handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
       }
     },
