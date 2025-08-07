@@ -1,9 +1,212 @@
-import sichuanCounty from "@/assets/geoJson/sichuanCounty.json";
 import * as Cesium from 'cesium'
+
+import siChuanCity from "@/assets/geoJson/sichuan.json";
+import sichuanCounty from "@/assets/geoJson/sichuanCounty.json";
+import yaAnVillage from "@/assets/geoJson/yaan.json";
+
 import yaAn from "@/assets/geoJson/yaan1.json";
+import {getModelData} from "@/api/system/tiltPhotography.js";
+import modelicon from "@/assets/icons/png/3D.png";
+import {TianDiTuToken} from "@/cesium/tool/config.js";
+import {tianditu} from "@/utils/server.js";
+
+
+let modelEntities = [];
+let siChuanCityRegionLabels = [];
+let sichuanCountyRegionLabels = [];
+let yaAnVillageRegionLabels = [];
+let sichuanCityStroke = []
+let siChuanCountyStroke = []
+let yaAnVillageStroke = []
 
 let layer = {
-    //视角跳转
+    // 四川省-雅安市三级行政区划
+    // 加载四川省市级图层
+    loadSichuanCityLayer() {
+        if (sichuanCityStroke.length === 0) {
+            console.log("loadCityLayer 加载市级图层")
+            // viewer.terrainProvider = Cesium.createWorldTerrain();
+
+            try {
+                // 遍历 GeoJSON 数据，手动创建填充和边界线
+                siChuanCity.features.forEach(feature => {
+                    const firstPolygon = feature.geometry.coordinates[0][0];
+                    const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+                    // 创建边界线部分
+                    let strokeentity = viewer.entities.add({
+                        polyline: {
+                            positions: positions,
+                            material: Cesium.Color.fromCssColorString('#ffffff'),
+                            width: 2,
+                            clampToGround: true
+                        }
+                    });
+                    sichuanCityStroke.push(strokeentity)
+                    const centroid = this.calculateCentroid(positions);
+                    let labelentity = window.viewer.entities.add({
+                        layer: "siChuanCityRegionLabel",
+                        position: centroid,
+                        label: {
+                            text: feature.properties.name || '未命名',
+                            font: '18px sans-serif',
+                            fillColor: Cesium.Color.WHITE,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                            pixelOffset: new Cesium.Cartesian2(0, 0),
+                            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
+                        }
+                    });
+                    siChuanCityRegionLabels.push(labelentity)
+                })
+            } catch (error) {
+                console.error("加载市级图层失败:", error);
+            }
+        }
+    },
+    // 加载四川省区县级图层
+    loadSiChuanCountyLayer() {
+        if (siChuanCountyStroke.length === 0) {
+            console.log(" 加载区县级图层")
+            // viewer.terrainProvider = Cesium.createWorldTerrain();
+            try {
+                // 遍历 GeoJSON 数据，手动创建填充和边界线
+                sichuanCounty.features.forEach(feature => {
+                    const firstPolygon = feature.geometry.coordinates[0][0];
+                    const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+                    // 创建边界线部分
+                    let strokeentity = viewer.entities.add({
+                        polyline: {
+                            positions: positions,
+                            material: Cesium.Color.fromCssColorString('#d9da95'),
+                            width: 2,
+                            clampToGround: true
+                        }
+                    });
+                    siChuanCountyStroke.push(strokeentity)
+                    const centroid = this.calculateCentroid(positions);
+                    let entity = window.viewer.entities.add({
+                        layer: "sichuanCountyRegionLabel",
+                        position: centroid,
+                        label: {
+                            text: feature.properties.name || '未命名',
+                            font: '18px sans-serif',
+                            fillColor: Cesium.Color.WHITE,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                            pixelOffset: new Cesium.Cartesian2(0, 0),
+                            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
+                        }
+                    });
+                    sichuanCountyRegionLabels.push(entity)
+                })
+            } catch (error) {
+                console.error("加载区县级图层失败:", error);
+            }
+        }
+    },
+    // 加载雅安市乡镇级图层
+    loadYaAnVillageLayer() {
+        // console.log(yaAnVillageStroke,"yaAnVillageStroke")
+        if (yaAnVillageStroke.length === 0) {
+            console.log("loadYaAnVillageLayer add")
+            // 确保地形提供者已加载
+            // viewer.terrainProvider = Cesium.createWorldTerrain();
+
+            try {
+                // 遍历 GeoJSON 数据，手动创建填充和边界线
+                yaAnVillage.features.forEach(feature => {
+                    const firstPolygon = feature.geometry.coordinates[0][0];
+                    const positions = firstPolygon.map(vertex => Cesium.Cartesian3.fromDegrees(vertex[0], vertex[1]));
+                    // 创建边界线部分
+                    let strokeentity = viewer.entities.add({
+                        polyline: {
+                            positions: positions,
+                            material: Cesium.Color.fromCssColorString('#ff1e00'),
+                            width: 2,
+                            clampToGround: true
+                        }
+                    });
+                    yaAnVillageStroke.push(strokeentity)
+                    const centroid = this.calculateCentroid(positions);
+                    let labelentity = window.viewer.entities.add({
+                        layer: "yaAnVillageRegionLabel",
+                        position: centroid,
+                        label: {
+                            text: feature.properties.name || '未命名',
+                            font: '18px sans-serif',
+                            fillColor: Cesium.Color.WHITE,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+                            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                            pixelOffset: new Cesium.Cartesian2(0, 0),
+                            eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
+                        }
+                    });
+                    yaAnVillageRegionLabels.push(labelentity)
+                    console.log("雅安市乡镇级图层加载成功！");
+                })
+            } catch (error) {
+                console.error("加载市级图层失败:", error);
+            }
+        }
+    },
+
+    calculateCentroid(positions) {
+        let centroid = Cesium.Cartesian3.ZERO;
+        positions.forEach(pos => {
+            centroid = Cesium.Cartesian3.add(centroid, pos, new Cesium.Cartesian3());
+        });
+        return Cesium.Cartesian3.divideByScalar(centroid, positions.length, new Cesium.Cartesian3());
+    },
+
+    removeSichuanCityLayer() {
+        // 移除标签
+        siChuanCityRegionLabels.forEach((item) => {
+            window.viewer.entities.remove(item)
+        })
+        sichuanCityStroke.forEach((item) => {
+            window.viewer.entities.remove(item)
+        })
+        siChuanCityRegionLabels = []
+        sichuanCityStroke = []
+    },
+    removeSiChuanCountyLayer() {
+        // 移除标签
+        sichuanCountyRegionLabels.forEach((item) => {
+            window.viewer.entities.remove(item)
+        })
+        siChuanCountyStroke.forEach((item) => {
+            window.viewer.entities.remove(item)
+        })
+        //移除图层
+        sichuanCountyRegionLabels = []
+        siChuanCountyStroke = []
+    },
+    removeYaAnVillageLayer() {
+        // 移除标签
+        yaAnVillageRegionLabels.forEach((item) => {
+            window.viewer.entities.remove(item)
+        })
+        yaAnVillageRegionLabels = []
+        yaAnVillageStroke.forEach((item) => {
+            window.viewer.entities.remove(item)
+        })
+        yaAnVillageStroke = []
+    },
+    //四川省-雅安市三级行政区划 end
+
+    //视角跳转-加载雅安市
     addYaanCityDistrict() {
         let geoPromise = Cesium.GeoJsonDataSource.load(yaAn, {
             clampToGround: true, //贴地显示
@@ -40,6 +243,7 @@ let layer = {
             })
         }));
     },
+    //视角跳转-加载雅安区县
     addCountyLayerJump(district) {
         // 根据区县代码过滤GeoJSON数据
         let filteredFeatures = sichuanCounty.features.filter(feature => {
@@ -102,6 +306,7 @@ let layer = {
             // console.error("未找到对应的区县:", adcode);
         }
     },
+    //视角跳转-取消视角跳转图层
     removeRegionLayerJump() {
         if (window.regionLayerJump) {
             // 从viewer的数据源中移除图层，第二个参数为true表示强制移除
@@ -115,6 +320,113 @@ let layer = {
             window.viewer.entities.remove(labelEntity)
         }
     },
-    //视角跳转 end
+
+    //多源要素图层-加载三维模型图层
+    addModelLayer() {
+        getModelData().then(res => {
+            console.log("倾斜模型数据，新加的点，", res)
+            // 创建一个数组来保存实体和对应的数据
+            for (let i = 0; i < res.length; i++) {
+                let alltiltPhotography = window.viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(res[i].geom.coordinates[0], res[i].geom.coordinates[1]),
+                    layer: "倾斜模型",
+                    // point: {
+                    //   pixelSize: 20,
+                    //   color: Cesium.Color.fromCssColorString("#e0c79b"),
+                    //   clampToGround: true,
+                    // },
+                    billboard: {
+                        image: modelicon,
+                        width: 30,
+                        height: 30,
+                        eyeOffset: new Cesium.Cartesian3(0, 0, 0), // 与坐标位置的偏移距离
+                        scaleByDistance: new Cesium.NearFarScalar(500, 1, 5e5, 0.1), // 近大远小
+                        depthTest: false, // 禁止深度测试
+                        // eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                        // color: Cesium.Color.WHITE.withAlpha(1),
+                        // scale: 0.8,
+                        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND, // 禁用，导致图标在高度计算或与地形交互时出现闪烁。 原作用：绑定到地形高度,让billboard贴地
+                        disableDepthTestDistance: Number.POSITIVE_INFINITY
+                    },
+                    properties: {
+                        data:res[i]
+                    }
+                });
+                // 将实体保存到数组中
+                modelEntities.push(alltiltPhotography);
+            }
+        })
+    },
+    removeModelLayer() {
+        if (window.modelObject) {
+            window.modelObject.show = false
+        }
+        modelEntities.forEach((item) => {
+            window.viewer.entities.remove(item)
+        })
+    },
+
+    //交通路网
+    addTrafficLayer() {
+        // 获取天地图API令牌
+        let token = TianDiTuToken;
+
+        let trafficLayerexists =false;
+        let trafficTxtLayerExists =false;
+        const layers = viewer.imageryLayers;
+        // 遍历所有图层，检查是否存在指定名称的图层
+        for (let i = 0; i < layers.length; i++) {
+            if (layers.get(i).name === 'TrafficLayer') {
+                // 如果找到指定名称的图层，返回true
+                trafficLayerexists=true;
+            }
+            if (layers.get(i).name === 'TrafficLayer') {
+                // 如果找到指定名称的图层，返回true
+                trafficTxtLayerExists=true;
+            }
+        }
+        if (!trafficLayerexists) {
+            // 创建并添加交通图层
+            let trafficLayer = viewer.imageryLayers.addImageryProvider(
+                new Cesium.WebMapTileServiceImageryProvider({
+                    // 天地图交通图层的URL模板
+                    url: `${tianditu}/cva_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cva&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&tk=${token}`,
+                    layer: "tdtAnnoLayer",
+                    style: "default",
+                    format: "image/jpeg", // 根据实际返回的图像格式调整
+                    tileMatrixSetID: "w", // 如果URL中已经指定了tileMatrixSet，则此参数可能不是必需的
+                    show: true
+                })
+            );
+            trafficLayer.name = "TrafficLayer"; // 设置名称
+        }
+
+        if (!trafficTxtLayerExists) {
+            // 创建并添加交通注记图层
+            let traffictxtLayer = viewer.imageryLayers.addImageryProvider(
+                new Cesium.WebMapTileServiceImageryProvider({
+                    // 天地图交通注记图层的URL模板
+                    url: `${tianditu}/cia_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cia&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&tk=${TianDiTuToken}`,
+                    layer: "tdtAnnoLayer",
+                    style: "default",
+                    format: "image/jpeg",
+                    tileMatrixSetID: "GoogleMapsCompatible",
+                    show: false // 初始状态下不显示图层
+                })
+            )
+            traffictxtLayer.name = "TrafficTxtLayer"
+        }
+    },
+    removeTrafficLayer() {
+        // 获取当前 viewer 的所有影像图层
+        //移除多个图层的时候需要从后往前遍历
+        const layers = window.viewer.imageryLayers;
+        for (let i = layers.length - 1; i >= 0; i--) {
+            if (layers.get(i).name === 'TrafficLayer' || layers.get(i).name === 'TrafficTxtLayer') {
+                layers.remove(layers.get(i));
+            }
+        }
+    },
+
 }
 export default layer;

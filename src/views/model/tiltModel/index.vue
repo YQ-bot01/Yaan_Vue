@@ -1,7 +1,7 @@
 <template>
   <div>
     <div id="cesiumContainer" v-if="pageStatus">
-      <el-form class="tool-container-1">
+      <el-form class="tool-container-1" :style="toolContainerStyle">
         <el-row>
           <div class="modelAdj" style="margin-top: 5px">模型调整</div>
           <el-button type="primary" @click="showSelectModel=!showSelectModel">
@@ -17,7 +17,7 @@
           <!--        <el-button class="el-button--primary" @click="isTerrainLoaded">地形是否加载</el-button>-->
           <el-button type="primary" @click="hideModel">{{ modelStatusContent }}</el-button>
           <!--        <el-button type="primary" @click="openDialog('新增')">新增模型</el-button>-->
-          <el-button type="primary" @click="updataPosition">更新位置</el-button>
+          <el-button v-if="isAdmin" type="primary" @click="updataPosition">更新位置</el-button>
         </el-row>
       </el-form>
       <el-form class="button-container" v-show="showSelectModel" style="display: flex; flex-direction: column;">
@@ -108,30 +108,7 @@
           </el-col>
         </el-row>
       </el-form>
-
-      <!--    <el-dialog v-model="dialogFormVisible" title="新增模型" width="500" :show-close="false">-->
-      <!--      <el-form :model="modelInfo">-->
-      <!--        <el-form-item label="模型名称">-->
-      <!--          <el-input v-model="modelInfo.name" autocomplete="off"/>-->
-      <!--        </el-form-item>-->
-      <!--        <el-form-item label="模型路径">-->
-      <!--          <el-input v-model="modelInfo.path" autocomplete="off"/>-->
-      <!--        </el-form-item>-->
-      <!--      </el-form>-->
-      <!--      <template #footer>-->
-      <!--        <div class="dialog-footer">-->
-      <!--          <el-button @click="closeDialog">Cancel</el-button>-->
-      <!--          <el-button type="primary" @click="commitDialog">-->
-      <!--            Confirm-->
-      <!--          </el-button>-->
-      <!--        </div>-->
-      <!--      </template>-->
-      <!--    </el-dialog>-->
-
     </div>
-    <!--  <div v-if="!pageStatus">-->
-    <!--    <tiltTable />-->
-    <!--  </div>-->
   </div>
 
 </template>
@@ -167,6 +144,9 @@ import {
   transferModel,
   rotationModel
 } from '@/cesium/model.js';
+import layer from "@/cesium/layer.js";
+import Point from "@/cesium/plot/Point.js";
+import useUserStore from "@/store/modules/user.js";
 
 
 let pageStatus = ref(true)
@@ -217,16 +197,35 @@ onBeforeUnmount(() => {
     window.viewer = null;
   }
 })
+// 获取用户名
+const userStore = useUserStore()
+console.log("隐藏",userStore)
+// 计算属性判断是否admin
+// 判断是否是 admin
+const isAdmin = computed(() => userStore.name === 'admin')
+
+// 根据角色设置容器宽度
+const toolContainerStyle = computed(() => ({
+  position: 'absolute',
+  padding: '10px',
+  borderRadius: '5px',
+  top: '10px',
+  left: '10px',
+  zIndex: 10,
+  backgroundColor: 'rgba(40, 40, 40, 0.7)',
+  width: isAdmin.value ? '625px' : '560px'
+}))
 
 
 // 初始化控件等
-function init() {
+  function init() {
   let viewer = initCesium(Cesium)
   viewer._cesiumWidget._creditContainer.style.display = 'none' // 隐藏版权信息
   window.viewer = viewer
   let options = {}
   // 用于在使用重置导航重置地图视图时设置默认视图控制。接受的值是Cesium.Cartographic 和 Cesium.Rectangle.
-  options.defaultResetView = Cesium.Cartographic.fromDegrees(103.00, 29.98, 1500, new Cesium.Cartographic)
+
+  options.defaultResetView = Cesium.Cartographic.fromDegrees(103.00, 29.98, 200000, new Cesium.Cartographic)
   // 用于启用或禁用罗盘。true是启用罗盘，false是禁用罗盘。默认值为true。如果将选项设置为false，则罗盘将不会添加到地图中。
   options.enableCompass = true
   // 用于启用或禁用缩放控件。true是启用，false是禁用。默认值为true。如果将选项设置为false，则缩放控件将不会添加到地图中。
@@ -238,6 +237,16 @@ function init() {
   options.resetTooltip = "重置视图";
   options.zoomInTooltip = "放大";
   options.zoomOutTooltip = "缩小";
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(103.00, 29.98, 20000),//足够高可以看到整个地球
+    orientation: {
+      // 指向
+      heading: 6.283185307179581,
+      // 视角
+      pitch: -1.5688168484696687,
+      roll: 0.0
+    }
+  });
   //新版必须new  CesiumNavigation ,可以查看作者github
   window.navigation = new CesiumNavigation(viewer, options)
   // document.getElementsByClassName('navigation-control-icon-zoom-in')[0].style.color = '#409EFF'
@@ -271,445 +280,502 @@ function init() {
       altitudeShow.innerHTML = altiString;
     }
   }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-
+  layer.loadYaAnVillageLayer();
+  window.viewer.camera.changed.addEventListener(handleCameraChange);
 }
 
-function switchToLocalDEM(){
-  // 切换地形提供者
-  if (true) {
-    window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand(); // 切换到第三方地形
-  } else {
-    window.viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand(); // 切换到仅底图
-  }
+  function handleCameraChange() {
+    // 定义相机高度阈值
+    let CITY_LAYER_HEIGHT = 1000000; // 市级图层的高度阈值
+    let COUNTY_LAYER_HEIGHT = 100000; // 区县级图层的高度阈值
+    let height = window.viewer.camera.positionCartographic.height; // 获取相机高度
+    console.log("当前相机高度:", height);
 
-  // 更新选中的地形
-  window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[true ? 1 : 0];
-
-  // 高亮当前选中的地形
-  const currentLayer = document.querySelector(`[title="${true ? '第三方地形' : 'WGS84标准球体'}"]`);
-  if (currentLayer) {
-    currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
-  }
-}
-
-function changeModel(row){
-  switchToLocalDEM()
-  if (isTerrainLoaded()){
-    tz.value=row.tze
-    rz.value=row.rze
-  }else {
-    tz.value=row.tz
-    rz.value=row.rz
-  }
-
-  modelInfo.name = row.name
-  modelInfo.path = row.path
-  modelInfo.tz = row.tz
-  modelInfo.rz = row.rz
-  modelInfo.time = row.time
-  // modelInfo.modelid = row.modelid
-  modelInfo.modelid = row.uuid
-  modelInfo.tze = row.tze
-  modelInfo.rze = row.rze
-
-  // 模型加载绕点旋转
-  new Promise((resolve,reject)=>{
-    goModel(row)
-    resolve()
-  }).then(()=>{
-    let tileset = window.modelObject
-    tileset.readyPromise.then(()=>{
-      let boundingSphere = tileset.boundingSphere;
-      let center = boundingSphere.center;
-      let cartographic = Cesium.Cartographic.fromCartesian(center);
-      let longitude = Cesium.Math.toDegrees(cartographic.longitude);
-      let latitude = Cesium.Math.toDegrees(cartographic.latitude);
-      rotateCamera({lng:longitude, lat:latitude, pitch: -85, height:1500, time:60})
+    // 根据高度动态加载或移除图层
+    if (height > CITY_LAYER_HEIGHT) {
+      // 移除区县级和道路级标签
+      layer.removeSiChuanCountyLayer()
+      layer.removeYaAnVillageLayer()
+      // 加载市级图层
+      layer.loadSichuanCityLayer();
+    } else if (height > COUNTY_LAYER_HEIGHT) {
+      // 移除市级和道路级标签
+      layer.removeSichuanCityLayer()
+      layer.removeYaAnVillageLayer()
+      // 加载区县级图层
+      layer.loadSiChuanCountyLayer();
+    } else {
+      layer.removeSichuanCityLayer()
+      layer.removeSiChuanCountyLayer()
+      // 加载乡镇级图层
+      layer.loadYaAnVillageLayer();
     }
-    )
-  })
-}
+  }
 
-function rotateCamera(options){
-  let time = options.time
-  let position = Cesium.Cartesian3.fromDegrees(options.lng, options.lat, 0.0);
-  // 相机看点的角度，如果大于0那么则是从地底往上看，所以要为负值，这里取-30度
-  let pitch = Cesium.Math.toRadians(options.pitch);
-  // 飞行720°所需时间，比如30s, 那么每秒转动度数
-  let angle = 720 / time;
-  // 给定相机距离点多少距离飞行
-  let distance = options.height;
-  let startTime = Cesium.JulianDate.fromDate(new Date());
+  function switchToLocalDEM() {
+    // 切换地形提供者
+    if (true) {
+      window.viewer.scene.terrainProvider = terrainProviderViewModels[2].creationCommand(); // 切换到DEM地形
+      // window.viewer.scene.terrainProvider = terrainProviderViewModels[1].creationCommand(); // 切换到第三方地形
+    } else {
+      window.viewer.scene.terrainProvider = terrainProviderViewModels[0].creationCommand(); // 切换到仅底图
+    }
 
-  let stopTime = Cesium.JulianDate.addSeconds(startTime, time, new Cesium.JulianDate());
+    // 更新选中的地形
+    window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[true ? 2 : 0];
+    //
+    // // 高亮当前选中的地形
+    const currentLayer = document.querySelector(`[title="${true ? '本地DEM地形' : 'WGS84标准球体'}"]`);
+    // 更新选中的地形
+    // window.viewer.baseLayerPicker.viewModel.selectedTerrain = terrainProviderViewModels[true ? 1 : 0];
 
-  viewer.clock.startTime = startTime.clone();  // 开始时间
-  viewer.clock.stopTime = stopTime.clone();     // 结速时间
-  viewer.clock.currentTime = startTime.clone(); // 当前时间
-  viewer.clock.clockRange = Cesium.ClockRange.CLAMPED; // 行为方式
-  viewer.clock.clockStep = Cesium.ClockStep.SYSTEM_CLOCK; // 时钟设置为当前系统时间; 忽略所有其他设置。
-  // 相机的当前heading
-  let initialHeading = viewer.camera.heading;
+    // 高亮当前选中的地形
+    // const currentLayer = document.querySelector(`[title="${true ? '第三方地形' : 'WGS84标准球体'}"]`);
+    // console.log("currentLayer",currentLayer)
+    if (currentLayer) {
+      currentLayer.classList.add('cesium-baseLayerPicker-selectedItem');
+    }
+  }
 
-  let Exection = function TimeExecution() {
-    // 当前已经过去的时间，单位s
-    let delTime = Cesium.JulianDate.secondsDifference(viewer.clock.currentTime, viewer.clock.startTime);
-    // 根据过去的时间，计算偏航角的变化
-    let heading = Cesium.Math.toRadians(delTime * angle) + initialHeading;
+  function changeModel(row) {
+    switchToLocalDEM()
+    if (isTerrainLoaded()) {
+      tz.value = row.tze
+      rz.value = row.rze
+    } else {
+      tz.value = row.tz
+      rz.value = row.rz
+    }
 
-    viewer.camera.lookAt(position, new Cesium.HeadingPitchRange(heading, pitch, distance));
+    modelInfo.name = row.name
+    modelInfo.path = row.path
+    modelInfo.tz = row.tz
+    modelInfo.rz = row.rz
+    modelInfo.time = row.time
+    // modelInfo.modelid = row.modelid
+    modelInfo.modelid = row.uuid
+    modelInfo.tze = row.tze
+    modelInfo.rze = row.rze
 
-    if (Cesium.JulianDate.compare(viewer.clock.currentTime, viewer.clock.stopTime) >= 0) {
+    // 模型加载绕点旋转
+    new Promise((resolve, reject) => {
+      goModel(row)
+      resolve()
+    }).then(() => {
+      let tileset = window.modelObject
+      tileset.readyPromise.then(() => {
+            let boundingSphere = tileset.boundingSphere;
+            let center = boundingSphere.center;
+            let cartographic = Cesium.Cartographic.fromCartesian(center);
+            let longitude = Cesium.Math.toDegrees(cartographic.longitude);
+            let latitude = Cesium.Math.toDegrees(cartographic.latitude);
+            rotateCamera({lng: longitude, lat: latitude, pitch: -40, height: 7500, time: 120})
+          }
+      )
+    })
+  }
+
+  function rotateCamera(options) {
+    let time = options.time
+    let position = Cesium.Cartesian3.fromDegrees(options.lng, options.lat, 0.0);
+    // 相机看点的角度，如果大于0那么则是从地底往上看，所以要为负值，这里取-30度
+    let pitch = Cesium.Math.toRadians(options.pitch);
+    // 飞行720°所需时间，比如30s, 那么每秒转动度数
+    let angle = 720 / time;
+    // 给定相机距离点多少距离飞行
+    let distance = options.height;
+    let startTime = Cesium.JulianDate.fromDate(new Date());
+
+    let stopTime = Cesium.JulianDate.addSeconds(startTime, time, new Cesium.JulianDate());
+
+    viewer.clock.startTime = startTime.clone();  // 开始时间
+    viewer.clock.stopTime = stopTime.clone();     // 结速时间
+    viewer.clock.currentTime = startTime.clone(); // 当前时间
+    viewer.clock.clockRange = Cesium.ClockRange.CLAMPED; // 行为方式
+    viewer.clock.clockStep = Cesium.ClockStep.SYSTEM_CLOCK; // 时钟设置为当前系统时间; 忽略所有其他设置。
+    // 相机的当前heading
+    let initialHeading = viewer.camera.heading;
+    viewer.entities.add({
+      id: new Date().getTime(),
+      position: Cesium.Cartesian3.fromDegrees(options.lng, options.lat),
+      point: {
+        pixelSize: 10,//点像素大小
+        color: Cesium.Color.RED,//点颜色，不能用rgb等css方法，需要用Cesium.Color
+        outlineColor: Cesium.Color.WHITE,
+        outlineWidth: 2,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY
+      },
+    })
+    let Exection = function TimeExecution() {
+      // 当前已经过去的时间，单位s
+      let delTime = Cesium.JulianDate.secondsDifference(viewer.clock.currentTime, viewer.clock.startTime);
+      // 根据过去的时间，计算偏航角的变化
+      let heading = Cesium.Math.toRadians(delTime * angle) + initialHeading;
+
+      viewer.camera.lookAt(position, new Cesium.HeadingPitchRange(heading, pitch, distance));
+
+      if (Cesium.JulianDate.compare(viewer.clock.currentTime, viewer.clock.stopTime) >= 0) {
+        viewer.clock.onTick.removeEventListener(Exection);
+      }
+    };
+    // 鼠标可以通过左击和滚动滚轮结束旋转
+    let handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+    handler.setInputAction(function (click) {
       viewer.clock.onTick.removeEventListener(Exection);
+      viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+      console.log('LEFT_CLICK')
+      handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+    handler.setInputAction(function (click) {
+      viewer.clock.onTick.removeEventListener(Exection);
+      viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+      console.log('WHEEL')
+      handler.removeInputAction(Cesium.ScreenSpaceEventType.WHEEL)
+    }, Cesium.ScreenSpaceEventType.WHEEL)
+    viewer.clock.onTick.addEventListener(Exection);
+  }
+
+  function showArrowModel() {
+    showArrow(showArrowValue)
+    if (!showArrowValue) {
+      showArrowValue = true
+      showArrowText.value = "隐藏坐标轴"
+    } else {
+      showArrowValue = false
+      showArrowText.value = "显示坐标轴"
     }
-  };
-  // 鼠标可以通过左击和滚动滚轮结束旋转
-  let handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-  handler.setInputAction(function (click) {
-    viewer.clock.onTick.removeEventListener(Exection);
-    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
-    console.log('LEFT_CLICK')
-    handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)
-  }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
-  handler.setInputAction(function (click) {
-    viewer.clock.onTick.removeEventListener(Exection);
-    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
-    console.log('WHEEL')
-    handler.removeInputAction(Cesium.ScreenSpaceEventType.WHEEL)
-  }, Cesium.ScreenSpaceEventType.WHEEL)
-  viewer.clock.onTick.addEventListener(Exection);
-}
-
-function showArrowModel() {
-  showArrow(showArrowValue)
-  if (!showArrowValue) {
-    showArrowValue = true
-    showArrowText.value = "隐藏坐标轴"
-  } else {
-    showArrowValue = false
-    showArrowText.value = "显示坐标轴"
   }
-}
-function hideModel() {
-  hide(modelStatus)
-  if (modelStatus) {
-    // window.modelObject.show = false
-    modelStatus = false
-    modelStatusContent.value = '显示当前模型'
-  } else {
-    // window.modelObject.show = true
-    modelStatus = true
-    modelStatusContent.value = '隐藏当前模型'
-  }
-}
 
+  function hideModel() {
+    hide(modelStatus)
+    if (modelStatus) {
+      // window.modelObject.show = false
+      modelStatus = false
+      modelStatusContent.value = '显示当前模型'
+    } else {
+      // window.modelObject.show = true
+      modelStatus = true
+      modelStatusContent.value = '隐藏当前模型'
+    }
+  }
 
 
 // 更新模型位置
-function updataPosition() {
+  function updataPosition() {
 
-  if (isTerrainLoaded()) {
-    let data = {
-      rze: rz.value,
-      tze: tz.value,
-      uuid: modelInfo.modelid
-    }
-    console.log(data,"update data")
-    updataModelElevation(data).then(res => {
-      ElMessage({
-        showClose: true,
-        message: '加载地形情况下，更新成功',
-        type: 'success',
-        duration: 2000,
+    if (isTerrainLoaded()) {
+      let data = {
+        rze: rz.value,
+        tze: tz.value,
+        uuid: modelInfo.modelid
+      }
+      console.log(data, "update data")
+      updataModelElevation(data).then(res => {
+        ElMessage({
+          showClose: true,
+          message: '加载地形情况下，更新成功',
+          type: 'success',
+          duration: 2000,
+        })
+        initModelTable()
       })
-      initModelTable()
-    })
-  }
-
-  else {
-    let data = {
-      rz: rz.value,
-      tz: tz.value,
-      uuid: modelInfo.modelid
-    }
-    console.log(data,"update data")
-    updataModelNoElevation(data).then(res => {
-      ElMessage({
-        showClose: true,
-        message: '不加载地形情况下，更新成功',
-        type: 'success',
-        duration: 2000,
+    } else {
+      let data = {
+        rz: rz.value,
+        tz: tz.value,
+        uuid: modelInfo.modelid
+      }
+      console.log(data, "update data")
+      updataModelNoElevation(data).then(res => {
+        ElMessage({
+          showClose: true,
+          message: '不加载地形情况下，更新成功',
+          type: 'success',
+          duration: 2000,
+        })
+        initModelTable()
       })
-      initModelTable()
-    })
+    }
   }
-}
 
 //监听地形
-function watchTerrainProviderChanged() {
-  window.viewer.scene.terrainProviderChanged.addEventListener(terrainProvider => {
-    if (isTerrainLoaded()) {
-      tz.value = modelInfo.tze
-      rz.value = modelInfo.rze
-      changeHeight(modelInfo.tze)
-      rotationModel(window.modelObject, rz.value)
-      findModel()
-    } else {
-      tz.value = modelInfo.tz
-      rz.value = modelInfo.rz
-      changeHeight(modelInfo.tz)
-      rotationModel(window.modelObject, rz.value)
-      findModel()
-    }
-  });
-}
-function changeHeight(_tz) {
-  tz.value=_tz
-  transferModel(window.modelObject, 0, 0, _tz, opacity.value)
-}
-function changeRotationZ(_rz) {
-  console.log(modelInfo,"modelInfo")
-  rz.value=_rz
-  rotationModel(window.modelObject, _rz)
-}
-function changeOpacity(_opacity) {
-  opacity.value=_opacity
-  transferModel(window.modelObject, 0, 0, tz.value, _opacity)
-}
+  function watchTerrainProviderChanged() {
+    window.viewer.scene.terrainProviderChanged.addEventListener(terrainProvider => {
+      if (isTerrainLoaded()) {
+        tz.value = modelInfo.tze
+        rz.value = modelInfo.rze
+        changeHeight(modelInfo.tze)
+        rotationModel(window.modelObject, rz.value)
+        findModel()
+      } else {
+        tz.value = modelInfo.tz
+        rz.value = modelInfo.rz
+        changeHeight(modelInfo.tz)
+        rotationModel(window.modelObject, rz.value)
+        findModel()
+      }
+    });
+  }
+
+  function changeHeight(_tz) {
+    tz.value = _tz
+    transferModel(window.modelObject, 0, 0, _tz, opacity.value)
+  }
+
+  function changeRotationZ(_rz) {
+    console.log(modelInfo, "modelInfo")
+    rz.value = _rz
+    rotationModel(window.modelObject, _rz)
+  }
+
+  function changeOpacity(_opacity) {
+    opacity.value = _opacity
+    transferModel(window.modelObject, 0, 0, tz.value, _opacity)
+  }
+
 //-----------------------模型table----------------------------
 
 // 初始化模型table数据
-function initModelTable() {
-  getAllModel().then(res => {
-    console.log(res)
-    modelList = res
-    total.value = modelList.length
-    tableData.value = getPageArr(modelList)
-    console.log("modelList, tableData", modelList, tableData)
-  })
-}
+  function initModelTable() {
+    getAllModel().then(res => {
+      console.log(res)
+      modelList = res
+      total.value = modelList.length
+      tableData.value = getPageArr(modelList)
+      console.log("modelList, tableData", modelList, tableData)
+    })
+  }
 
 // 修改table的header的样式
-function tableHeaderColor() {
-  return {
-    'border-width': '1px',
-    'border-style': 'solid',
-    'border-color': '#555555',
-    'background-color': '#293038 !important', // 此处是elemnetPlus的奇怪bug，header-cell-style中背景颜色不加!important不生效
-    'color': '#fff',
-    'padding': '0',
-    'text-align': 'center',
-    'font-size': '14px'
+  function tableHeaderColor() {
+    return {
+      'border-width': '1px',
+      'border-style': 'solid',
+      'border-color': '#555555',
+      'background-color': '#293038 !important', // 此处是elemnetPlus的奇怪bug，header-cell-style中背景颜色不加!important不生效
+      'color': '#fff',
+      'padding': '0',
+      'text-align': 'center',
+      'font-size': '14px'
+    }
   }
-}
 
 // 修改table 中每行的样式
-function tableColor({row, column, rowIndex, columnIndex}) {
-  if (rowIndex % 2 == 1) {
-    return {
-      'border-width': '1px',
-      'border-style': 'solid',
-      'border-color': '#555555',
-      'background-color': '#313a44',
-      'color': '#fff',
-      'padding': '0',
-      'text-align': 'center',
-      'font-size': '14px'
-    }
-  } else {
-    return {
-      'border-width': '1px',
-      'border-style': 'solid',
-      'border-color': '#555555',
-      'background-color': '#304156',
-      'color': '#fff',
-      'padding': '0',
-      'text-align': 'center',
-      'font-size': '14px'
-    }
-  }
-}
-
-/**
- * 分页
- * @param data
- * @returns {*[]}
- */
-//数组切片
-function getPageArr(data) {
-  let arr = []
-
-  // 打印分页的起始和结束位置
-  let start = (currentPage.value - 1) * pageSize.value
-  let end = currentPage.value * pageSize.value
-  console.log('Start index:', start);  // 打印起始索引
-  console.log('End index:', end);      // 打印结束索引
-
-  if (end > total.value) {
-    end = total.value
-  }
-
-  console.log('Adjusted End index:', end); // 打印调整后的结束索引
-
-  // 遍历数据，打印每个数据项
-  for (; start < end; start++) {
-    // 检查是否存在数据项
-    if (data[start]) {
-      console.log('Data item:', data[start]);  // 打印每个数据项
-      data[start].show = false
-      arr.push(data[start])
+  function tableColor({row, column, rowIndex, columnIndex}) {
+    if (rowIndex % 2 == 1) {
+      return {
+        'border-width': '1px',
+        'border-style': 'solid',
+        'border-color': '#555555',
+        'background-color': '#313a44',
+        'color': '#fff',
+        'padding': '0',
+        'text-align': 'center',
+        'font-size': '14px'
+      }
     } else {
-      console.log('No data at index', start);  // 如果没有数据，打印当前索引
+      return {
+        'border-width': '1px',
+        'border-style': 'solid',
+        'border-color': '#555555',
+        'background-color': '#304156',
+        'color': '#fff',
+        'padding': '0',
+        'text-align': 'center',
+        'font-size': '14px'
+      }
     }
   }
-  console.log('Current page data:', arr);  // 打印当前页的数据
-  return arr
-}
+
+  /**
+   * 分页
+   * @param data
+   * @returns {*[]}
+   */
+//数组切片
+  function getPageArr(data) {
+    let arr = []
+
+    // 打印分页的起始和结束位置
+    let start = (currentPage.value - 1) * pageSize.value
+    let end = currentPage.value * pageSize.value
+    console.log('Start index:', start);  // 打印起始索引
+    console.log('End index:', end);      // 打印结束索引
+
+    if (end > total.value) {
+      end = total.value
+    }
+
+    console.log('Adjusted End index:', end); // 打印调整后的结束索引
+
+    // 遍历数据，打印每个数据项
+    for (; start < end; start++) {
+      // 检查是否存在数据项
+      if (data[start]) {
+        console.log('Data item:', data[start]);  // 打印每个数据项
+        data[start].show = false
+        arr.push(data[start])
+      } else {
+        console.log('No data at index', start);  // 如果没有数据，打印当前索引
+      }
+    }
+    console.log('Current page data:', arr);  // 打印当前页的数据
+    return arr
+  }
 
 
 //`每页 ${val} 条`
-function handleSizeChange(val) {
-  pageSize.value = val
-  tableData.value = getPageArr(modelList)
-  // console.log(`每页 ${val} 条`);
-}
+  function handleSizeChange(val) {
+    pageSize.value = val
+    tableData.value = getPageArr(modelList)
+    // console.log(`每页 ${val} 条`);
+  }
 
 // `当前页: ${val}`
-function handleCurrentChange(val) {
-  currentPage.value = val
-  tableData.value = getPageArr(modelList)
-  // console.log(`当前页: ${val}`);
-}
-
+  function handleCurrentChange(val) {
+    currentPage.value = val
+    tableData.value = getPageArr(modelList)
+    // console.log(`当前页: ${val}`);
+  }
 
 
 //----------------------无用法-------------------------------------
 
 // 打开对话框
-function openDialog(titleM, row) {
-  if (titleM === "新增") {
-    title.value = "新增"
-    modelInfo.rz = 0
-    modelInfo.tz = 0
-    modelInfo.time = '1717743010164'
-    modelInfo.modelid = Date.now()
-  } else {
-    modelInfo.rz = 0
-    modelInfo.tz = 0
-    modelInfo.time = '1717743010164'
-    modelInfo.modelid = row.modelid
-    modelInfo.name = row.name
-    modelInfo.path = row.path
-    title.value = "编辑"
-  }
-  dialogFormVisible.value = true
+  function openDialog(titleM, row) {
+    if (titleM === "新增") {
+      title.value = "新增"
+      modelInfo.rz = 0
+      modelInfo.tz = 0
+      modelInfo.time = '1717743010164'
+      modelInfo.modelid = Date.now()
+    } else {
+      modelInfo.rz = 0
+      modelInfo.tz = 0
+      modelInfo.time = '1717743010164'
+      modelInfo.modelid = row.modelid
+      modelInfo.name = row.name
+      modelInfo.path = row.path
+      title.value = "编辑"
+    }
+    dialogFormVisible.value = true
 
-}
+  }
 
 // 关闭对话框
-function closeDialog() {
-  for (let key in modelInfo) {
-    modelInfo[key] = null
+  function closeDialog() {
+    for (let key in modelInfo) {
+      modelInfo[key] = null
+    }
+    dialogFormVisible.value = false
   }
-  dialogFormVisible.value = false
-}
 
 // 确认提交对话框，添加模型
-function commitDialog() {
-  let data = {
-    name: modelInfo.name,
-    path: modelInfo.path,
-    rz: modelInfo.rz,
-    tz: modelInfo.tz,
-    rze: modelInfo.rze,
-    tze: modelInfo.tze,
-    time: modelInfo.time,
-    modelid: modelInfo.modelid
+  function commitDialog() {
+    let data = {
+      name: modelInfo.name,
+      path: modelInfo.path,
+      rz: modelInfo.rz,
+      tz: modelInfo.tz,
+      rze: modelInfo.rze,
+      tze: modelInfo.tze,
+      time: modelInfo.time,
+      modelid: modelInfo.modelid
+    }
+    if (title.value === "新增") {
+      addModelApi(data).then(res => {
+        initModelTable()
+        for (let key in modelInfo) {
+          modelInfo[key] = null
+        }
+      })
+    }
+    dialogFormVisible.value = false
   }
-  if (title.value === "新增") {
-    addModelApi(data).then(res => {
+
+// 删除模型
+  function deleteM(row) {
+    deleteModel({modelid: row.modelid}).then(res => {
+      initModelTable()
+    })
+  }
+
+// 修改模型
+  function updataM(row) {
+    modelInfo.name = row.name
+    modelInfo.path = row.path
+    modelInfo.tz = row.tz
+    modelInfo.rz = row.rz
+    modelInfo.time = row.time
+    modelInfo.modelid = row.modelid
+    modelInfo.tze = row.tze
+    modelInfo.rze = row.rze
+    // row.show = !row.show
+  }
+
+  function updataMCommit() {
+    let data = {
+      name: modelInfo.name,
+      path: modelInfo.path,
+      rz: modelInfo.rz,
+      tz: modelInfo.tz,
+      rze: modelInfo.rze,
+      tze: modelInfo.tze,
+      time: modelInfo.time,
+      modelid: modelInfo.modelid
+    }
+    updataModel(data).then(res => {
       initModelTable()
       for (let key in modelInfo) {
         modelInfo[key] = null
       }
+      console.log(res, '编辑')
     })
   }
-  // else{
-  //   updataModel(data).then(res=>{
-  //     initModelTable()
-  //     for(let key in modelInfo){
-  //       modelInfo[key] = null
-  //     }
-  //     console.log(res,'编辑')
-  //   })
-  // }
-  dialogFormVisible.value = false
-}
 
-// 删除模型
-function deleteM(row) {
-  deleteModel({modelid: row.modelid}).then(res => {
-    initModelTable()
-  })
-}
+  function selectGltfModel() {
+    remove3dData()
+    tz.value = 0
+    originTz = 0
 
-// 修改模型
-function updataM(row) {
-  modelInfo.name = row.name
-  modelInfo.path = row.path
-  modelInfo.tz = row.tz
-  modelInfo.rz = row.rz
-  modelInfo.time = row.time
-  modelInfo.modelid = row.modelid
-  modelInfo.tze = row.tze
-  modelInfo.rze = row.rze
-  // row.show = !row.show
-}
+    let cartesian = new Cesium.Cartesian3.fromDegrees(103.00, 29.98, 0.0)
+    let modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(cartesian);
 
-function updataMCommit() {
-  let data = {
-    name: modelInfo.name,
-    path: modelInfo.path,
-    rz: modelInfo.rz,
-    tz: modelInfo.tz,
-    rze: modelInfo.rze,
-    tze: modelInfo.tze,
-    time: modelInfo.time,
-    modelid: modelInfo.modelid
+    let model = Cesium.Model.fromGltf({
+      url: './peilou/万达.gltf',
+      modelMatrix: modelMatrix,
+      id: 'wanda',
+      minimumPixelSize: 128,
+      scale: 1,
+    })
+    window.modelObject = model
+    window.viewer.scene.primitives.add(window.modelObject)
+    console.log(window.modelObject)
+    window.modelObject.readyPromise.then(function () {
+
+      let origin = new Cesium.Cartesian3(0, 0, 1000)
+      Cesium.Matrix4.multiplyByPoint(window.modelObject.modelMatrix, origin, origin)
+      window.viewer.camera.zoomTo({
+        destination: origin,
+        orientation: {
+          // 指向
+          heading: 6.283185307179581,
+          // 视角
+          pitch: -1.5688168484696687,
+          roll: 0.0
+        }
+      });
+    })
+
   }
-  updataModel(data).then(res => {
-    initModelTable()
-    for (let key in modelInfo) {
-      modelInfo[key] = null
-    }
-    console.log(res, '编辑')
-  })
-}
 
-function selectGltfModel() {
-  remove3dData()
-  tz.value = 0
-  originTz = 0
-
-  let cartesian = new Cesium.Cartesian3.fromDegrees(103.00, 29.98, 0.0)
-  let modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(cartesian);
-
-  let model = Cesium.Model.fromGltf({
-    url: './peilou/万达.gltf',
-    modelMatrix: modelMatrix,
-    id: 'wanda',
-    minimumPixelSize: 128,
-    scale: 1,
-  })
-  window.modelObject = model
-  window.viewer.scene.primitives.add(window.modelObject)
-  console.log(window.modelObject)
-  window.modelObject.readyPromise.then(function () {
-
-    let origin = new Cesium.Cartesian3(0, 0, 1000)
-    Cesium.Matrix4.multiplyByPoint(window.modelObject.modelMatrix, origin, origin)
-    window.viewer.camera.zoomTo({
-      destination: origin,
+  function home() {
+    remove3dData()
+    viewer.camera.setView({
+      // Cesium的坐标是以地心为原点，一向指向南美洲，一向指向亚洲，一向指向北极州
+      // fromDegrees()方法，将经纬度和高程转换为世界坐标
+      destination: Cesium.Cartesian3.fromDegrees(103.00, 29.98, 1500),
       orientation: {
         // 指向
         heading: 6.283185307179581,
@@ -718,46 +784,28 @@ function selectGltfModel() {
         roll: 0.0
       }
     });
-  })
-
-}
-
-function home() {
-  remove3dData()
-  viewer.camera.setView({
-    // Cesium的坐标是以地心为原点，一向指向南美洲，一向指向亚洲，一向指向北极州
-    // fromDegrees()方法，将经纬度和高程转换为世界坐标
-    destination: Cesium.Cartesian3.fromDegrees(103.00, 29.98, 1500),
-    orientation: {
-      // 指向
-      heading: 6.283185307179581,
-      // 视角
-      pitch: -1.5688168484696687,
-      roll: 0.0
-    }
-  });
-}
+  }
 
 // 搜索按钮
-function handleQuery() {
-  const searchKey = queryParams.value.trim();  // 获取搜索关键字
+  function handleQuery() {
+    const searchKey = queryParams.value.trim();  // 获取搜索关键字
 
-  querytiltModelData(searchKey || undefined)  // 如果没有搜索关键字，传递 `undefined` 获取所有数据
-      .then(res => {
-        modelList = res.data
-        console.log("获取的数据:", modelList); // 打印获取的数据
-        total.value = modelList.length;  // 更新分页总数
-        tableData.value = getPageArr(modelList);  // 获取分页数据
-      })
-      .catch(error => {
-        console.error("查询时出现错误:", error.message || error);
-      });
-}
+    querytiltModelData(searchKey || undefined)  // 如果没有搜索关键字，传递 `undefined` 获取所有数据
+        .then(res => {
+          modelList = res.data
+          console.log("获取的数据:", modelList); // 打印获取的数据
+          total.value = modelList.length;  // 更新分页总数
+          tableData.value = getPageArr(modelList);  // 获取分页数据
+        })
+        .catch(error => {
+          console.error("查询时出现错误:", error.message || error);
+        });
+  }
 
-function resetQuery() {
-  queryParams.value = '';
-  initModelTable();// 清空搜索输入框
-}
+  function resetQuery() {
+    queryParams.value = '';
+    initModelTable();// 清空搜索输入框
+  }
 
 </script>
 

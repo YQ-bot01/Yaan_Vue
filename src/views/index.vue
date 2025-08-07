@@ -2,7 +2,7 @@
   <div class="content-body">
     <div class="header">
       <div class="header-center">
-        <span>{{useTitleStore().pageTitle}}</span>
+        <span>{{ useTitleStore().pageTitle }}</span>
       </div>
       <div class="header-time">
         <span id="time">{{ nowTime }}</span>
@@ -44,49 +44,52 @@
               <div style="position: relative; width: 100%; height: auto;">
                 <!-- 图片 -->
                 <img
-                  src="@/assets/earthquakeList.png"
-                  alt="地震列表"
-                  style="width: 90%; height: auto; display: block;"
+                    src="@/assets/earthquakeList.png"
+                    alt="地震列表"
+                    style="width: 90%; height: auto; display: block;"
                 >
 
                 <!-- 输入框和按钮 -->
                 <div
-                  style="position: absolute; top: 5px; left: 120px; display: flex; align-items: center; z-index: 1;"
+                    style="position: absolute; top: 12px; left: 135px; display: flex; align-items: center; z-index: 1;"
                 >
                   <el-input
-                    size="small"
-                    style="width: 5vw; font-size: 16px;margin-right: 5px;margin-left: 7px"
-                    v-model="requestParams"
-                    @keyup.enter="query()"
+                      size="small"
+                      style="width: 5vw; font-size: 16px;margin-right: 5px;margin-left: 7px"
+                      v-model="requestParams"
+                      @keyup.enter="query()"
                   ></el-input>
                   <el-button
-                    size="small"
-                    style="font-size: 14px;"
-                    @click="query()"
-                  >查询</el-button>
+                      size="small"
+                      style="font-size: 14px;"
+                      @click="query()"
+                  >查询
+                  </el-button>
                   <el-button
-                    size="small"
-                    style="font-size: 14px;"
-                    @click="openQueryFrom()"
-                  >筛选</el-button>
+                      size="small"
+                      style="font-size: 14px;"
+                      @click="openQueryFrom()"
+                  >筛选
+                  </el-button>
 
                   <!-- 正式和测试按钮，固定不切换 -->
                   <el-button
-                    size="small"
-                    :type="activeMode === 'Z' ? 'danger' : 'default'"
-                    style="font-size: 14px;color:greenyellow;"
-                    @click="activeMode = 'Z'"
+                      size="small"
+                      :type="activeMode === 'Z' ? 'danger' : 'default'"
+                      style="font-size: 14px;"
+                      @click="activeMode = 'Z'"
                   >
                     真实
                   </el-button>
+
                   <el-button
-                    size="small"
-                    :type="activeMode === 'Y' || activeMode === 'T' ? 'primary' : 'default'"
-                    style="font-size: 14px;color:white;"
-                    @click="activeMode = 'Y'"
+                      size="small"
+                      class="custom-button"
+                      @click="activeMode = 'Y'"
                   >
                     测试
                   </el-button>
+
                 </div>
               </div>
               <eq-table :eq-data="CeShiTableData"/>
@@ -94,7 +97,6 @@
 
             <div class="right-bottom public-bg" ref="rightBottom">
               <img src="@/assets/historyEarthquake.png" alt="历史地震" style="width: 80%; height: auto;">
-              <!--              <div class="public-title">历史地震统计(次)</div>-->
               <chart1 :eq-data="EqAll"/>
             </div>
           </div>
@@ -110,15 +112,15 @@
         </el-form-item>
         <el-form-item label="发震时间">
           <el-date-picker
-            v-model="formValue.occurrenceTime"
-            type="daterange"
-            unlink-panels
-            range-separator="至"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            :shortcuts="shortcuts"
-            style="width: 23vw;"
-            value-format="x"
+              v-model="formValue.occurrenceTime"
+              type="daterange"
+              unlink-panels
+              range-separator="至"
+              start-placeholder="开始时间"
+              end-placeholder="结束时间"
+              :shortcuts="shortcuts"
+              style="width: 23vw;"
+              value-format="x"
           />
         </el-form-item>
         <el-form-item label="地震震级">
@@ -144,8 +146,8 @@
 </template>
 
 <script setup>
-import { BorderBox7 as DvBorderBox7, Decoration5 as DvDecoration5 } from '@kjgl77/datav-vue3';
-import { onMounted, ref, reactive, nextTick, watch } from 'vue';
+import {BorderBox7 as DvBorderBox7, Decoration5 as DvDecoration5} from '@kjgl77/datav-vue3';
+import {onMounted, ref, reactive, nextTick, watch} from 'vue';
 import EMap from '@/components/Home/emap.vue';
 import EqTable from '@/components/Home/eqtable.vue';
 import NewInfo from '@/components/Home/newInfo.vue';
@@ -153,7 +155,7 @@ import Chart1 from '@/components/Home/chart1.vue';
 import Chart2 from '@/components/Home/chart2.vue';
 import Chart3 from '@/components/Home/chart3.vue';
 import {fromEq, fromEqList, getAllEq, queryEq, queryEqList} from '@/api/system/eqlist';
-import {getEqList} from "@/api/system/damageassessment.js";
+import {getEqList, getEqListZ} from "@/api/system/damageassessment.js";
 import {useTitleStore} from "../store/index.js";
 
 const nowTime = ref(null);
@@ -164,12 +166,16 @@ const lastValidEqData = ref(null);
 const getEq = () => {
   getEqList().then((res) => {
     console.log("地震数据", res.data)
-    EqAll.value = res.data;
-    console.log("EqAll.value", EqAll.value)
+    // EqAll.value = res.data;
+    // console.log("EqAll.value", EqAll.value)
     tableData.value = res.data;
-
     lastEqData.value = tableData.value[0];
-
+  });
+};
+const getEqZ = () => {
+  getEqListZ().then((res) => {
+    console.log("地震数据", res.data)
+    EqAll.value = res.data;
   });
 };
 
@@ -180,12 +186,16 @@ const requestParams = ref('');
 const activeMode = ref('Z');
 const CeShiTableData = computed(() => {
   if (activeMode.value === 'Z') {
+    console.log(tableData.value.filter(item => item.eqType === 'Z'),"tableData.valueZ")
     return tableData.value.filter(item => item.eqType === 'Z');
   } else if (activeMode.value === 'Y' || activeMode.value === 'T') {
+    console.log(tableData.value.filter(item => item.eqType === 'Y' || item.eqType === 'T'),"tableData.valueYT")
     return tableData.value.filter(item => item.eqType === 'Y' || item.eqType === 'T');
   }
+  console.log(tableData.value,"tableData.value")
   return tableData.value;
 });
+
 const MapData = computed(() => {
   let filteredData = tableData.value;
 
@@ -195,33 +205,35 @@ const MapData = computed(() => {
     filteredData = filteredData.filter(item => item.eqType === 'Y' || item.eqType === 'T');
   }
   // 过滤出年份大于等于2000的地震数据
-  filteredData = filteredData.filter(item => item.occurrenceTime && new Date(item.occurrenceTime).getFullYear() >= 2000&&item.magnitude >= 3);
-  console.log("filterDate2000",filteredData)
+
+  filteredData = filteredData.filter(item => item.occurrenceTime && new Date(item.occurrenceTime).getFullYear() >= 2000 && (item.earthquakeName.includes("雅安") || Number(item.magnitude) >= 3));
+  console.log("filterDate2000", filteredData)
   return filteredData;
 });
 
 
 // 监听 MapData 变化，更新 lastEqData
 watch(MapData, (newVal) => {
-  if (newVal.length > 0&&newVal[0].magnitude>=3) {
+  if (newVal.length > 0 && (newVal[0].earthquakeName.includes("雅安") || Number( newVal[0].magnitude) >= 3)) {
     lastValidEqData.value = newVal[0]; // 存储上一次有值的第一条数据
     lastEqData.value = newVal[0];
   } else {
     lastEqData.value = lastValidEqData.value; // 为空时回退到存储值
   }
-}, { deep: true, immediate: true });
+  console.log(lastEqData.value,"lastEqData.value11")
+}, {deep: true, immediate: true});
 
 
 // 监听 CeShiTableData 变化，更新 lastEqData
 watch(CeShiTableData, (newVal) => {
-  // console.log(CeShiTableData,"CeShiTableData")
-  if (newVal.length > 0&&newVal[0].magnitude>=3) {
+  if (newVal.length > 0 && (newVal[0].earthquakeName.includes("雅安") || Number( newVal[0].magnitude) >= 3)) {
     lastValidEqData.value = newVal[0]; // 存储上一次有值的第一条数据
     lastEqData.value = newVal[0];
   } else {
     lastEqData.value = lastValidEqData.value; // 为空时回退到存储值
   }
-}, { deep: true, immediate: true });
+  console.log(lastEqData.value,"lastEqData.value22")
+}, {deep: true, immediate: true});
 
 const queryFormVisible = ref(false);
 
@@ -296,7 +308,7 @@ const formValue = reactive({
 
 //筛选
 const onSubmit = () => {
-  if (formValue.occurrenceTime !== '') {
+  if (formValue.occurrenceTime) {
     const [startTime, endTime] = formValue.occurrenceTime;
     const startDate = new Date(startTime).toISOString();
     const endDate = new Date(endTime).toISOString();
@@ -320,7 +332,7 @@ const onSubmit = () => {
   console.log("5555555555555555555555555555", queryParams)
 
   fromEqList(queryParams).then((res) => {
-    console.log(tableData,"tableData")
+    console.log(tableData, "tableData")
     tableData.value = res;
     lastEqData.value = CeShiTableData.value.length > 0 ? CeShiTableData.value[0] : null;
   });
@@ -360,18 +372,18 @@ const now_time = () => {
   let mySecond = myDate.getSeconds(); // 获取当前秒数(0-59)
   let week = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
   return (
-    myYear +
-    '年' +
-    fillZero(myMonth) +
-    '月' +
-    fillZero(myToday) +
-    '日' +
-    fillZero(myHour) +
-    ':' +
-    fillZero(myMinute) +
-    ':' +
-    fillZero(mySecond) +
-    week[myDay]
+      myYear +
+      '年' +
+      fillZero(myMonth) +
+      '月' +
+      fillZero(myToday) +
+      '日' +
+      fillZero(myHour) +
+      ':' +
+      fillZero(myMinute) +
+      ':' +
+      fillZero(mySecond) +
+      week[myDay]
   );
 };
 
@@ -425,9 +437,9 @@ onMounted(() => {
     if (rightTop.value) resizeObserver.observe(rightTop.value);
     if (rightBottom.value) resizeObserver.observe(rightBottom.value);
   });
-
   setInterval(updateTime, 500);
   getEq();
+  getEqZ();
 });
 
 </script>
@@ -833,5 +845,11 @@ onMounted(() => {
   text-shadow: 0 0 5px #00eaff;
 }
 
+.custom-button {
+  background: linear-gradient(45deg, #868798, #718383) !important;
+  display: flex !important; /* 使用 flex 布局 */
+  justify-content: center !important; /* 水平居中 */
+  align-items: center !important; /* 垂直居中 */
+}
 
 </style>

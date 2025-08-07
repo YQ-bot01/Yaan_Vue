@@ -15,11 +15,11 @@
     </span>
     <!--    经纬度跳转-->
     <div class="panelContent">
-      <div>经度：
+      <div>经度：°E
         <el-input v-model="positionFlyToLocal.lon" class="positionFlyToInput" @keyup.enter="flyToPosition"
         ></el-input>
       </div>
-      <div style="margin-left: 10px">纬度：
+      <div style="margin-left: 10px">纬度：°N
         <el-input v-model="positionFlyToLocal.lat" class="positionFlyToInput"
                   @keyup.enter="flyToPosition"></el-input>
       </div>

@@ -241,18 +241,15 @@ export default {
       currentPage: 1,
       // ---表头---
       headersArr: [
-        // { prop: 'uniqueId', label: '唯一标识', width: 150 },
         { prop: 'name', label: '名称', width: 280 },
         { prop: 'area', label: '面积（平方米）', width: 150 },
         { prop: 'capacity', label: '可容纳人数', width: 150 },
         { prop: 'administrativeDivision', label: '行政区划', width: 200 },
         { prop: 'address', label: '地址', width: 450 },
         { prop: 'personInCharge', label: '负责人', width: 150 },
-        // { prop: 'emergencyPhone', label: '应急电话', width: 150 }, 数据库没有一条数据
         { prop: 'emergencyMobile', label: '应急手机', width: 150 },
         { prop: 'affiliatedOrganization', label: '所属机构', width: 140 },
         { prop: 'designServiceLife', label: '设计使用年限（年）', width: 190 },
-        { prop: 'dataSourceUnit', label: '数据来源单位', width: 180 },
         { prop: 'longitude', label: '经度（度分）', width: 120 },
         { prop: 'latitude', label: '纬度（度分）', width: 120 },
         { prop: 'remarks', label: '备注', width: 300 },
@@ -262,6 +259,7 @@ export default {
         { prop: 'shelterTypeName', label: '场所类型名称', width: 120 },
         { prop: 'levelName', label: '级别名称', width: 120 },
         { prop: 'secretLevel', label: '保密级别', width: 120 },
+        { prop: 'dataSourceUnit', label: '数据来源', width: 180 },
       ],
       // 查询功能
       queryParams: '',   // 搜索关键字

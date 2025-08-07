@@ -112,7 +112,7 @@ export function addHospitalLayer() {
 // 绘制村庄
 export function addVillageLayer() {
   // GeoJSON文件路径
-  const geoJsonUrl = new URL("@/assets/geoJson/village.geojson", import.meta.url).href;
+  const geoJsonUrl = new URL("@/assets/geoJson/village_20250409.geojson", import.meta.url).href;
   if (viewer.dataSources.getByName("village").length === 0) {
     // 使用fetch加载GeoJSON文件
     fetch(geoJsonUrl)
@@ -125,6 +125,7 @@ export function addVillageLayer() {
           strokeWidth: 2,
           clampToGround: true,
         })).then(function (dataSource) {
+          console.log("dataSource.entities.values:",dataSource.entities.values)
           // 给 dataSource 添加 name 属性
           dataSource.name = "village";
 
@@ -133,8 +134,8 @@ export function addVillageLayer() {
             entity.properties.sourceName = "village";  // 追加自定义的属性
             entity.billboard = new Cesium.BillboardGraphics({
               image: villageIcon, // 使用导入的图片
-              width: 32, // 图片宽度
-              height: 32, // 图片高度
+              width: 30, // 图片宽度
+              height: 30, // 图片高度
               scale: 1, // 图片缩放
             });
           });
@@ -183,8 +184,6 @@ export function addSchoolLayer() {
   }
 }
 
-
-// 绘制断裂带
 export function addFaultZones(centerPoint) {
   // GeoJSON文件路径
   const geoJsonUrl = new URL("@/assets/geoJson/duanliedai.geojson", import.meta.url).href;
@@ -201,21 +200,33 @@ export function addFaultZones(centerPoint) {
         viewer.dataSources.add(
             Cesium.GeoJsonDataSource.load(geoJsonData, {
               stroke: Cesium.Color.RED,
-              fill: Cesium.Color.RED.withAlpha(0.5),
-              strokeWidth: 3,
+              fill:  Cesium.Color.fromCssColorString("#f1cfcf").withAlpha(0.5),
+              strokeWidth: 2, // 默认线条粗细
               clampToGround: true,
             })
         ).then(function (dataSource) {
           // 给 dataSource 添加 name 属性
           dataSource.name = "faultZone";
 
-          // 遍历所有实体，提取断层名称并添加 label
+          // 遍历所有实体，提取断层名称并设置线条粗细
           dataSource.entities.values.forEach((entity) => {
-            if (entity.properties && entity.properties.O_Com) {
+            console.log(entity,"entity faultZone")
+            if (entity._properties && entity._properties._O_Com && entity._properties._O_Com.getValue() ) {
               // 提取断裂带名称
-              const faultNameMatch = entity.properties.O_Com.getValue().match(/"断层名称":"([^"]+)"/);
+              // console.log(entity._properties._O_Com,"entity._properties._O_Com")
+              // console.log(entity._properties._O_Com.getValue(),"entity._properties._O_Com.getValue().")
+              const faultNameMatch = entity._properties._O_Com.getValue().match(/"断层名称":"([^"]+)"/);
               if (faultNameMatch) {
                 const faultName = faultNameMatch[1];
+                // 根据断层名称设置线条粗细
+                if (faultName === "鲜水河断裂带"||faultName === "竹马断裂"||faultName === "公益海断裂"|| faultName === "大凉山断裂"||faultName === "安宁河断裂"||faultName === "双石-大川断裂"||faultName === "盐井-五龙断裂") {
+                  console.log("鲜水河断裂带")
+                  entity.polyline.material = Cesium.Color.fromCssColorString("#a41919").withAlpha(1); // 使用白色，不透明度70%
+                  entity.polyline.width = 6; // 鲜水河断裂带的线条粗细为5
+                } else {
+                  entity.polyline.material = Cesium.Color.fromCssColorString("#ecc9c9").withAlpha(0.7); // 使用白色，不透明度70%
+                  entity.polyline.width = 2; // 其他断裂带的线条粗细为3
+                }
 
                 // 如果该名称已经添加，则跳过
                 if (addedFaultNames.has(faultName)) {
@@ -693,10 +704,10 @@ export function addOCTest(eqid, eqqueueId, centerPosition) {
    * 烈度圈部分
    */
   // 本地测试请解开↓↓↓
-  fetch(`/ThematicMap/be3a5ea4-8dfd-a0a2-2510-21845f17960b01_intensity.geojson`)
+  // fetch(`/ThematicMap/be3a5ea4-8dfd-a0a2-2510-21845f17960b01_intensity.geojson`)
   // fetch(`/ThematicMap/5a72f3d7-0546-4fee-a686-627d45e5965f02_intensity.geojson`)
     // 真实数据请解开↓↓↓
-    // fetch(`${zaisunimageipLocal}/profile/upload/yxcdown/${eqqueueId}/${eqqueueId}_intensity.geojson`)
+    fetch(`${zaisunimageipLocal}/profile/upload/yxcdown/${eqqueueId}/${eqqueueId}_intensity.geojson`)
     .then((response) => response.json())
     .then((geojsonData) => {
       let ovalCirclePromise = Cesium.GeoJsonDataSource.load(geojsonData, {
@@ -935,7 +946,8 @@ export function handleTownData(town) {
   // 建筑破坏
   const buildingDamageData = yaanCountyData.map(entry => ({
       county: entry.county,
-      size: parseFloat((entry.buildingDamage / 100).toFixed(2)),
+      // size: parseFloat((entry.buildingDamage / 100).toFixed(2)),
+      size: parseFloat((entry.buildingDamage).toFixed(2)),
     }));
 
   // 经济损失
@@ -1006,12 +1018,13 @@ export function handleOutputData(eqid, eqqueueId, eqFullName, type) {
             imgUrl: `${zaisunimageipLocal}${data[i].sourceFile}`,
             theme: data[i].fileName,
           };
-          console.log("专题图",thematicMapObject)
+          // console.log("专题图",thematicMapObject)
           thematicMapData.push(thematicMapObject);
         }
 
         returnData.themeName = themeName;
         returnData.themeData = thematicMapData;
+        console.log("返回专题图数据：", returnData)
 
         resolve(returnData); // 返回更新后的数据
       }).catch(err => {
@@ -1035,56 +1048,57 @@ export function handleOutputData(eqid, eqqueueId, eqFullName, type) {
 
         returnData.themeName = themeName;
         returnData.themeData = reportData;
+        console.log("返回报告数据：", returnData)
+        resolve(returnData); // 这里也是异步，所以也需要 resolve
+      }).catch(err => {
+        reject(err);
+      });
+    }
+    else if(type==="AssistantDecision"){
+      getEqOutPutJueCe(DTO).then((res) => {
+        console.log("辅助决策数据：", res);
+        const data = res.data;
+        const themeName = eqFullName + "-" + "辅助决策报告";
+        let reportData = [];
+        for (let i = 0; i < res.data.length; i++) {
+          const reportObject = {
+            docxUrl: `${zaiSunFuZhuJueCe}${data[i].sourceFile}`,
+            theme: data[i].fileName,
+          }
+          reportData.push(reportObject);
+        }
+        returnData.themeName = themeName;
+        returnData.themeData = reportData;
         resolve(returnData); // 这里也是异步，所以也需要 resolve
       }).catch(err => {
         reject(err);
       });
     }
     // else if(type==="AssistantDecision"){
-    //   getEqOutPutJueCe(DTO).then((res) => {
-    //     console.log("辅助决策数据：", res);
+    //   getEqOutPutJueCeLocal(DTO).then((res) => {
+    //     // console.log("辅助决策数据：", res);
     //     const data = res.data;
     //     const themeName = eqFullName + "-" + "辅助决策报告";
-    //     let reportData = [];
+    //     let jueceData = [];
+    //
     //     for (let i = 0; i < res.data.length; i++) {
+    //       const fullPath = `${zaiSunFuZhuJueCe}${data[i].sourceFile}`;
+    //       // console.log("docxUrl:", fullPath); // 检查路径是否正确
     //       const reportObject = {
-    //         docxUrl: `${zaiSunFuZhuJueCe}${data[i].sourceFile}`,
+    //         docxUrl: fullPath,
     //         theme: data[i].fileName,
-    //       }
-    //       reportData.push(reportObject);
+    //       };
+    //       console.log(reportObject)
+    //       jueceData.push(reportObject);
     //     }
+    //
     //     returnData.themeName = themeName;
-    //     returnData.themeData = reportData;
+    //     returnData.themeData = jueceData;
     //     resolve(returnData); // 这里也是异步，所以也需要 resolve
     //   }).catch(err => {
     //     reject(err);
     //   });
     // }
-    else if(type==="AssistantDecision"){
-      getEqOutPutJueCeLocal(DTO).then((res) => {
-        console.log("辅助决策数据：", res);
-        const data = res.data;
-        const themeName = eqFullName + "-" + "辅助决策报告";
-        let jueceData = [];
-
-        for (let i = 0; i < res.data.length; i++) {
-          const fullPath = `${zaiSunFuZhuJueCe}${data[i].sourceFile}`;
-          console.log("docxUrl:", fullPath); // 检查路径是否正确
-          const reportObject = {
-            docxUrl: fullPath,
-            theme: data[i].fileName,
-          };
-          console.log(reportObject)
-          jueceData.push(reportObject);
-        }
-
-        returnData.themeName = themeName;
-        returnData.themeData = jueceData;
-        resolve(returnData); // 这里也是异步，所以也需要 resolve
-      }).catch(err => {
-        reject(err);
-      });
-    }
     else {
       resolve(returnData); // 如果 type 不是 "thematicMap" 或 "report"，直接返回默认值
     }

@@ -233,6 +233,7 @@ export default {
       deep: true,
       handler() {
         this.popupPanelData = this.popupData
+        // console.log(this.popupData,"popupData")
         this.plotInfoActivities = []
         // 必须把生成对应标绘的html模板代码（下面的for循环），写在watch的popupData中，不能写在visible中。
         // 在执行顺序上，visible比popupData快。导致在判断this.popupPanelData.plottype === plotType[item].name时，
@@ -317,7 +318,7 @@ export default {
     },
     // 删除标绘点
     deletePlot() {
-      let arraw = false
+      // let arraw = false
       let data = {
         plotId: null,
         plotType: null,
@@ -380,7 +381,7 @@ export default {
         console.log("data.plotId----------------", data.plotId)
         if (data.drawType==="arraw") {
           arrow.clearById(data.plotId)
-          arraw = false
+          // arraw = false
         }
       })
     },

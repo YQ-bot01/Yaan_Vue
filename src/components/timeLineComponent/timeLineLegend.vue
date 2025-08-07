@@ -13,9 +13,7 @@
 
       <div v-for="item in getPicData" :key="item.label" class="legend-item">
         <div v-if="item.img && item.img !== ''">
-<!--          <img  class="legend-img" :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' + item.img+ '.png?t=' + new Date().getTime()" alt="暂无符号">-->
-          <img  class="legend-img" :src="'http://localhost:8080'+'/uploads/PlotsPic/' + item.img+ '.png?t=' + new Date().getTime()" alt="暂无符号">
-
+         <img  class="legend-img" :src="iconRoad + item.img+ '.png?t=' + new Date().getTime()" alt="暂无符号">
         </div>
         <span class="legend-label">{{ item.name }}</span>
       </div>
@@ -23,6 +21,14 @@
       <div class="legend-item">
         <img class="legend-img" src="@/assets/icons/TimeLine/聚合图标.png" />
         <span class="legend-label">聚合信息</span>
+      </div>
+      <div class="legend-item">
+        <img class="legend-img" src="@/assets/images/EmergencyResourceInformation/rescueTeamsInfoLogo.png" />
+        <span class="legend-label">救援队伍分布点</span>
+      </div>
+      <div class="legend-item">
+        <img class="legend-img" src="@/assets/images/EmergencyResourceInformation/emergencyRescueEquipmentLogo.png" />
+        <span class="legend-label">应急物资存储点</span>
       </div>
 <!--      用于填满图例表，不可删除。  删除则导致最后一行中间为空-->
       <div class="legend-item">
@@ -59,10 +65,14 @@ export default {
   props: ['activeComponent'],
   data() {
     return {
+      iconRoad: '', // 初始化为空字符串
       getPicData: [],
     };
   },
   mounted() {
+    import('@/utils/server.js').then((module) => {
+      this.iconRoad = module.iconRoad;
+    });
     this.getPlotPicture();
   },
   methods: {

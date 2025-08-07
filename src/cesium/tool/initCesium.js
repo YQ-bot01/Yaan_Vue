@@ -218,7 +218,7 @@ export function getTerrainProviderViewModelsArr() {
             //图层的名称
             name: '本地DEM地形',
             //显示项目被隐藏的工具提示
-            tooltip: 'DEM地形',
+            tooltip: '本地DEM地形',
             //代表图层的图标
             iconUrl: CesiumWorldTerrain,
             //一个函数或命令，用于创建一个或多个提供程序，这些提供程序将在选择此项目时添加到地球仪中

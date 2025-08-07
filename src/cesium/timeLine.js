@@ -642,6 +642,7 @@ let timeLine = {
         }
     },
     addArrow(item, type) {
+        console.log(item,type,"addArrow timeline")
         if (item.drawtype === 'straight') {
             this.addStraightArrow(item, type)
         } else if (item.drawtype === 'attack') {
@@ -675,26 +676,27 @@ let timeLine = {
                 }
                 return new Cesium.PolygonHierarchy(arrow);
             }
-            if (window.viewer.entities.getById(item.plotId)) {
-                window.viewer.entities.removeById(item.plotId);  // 删除已存在的多边形实体
+            if (!window.viewer.entities.getById(item.plotId)) {
+                window.viewer.entities.add({
+                    availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({
+                        start: Cesium.JulianDate.fromDate(new Date(item.startTime)),
+                        stop: Cesium.JulianDate.fromDate(new Date(item.endTime))
+                    })]),
+                    drawtype:item.drawtype,
+                    id: item.plotId,
+                    polygon: new Cesium.PolygonGraphics({
+                        hierarchy: new Cesium.CallbackProperty(update, false),
+                        show: true,
+                        fill: true,
+                        material: Cesium.Color.BLUE  // 蓝色，透明度0.5
+                    }),
+                    layer: type,
+                    properties: {
+                        ...item
+                    }
+                })
             }
-            window.viewer.entities.add({
-                availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({
-                    start: Cesium.JulianDate.fromDate(new Date(item.startTime)),
-                    stop: Cesium.JulianDate.fromDate(new Date(item.endTime))
-                })]),
-                id: item.plotId,
-                polygon: new Cesium.PolygonGraphics({
-                    hierarchy: new Cesium.CallbackProperty(update, false),
-                    show: true,
-                    fill: true,
-                    material: Cesium.Color.BLUE  // 蓝色，透明度0.5
-                }),
-                layer: type,
-                properties: {
-                    ...item
-                }
-            })
+
         }
     },
     addAttackArrow(item, type) {
@@ -877,6 +879,7 @@ let timeLine = {
                 window.pointDataSource.entities.remove(entity)
             }
         } else {
+            console.log(window.viewer.entities,"window.viewer.entities delete timleline")
             let entity = window.viewer.entities.getById(plotId)
             console.log(entity, "delete entity window.viewer")
             if (entity) {
@@ -989,6 +992,7 @@ let timeLine = {
                 resolve();
                 return;
             }
+            console.log(entity,"blinkMarker entity")
             const interval = 200; // 每次闪烁的时间间隔
             let count = 0;
             const blinkInterval = setInterval(() => {

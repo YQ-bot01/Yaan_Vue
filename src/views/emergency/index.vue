@@ -412,6 +412,10 @@ import {getEqById, getEqListById, getExcelUploadEarthquake, getExcelUploadEqList
 import centerstar from "@/assets/icons/TimeLine/震中.png";
 import {AmapApiLocal, tianditu} from "@/utils/server.js";
 import {TianDiTuToken} from "@/cesium/tool/config.js";
+import siChuanCity from "@/assets/geoJson/sichuan.json";
+import sichuanCounty from "@/assets/geoJson/sichuanCounty.json";
+import yaAnVillage from "@/assets/geoJson/yaan.json";
+import layer from "@/cesium/layer.js";
 
 export default {
   components: {
@@ -472,6 +476,10 @@ export default {
           showDropdown: false
         },
       ],
+
+      siChuanCityEntity: [],
+      siChuanCountyEntity: [],
+      siChuanVillageEntity: [],
       handler: null, // 创建共享的 handler
       isRouting: false, // 路径规划是否在进行中
       isAddingArea: false, // 是否在添加受灾区域
@@ -689,6 +697,8 @@ export default {
     }
   },
   methods: {
+
+
     handleEqListChange() {
       if (this.eqlistName) {
         getEqListById({'id': this.eqlistName}).then(async res => {
@@ -922,6 +932,9 @@ export default {
           1500,
           new Cesium.Cartographic()
       );
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(103.0, 29.98, 20000), // 设置经度、纬度和高度
+      });
       options.enableCompass = true;
       options.enableZoomControls = true;
       options.enableDistanceLegend = true;
@@ -1003,6 +1016,37 @@ export default {
           }
         }
       }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+      layer.loadYaAnVillageLayer();
+      window.viewer.camera.changed.addEventListener(this.handleCameraChange);
+      },
+    handleCameraChange() {
+      // 定义相机高度阈值
+      let CITY_LAYER_HEIGHT = 1000000; // 市级图层的高度阈值
+      let COUNTY_LAYER_HEIGHT = 100000; // 区县级图层的高度阈值
+      let VILLAGE_LAYER_HEIGHT = 10000; // 道路级图层的高度阈值
+      let height = window.viewer.camera.positionCartographic.height; // 获取相机高度
+      console.log("当前相机高度:", height);
+
+      // 根据高度动态加载或移除图层
+      if (height > CITY_LAYER_HEIGHT) {
+        // 移除区县级和道路级标签
+        layer.removeSiChuanCountyLayer()
+        layer.removeYaAnVillageLayer()
+        // 加载市级图层
+        layer.loadSichuanCityLayer();
+      } else if (height > COUNTY_LAYER_HEIGHT) {
+        // 移除市级和道路级标签
+        layer.removeSichuanCityLayer()
+        layer.removeYaAnVillageLayer()
+        // 加载区县级图层
+        layer.loadSiChuanCountyLayer();
+      }
+      else {
+        layer.removeSichuanCityLayer()
+        layer.removeSiChuanCountyLayer()
+        // 加载乡镇级图层
+        layer.loadYaAnVillageLayer();
+      }
     },
     initPlot() {
 
@@ -2260,6 +2304,14 @@ export default {
 
             // 将新的路径绘制到地图上
             that.polylineD(pathSegments, that.propertiesId);  // 传递路径和 id 更新折线
+
+            // ✅ 更新文字描述
+            that.RouteGuilde = pathName;
+            that.totalRoute = pathM;
+            that.cartime = (parseFloat(res.data.route.paths[0].duration) / 60).toFixed(2);
+            that.humantime = (pathM * 0.7 / 60).toFixed(2);
+            that.driveStyle();
+            that.walkStyle();
           })
           .catch(error => {
             console.error("路径规划请求失败", error);

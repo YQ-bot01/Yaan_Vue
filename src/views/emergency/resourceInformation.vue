@@ -80,9 +80,9 @@
                     { label: '设计使用年限', width: 50 },
                     { label: '基本信息', width: 50 },
                     { label: '地震烈度', width: 50 },
-                    { label: '数据来源单位', width: 50 },
                     { label: '经度', width: 50 },
                     { label: '纬度', width: 50 },
+                    { label: '数据来源', width: 50 },
                     { label: '备注', width: 50 }
                 ],
                 // 救援队伍表头

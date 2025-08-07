@@ -20,7 +20,7 @@
           <!-- 圆圈震级 -->
           <div style="width: 55px">
             <div class="eqMagnitude">
-              <img width="30px" height="30px" :src="'http://localhost:8080'+'/uploads/PlotsPic/' +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">
+              <img width="30px" height="30px" :src="iconRoad +plot.plotInfo.icon+ '.png?t=' + new Date().getTime()" alt="暂无符号">
             </div>
           </div>
 
@@ -141,6 +141,7 @@ export default {
   },
   data() {
     return {
+      iconRoad: '', // 初始化为空字符串
       plots:[],
       isFoldShow: true,
       isFoldUnfolding: false,
@@ -162,6 +163,9 @@ export default {
     }
   },
   mounted() {
+    import('@/utils/server.js').then((module) => {
+      this.iconRoad = module.iconRoad;
+    });
     this.getPlot(this.eqid)
   },
   methods : {
@@ -196,7 +200,10 @@ export default {
           let plotArray = Array.isArray(params.plotArray)
               ? params.plotArray
               : [params.plotArray]; // 如果不是数组，则转为数组
-          this.plots=plotArray
+          this.plots = plotArray.filter((plot, index, self) => {
+            return index === self.findIndex(t => t.plotId === plot.plotId);
+          });
+          // this.plots=plotArray
           // this.plots=[...this.plots,...plotArray]
           this.filteredEqData=this.plots
           console.log(this.plots,"params.plotArray")

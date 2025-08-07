@@ -75,7 +75,7 @@
 
         <div style="height: 10px;background-color: #054576"></div>
 
-        <el-divider content-position="left"> 专题图</el-divider>
+        <el-divider content-position="left"> 灾情专题图</el-divider>
 
         <div :style="{height: ((thematicMapData.length+1)/2 * 80) + 'px' }">
           <div class="eqTheme">
@@ -87,17 +87,18 @@
             </div>
           </div>
         </div>
-
-        <div style="height: 10px;background-color: #054576"></div>
-        <el-divider content-position="left"> 灾情报告</el-divider>
-        <div class="eqTheme">
-          <div class="button themes history"
-               v-for="(item,index) in reportData"
-               style="width: 120px;font-size: 14px;"
-               @click="handleDownloadReport(item.docxUrl)"
-          >{{ item.theme }}
+        <template v-if="isAdmin">
+          <div style="height: 10px;background-color: #054576"></div>
+          <el-divider content-position="left"> 灾情报告</el-divider>
+          <div class="eqTheme">
+            <div class="button themes history"
+                 v-for="(item,index) in reportData"
+                 style="width: 120px;font-size: 14px;"
+                 @click="handleDownloadReport(item.docxUrl)">
+              {{ item.theme }}
+            </div>
           </div>
-        </div>
+        </template>
       </div>
     </div>
   </div>
@@ -111,9 +112,10 @@ import TwoAndThreeDIntegrationImageData
 import {getAllEq, getAllEqList} from "../../api/system/eqlist.js";
 import * as Cesium from "cesium";
 import eqMark from '@/assets/images/DamageAssessment/eqMark.png';
-import yaan from "@/assets/geoJson/yaan1.json";
+// import yaan from "@/assets/geoJson/yaan1.json";
 import {handleOutputData} from "../../cesium/plot/eqThemes.js";
 import {getEqList} from "@/api/system/damageassessment.js";
+import useUserStore from "@/store/modules/user.js";
 
 export default {
   name: "earthquakeList",
@@ -129,8 +131,8 @@ export default {
       listEqPoints: [],
 
       // 行政区划
-      RegionLabels: [],
-      sichuanRegionLabels: [],
+      // RegionLabels: [],
+      // sichuanRegionLabels: [],
       title: "",
       thematicMapData: [],
       reportData: [],
@@ -148,6 +150,17 @@ export default {
   mounted() {
     this.getEq()
   },
+
+  setup() {
+    const userStore = useUserStore()
+    const isAdmin = computed(() => userStore.name === 'admin')
+
+    return {
+      userStore,
+      isAdmin
+    }
+  },
+
   methods: {
     handlePanel(type) {
       console.log(this.selectedTabData, "this.selectedEqData")
@@ -226,7 +239,9 @@ export default {
       let that = this
       getEqList().then(res => {
         console.log("返回的数据1", res.data)
-        let resData = res.data.filter(item => item.magnitude >= 4.0)
+        let resData = res.data.filter(item =>
+            item.earthquakeName.includes("雅安") || Number(item.magnitude) >= 4
+        )
         console.log("过滤后", resData)
         that.getEqData = resData
         that.total = resData.length
@@ -250,10 +265,6 @@ export default {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = this.currentPage * this.pageSize;
       this.pagedEqData = this.filteredEqData.slice(start, end);
-      // console.log("pagedEqData:", this.pagedEqData)
-
-      // 清除之前的点并重新添加
-      viewer.entities.removeAll();
       this.renderQueryEqPoints();
     },
 
@@ -289,29 +300,6 @@ export default {
           },
           id: eq.eqid
         });
-        yaan.features.forEach((feature) => {
-          let center = feature.properties.center;
-
-          if (center && center.length === 2) {
-            let position = Cesium.Cartesian3.fromDegrees(center[0], center[1]);
-            let regionlabel = viewer.entities.add(new Cesium.Entity({
-              position: position,
-              label: new Cesium.LabelGraphics({
-                text: feature.properties.name,
-                scale: 1,
-                font: '18px Sans-serif',
-                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                outlineWidth: 2,
-                verticalOrigin: Cesium.VerticalOrigin.CENTER,
-                horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-                fillColor: Cesium.Color.fromCssColorString("#ffffff"),
-                pixelOffset: new Cesium.Cartesian2(0, 0),
-                eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
-              })
-            }));
-            this.RegionLabels.push(regionlabel)
-          }
-        })
         this.listEqPoints.push(entity);
       });
     },

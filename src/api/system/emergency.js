@@ -73,6 +73,41 @@ export function deleteDisasterReserves(uuid) {
     });
 }
 
+//紧急联系人
+export function unitContactList() {
+    return request({
+        url: '/unitContact/unitContactList',
+        method: 'get',
+    })
+}
+export function searchUnitContact(inputData) {
+    return request({
+        url: '/unitContact/searchUnitContact',
+        method: 'post',
+        params: {'inputData':inputData}
+    })
+}
+export function deleteUnitContact(uuid) {
+    return request({
+        url:  `/unitContact/deleteUnitContact/${uuid}`,
+        method: 'delete',
+    })
+}
+export function addUnitContact(data) {
+    return request({
+        url: '/unitContact/addUnitContact',
+        method: 'post',
+        data: data
+    })
+}
+export function updateUnitContact(data) {
+    return request({
+        url: '/unitContact/updateUnitContact',
+        method: 'put',
+        data: data
+    })
+}
+
 
 //  -----------------------------------------------
 

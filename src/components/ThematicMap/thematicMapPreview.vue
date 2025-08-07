@@ -23,7 +23,8 @@
           <div class="box"></div>
         </div>
       </div>
-      <div style="font-size:14px ;padding: 0; width: 100%; margin-top: 0; background-color: white; display: flex; justify-content: space-between; align-items: center; text-align: center;">
+      <div
+          style="font-size:14px ;padding: 0; width: 100%; margin-top: 0; background-color: white; display: flex; justify-content: space-between; align-items: center; text-align: center;">
         <p style="flex: 1; text-align: left; margin-left: 10px;"></p>
         <p style="flex: 1; text-align: center;">制作时间： {{ pictureCreateTime }} </p>
         <p style="flex: 1; text-align: right; margin-right: 10px;">版本：专业版</p>
@@ -36,7 +37,8 @@
       <div class="main">
         <img :src="imgshowURL" alt="三维模型" style="width: 100%;height: 100%">
       </div>
-      <div style="font-size:14px ;padding: 0; width: 100%; margin-top: 0; background-color: white; display: flex; justify-content: space-between; align-items: center; text-align: center;">
+      <div
+          style="font-size:14px ;padding: 0; width: 100%; margin-top: 0; background-color: white; display: flex; justify-content: space-between; align-items: center; text-align: center;">
         <p style="flex: 1; text-align: left; margin-left: 10px;"></p>
         <p style="flex: 1; text-align: center;">制作时间： {{ pictureCreateTime }} </p>
         <p style="flex: 1; text-align: right; margin-right: 10px;">版本：专业版</p>
@@ -47,7 +49,7 @@
     </div>
     <div class="preview-buttons">
       <button @click="downloadPdf" class="download-button">导出为PDF</button>
-      <button @click="downloadImage" class="download-button" >下载图片</button>
+      <button @click="downloadImage" class="download-button">下载图片</button>
       <button @click="closePreview" class="cancel-button">取消</button>
     </div>
   </div>
@@ -59,25 +61,25 @@ import html2canvas from "html2canvas";
 import {handleOutputData, timestampToTime} from "../../cesium/plot/eqThemes.js";
 import {ElMessage} from "element-plus";
 
-  export default {
-    data() {
-      return {
-        imgshowURLLocal: '',
-        imgurlFromDateLocal: '',
-        imgNameLocal: '',
-        ifShow: false,
-        pictureCreateTime: '',
-      }
-    },
-    props: [
-      'imgshowURL', 'imgurlFromDate', 'imgName',
-      'ifShowMapPreview', 'selectedEq','showTypes','corners', 'step',
+export default {
+  data() {
+    return {
+      imgshowURLLocal: '',
+      imgurlFromDateLocal: '',
+      imgNameLocal: '',
+      ifShow: false,
+      pictureCreateTime: '',
+    }
+  },
+  props: [
+    'imgshowURL', 'imgurlFromDate', 'imgName',
+    'ifShowMapPreview', 'selectedEq', 'showTypes', 'corners', 'step',
   ],
   watch: {
     imgshowURL(newVal) {
       // console.log("newVal",newVal)
       this.imgshowURLLocal = this.getAssetsFile(newVal)
-      if (this.showTypes === 2){
+      if (this.showTypes === 2) {
         this.exportImage()
       }
     },
@@ -86,7 +88,7 @@ import {ElMessage} from "element-plus";
     },
     imgName(newVal) {
       console.log('imgName 更新为:', newVal);
-      if(this.showTypes === 3){
+      if (this.showTypes === 3) {
         this.setPictureCreateTime();
       }
     },
@@ -124,21 +126,23 @@ import {ElMessage} from "element-plus";
       this.imgNameLocal = `${earthquakeName}${this.selectedEq.magnitude}级地震震区${this.imgName}`;
       return this.imgNameLocal
     },
-    downloadPdf() {
+    async downloadPdf() {
       this.$notify({
-        title: 'pdf导出',
+        title: 'PDF导出',
         message: '数据正在解析中...',
         duration: 5000, // 设置持续时间
-        zIndex: 9999  // 设置 zIndex 来确保通知在最上层
+        zIndex: 9999 // 设置 zIndex 来确保通知在最上层
       });
-      // 判断是否是遥感影像图
-      if (this.imgName === "遥感影像图") {
-        // 获取要截取的 DOM 元素
-        const elementToCapture = document.querySelector('.export-image');
+
+      // 判断是否是遥感影像图或三维模型图
+      if (this.imgName === "遥感影像图" || this.imgName === "三维模型图") {
+        const selector = this.imgName === "遥感影像图" ? '.export-image' : '.export-model-image';
+        const elementToCapture = document.querySelector(selector);
 
         // 检查 DOM 元素是否存在
         if (!elementToCapture) {
           console.error("无法找到要截取的 DOM 元素");
+          this.$message && this.$message.error('无法找到要截取的 DOM 元素');
           return;
         }
 
@@ -156,120 +160,135 @@ import {ElMessage} from "element-plus";
           this.generatePdf(img);
         }).catch(err => {
           console.error("截图失败：", err);
+          this.$message && this.$message.error('截图失败，请检查 DOM 元素是否正确');
         });
-      }
-      if (this.imgName === "三维模型图") {
-        // 获取要截取的 DOM 元素
-        const elementToCapture = document.querySelector('.export-model-image');
-
-        // 检查 DOM 元素是否存在
-        if (!elementToCapture) {
-          console.error("无法找到要截取的 DOM 元素");
-          return;
-        }
-
-        // 使用 html2canvas 截图
-        html2canvas(elementToCapture, {
-          useCORS: true, // 允许跨域请求
-          logging: true, // 打开日志
-          scale: 2, // 提高图像质量
-          backgroundColor: null // 设置背景透明
-        }).then(canvas => {
-          // 将 canvas 转换为 Base64 图片数据
-          const img = canvas.toDataURL('image/png');
-
-          // 调用生成 PDF 的函数
-          this.generatePdf(img);
-        }).catch(err => {
-          console.error("截图失败：", err);
-        });
-      }
-      else {
-        // 如果不是遥感影像图，直接使用现有的图片生成 PDF
-        if (!this.imgshowURL) {
-          console.error("图片数据为空，无法生成 PDF");
-          return;
-        }
-        // 调用生成 PDF 的函数
+      } else {
+        // 直接使用 imgshowURL 生成 PDF
         this.generatePdf(this.imgshowURL);
       }
     },
 
-// 独立的生成 PDF 方法
-    generatePdf(imageData) {
-      // 确定 PDF 文件的动态名称
-      const title = this.imgName || "生成PDF"; // 默认名称为 "生成PDF"
+    async generatePdf(imageData) {
+      console.log("imgName:", this.imgName);
+      console.log("imgshowURL", this.imgshowURL);
+      console.log("imgurlFromDate", this.imgurlFromDate);
 
-      // 初始化 jsPDF 实例
-      const PDF = new jsPDF('', 'pt', 'a4');
+      this.$notify({
+        title: '专题图下载',
+        message: '数据正在解析中...',
+        duration: 7000, // 设置持续时间
+        zIndex: 9999 // 设置 zIndex 来确保通知在最上层
+      });
 
-      // A4 页面宽度和高度（单位：pt）
-      const pdfWidth = 595.28; // A4 宽度
-      const pdfHeight = 841.89; // A4 高度
+      try {
+        // 确定 PDF 文件的动态名称
+        const title = this.imgName || "生成PDF"; // 默认名称为 "生成PDF"
 
-      // 设置边距（单位：pt）
-      const margin = 20; // 边距大小
+        // 初始化 jsPDF 实例
+        const PDF = new jsPDF('', 'pt', 'a4');
 
-      // 图片的实际宽高
-      const img = new Image();
-      img.src = imageData;
+        // A4 页面宽度和高度（单位：pt）
+        const pdfWidth = 595.28; // A4 宽度
+        const pdfHeight = 841.89; // A4 高度
 
-      img.onload = () => {
-        const imgWidth = img.width; // 图片原始宽度
-        const imgHeight = img.height; // 图片原始高度
+        // 设置边距（单位：pt）
+        const margin = 20; // 边距大小
 
-        // 计算图片显示在 PDF 中的宽高，保持比例，并预留边距
-        const availableWidth = pdfWidth - margin * 2;
-        const availableHeight = pdfHeight - margin * 2;
+        // 判断是否为 Base64 数据
+        const isBase64 = imageData.startsWith('data:image');
 
-        const ratio = imgWidth / imgHeight;
-        let displayWidth = availableWidth;
-        let displayHeight = availableWidth / ratio;
+        let imgSrc;
 
-        if (displayHeight > availableHeight) {
-          displayHeight = availableHeight;
-          displayWidth = availableHeight * ratio;
+        if (isBase64) {
+          // 如果是 Base64 数据，直接使用
+          imgSrc = imageData;
+        } else if (imageData.startsWith('http') || imageData.startsWith('/')) {
+          // 如果是 URL，使用 fetch 下载图片数据
+          const response = await fetch(imageData);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.statusText}`);
+          }
+          const blob = await response.blob(); // 将响应转换为 Blob
+          const blobUrl = URL.createObjectURL(blob); // 创建 Blob URL
+          imgSrc = blobUrl; // 设置图片源为 Blob URL
+        } else {
+          throw new Error("Invalid image URL or Base64 data");
         }
 
-        let leftHeight = imgHeight * (displayWidth / imgWidth); // 按比例调整后的图片总高度
-        let position = margin; // 初始绘制位置，包含顶部边距
+        // 创建图片对象
+        const img = new Image();
+        img.crossOrigin = "Anonymous"; // 确保跨域图片可以加载
+        img.src = imgSrc;
 
-        do {
-          // 添加图片到当前页面
-          PDF.addImage(
-              imageData,
-              'JPEG',
-              (pdfWidth - displayWidth) / 2, // 居中显示
-              position,
-              displayWidth,
-              displayHeight
-          );
+        img.onload = () => {
+          const imgWidth = img.width; // 图片原始宽度
+          const imgHeight = img.height; // 图片原始高度
 
-          // 计算剩余高度
-          leftHeight -= pdfHeight - margin * 2;
-          position = margin - leftHeight; // 更新绘制位置，包含分页
+          // 计算图片显示在 PDF 中的宽高，保持比例，并预留边距
+          const availableWidth = pdfWidth - margin * 2;
+          const availableHeight = pdfHeight - margin * 2;
 
-          // 如果图片超出一页，添加新页面
-          if (leftHeight > 0) {
-            PDF.addPage();
+          const ratio = imgWidth / imgHeight;
+          let displayWidth = availableWidth;
+          let displayHeight = availableWidth / ratio;
+
+          if (displayHeight > availableHeight) {
+            displayHeight = availableHeight;
+            displayWidth = availableHeight * ratio;
           }
-        } while (leftHeight > 0);
 
-        // 保存 PDF 文件
-        PDF.save(`${title}.pdf`);
-      };
+          let leftHeight = imgHeight * (displayWidth / imgWidth); // 按比例调整后的图片总高度
+          let position = margin; // 初始绘制位置，包含顶部边距
 
-      img.onerror = () => {
-        console.error("加载图片失败，无法生成 PDF");
-      };
+          do {
+            // 添加图片到当前页面
+            PDF.addImage(
+                img.src, // 使用图片的 src 属性
+                'JPEG',
+                (pdfWidth - displayWidth) / 2, // 居中显示
+                position,
+                displayWidth,
+                displayHeight
+            );
+
+            // 计算剩余高度
+            leftHeight -= pdfHeight - margin * 2;
+            position = margin - leftHeight; // 更新绘制位置，包含分页
+
+            // 如果图片超出一页，添加新页面
+            if (leftHeight > 0) {
+              PDF.addPage();
+            }
+          } while (leftHeight > 0);
+
+          // 保存 PDF 文件
+          PDF.save(`${title}.pdf`);
+
+          // 释放 Blob URL（如果使用了 Blob URL）
+          if (!isBase64) {
+            URL.revokeObjectURL(imgSrc);
+          }
+        };
+
+        img.onerror = () => {
+          console.error("加载图片失败，无法生成 PDF");
+          this.$message && this.$message.error('加载图片失败，请检查图片地址是否正确！');
+        };
+      } catch (error) {
+        console.error('生成 PDF 失败:', error);
+        this.$message && this.$message.error('生成 PDF 失败，请检查图片地址或模块路径是否正确！');
+      }
     },
+
+
+
     getAssetsFile(imgshowURL) {
       return new URL(imgshowURL, import.meta.url).href
     },
     async downloadImage() {
-      console.log("imgName:",this.imgName)
-      console.log("imgshowURL",this.imgshowURL)
-      console.log("imgurlFromDate",this.imgurlFromDate)
+      console.log("imgName:", this.imgName)
+      console.log("imgshowURL", this.imgshowURL)
+      console.log("imgurlFromDate", this.imgurlFromDate)
 
       this.$notify({
         title: '专题图下载',
@@ -291,21 +310,19 @@ import {ElMessage} from "element-plus";
           backgroundColor: null // 使背景透明
         })
             .then(canvas => {
-          // 将 canvas 转换为图片
-          const finalImage = canvas.toDataURL('image/png');
-          this.setPictureCreateTime()
-          // 创建下载链接并触发下载
-          const link = document.createElement('a');
-          link.download = `${this.imgName}.png`; // 设置下载文件名
-          link.href = finalImage; // 设置图片来源
-          link.click(); // 触发下载
-          console.log("1111111111111111")
-        })
+              // 将 canvas 转换为图片
+              const finalImage = canvas.toDataURL('image/png');
+              this.setPictureCreateTime()
+              // 创建下载链接并触发下载
+              const link = document.createElement('a');
+              link.download = `${this.imgName}.png`; // 设置下载文件名
+              link.href = finalImage; // 设置图片来源
+              link.click(); // 触发下载
+            })
             .catch(error => {
-          console.error('Error capturing the screenshot:', error);
-        });
-      }
-      else if (this.imgName === "三维模型图") {
+              console.error('Error capturing the screenshot:', error);
+            });
+      } else if (this.imgName === "三维模型图") {
         // 获取要截取的 DOM 元素
         const elementToCapture = document.querySelector('.export-model-image');
 
@@ -317,19 +334,19 @@ import {ElMessage} from "element-plus";
           backgroundColor: null // 使背景透明
         })
             .then(canvas => {
-          // 将 canvas 转换为图片
-          const finalImage = canvas.toDataURL('image/png');
-          this.setPictureCreateTime();
+              // 将 canvas 转换为图片
+              const finalImage = canvas.toDataURL('image/png');
+              this.setPictureCreateTime();
 
-          // 创建下载链接并触发下载
-          const link = document.createElement('a');
-          link.download = `${this.imgName}.png`; // 设置下载文件名
-          link.href = finalImage; // 设置图片来源
-          link.click(); // 触发下载
-        })
+              // 创建下载链接并触发下载
+              const link = document.createElement('a');
+              link.download = `${this.imgName}.png`; // 设置下载文件名
+              link.href = finalImage; // 设置图片来源
+              link.click(); // 触发下载
+            })
             .catch(error => {
-          console.error('Error capturing the screenshot:', error);
-        });
+              console.error('Error capturing the screenshot:', error);
+            });
       } else {
         try {
           const link = document.createElement('a'); // 创建下载链接
@@ -393,7 +410,7 @@ import {ElMessage} from "element-plus";
       this.setPictureCreateTime()
     },
 
-    removeBoxs(container){
+    removeBoxs(container) {
       if (!container) return;
       // 清空容器中的已有盒子
       while (container.firstChild) {

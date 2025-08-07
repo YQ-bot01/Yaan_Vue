@@ -29,30 +29,6 @@
           :width="header.width"
           show-overflow-tooltip
       >
-        <!-- 为表格单元格内容定义默认模板 -->
-        <!--        <template #default="scope">-->
-        <!--          &lt;!&ndash; 对特定表头，使用Popover显示完整信息 &ndash;&gt;-->
-        <!--          <div v-if="header.label === '地址'">-->
-        <!--            <el-popover placement="top" :width="200" trigger="hover">-->
-        <!--              <div style="text-align: left">{{ scope.row[header.prop] }}</div>-->
-        <!--              &lt;!&ndash; 定义触发Popover显示的参考元素 &ndash;&gt;-->
-        <!--              <template #reference>-->
-        <!--                <div-->
-        <!--                    :style="{ width: header.width + 'px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left' }"-->
-        <!--                >-->
-        <!--                  &lt;!&ndash; 在参考元素内显示截断的字段值 &ndash;&gt;-->
-        <!--                  <span class="myNote" style="text-align: left">-->
-        <!--                                             {{ scope.row[header.prop] }}-->
-        <!--                                         </span>-->
-        <!--                </div>-->
-        <!--              </template>-->
-        <!--            </el-popover>-->
-        <!--          </div>-->
-        <!--          &lt;!&ndash; 对其他表头，直接显示字段值 &ndash;&gt;-->
-        <!--          <div v-else>-->
-        <!--            {{ scope.row[header.prop] }}-->
-        <!--          </div>-->
-        <!--        </template>-->
       </el-table-column>
 
       <el-table-column label="操作" align="center" width="150" fixed="right">
@@ -89,19 +65,6 @@
             </el-form-item>
           </el-col>
         </el-row>
-<!--        <el-row>-->
-<!--          <el-col :span="18">-->
-<!--            <el-form-item label="插入时间：" prop="insertTime">-->
-<!--              <el-date-picker-->
-<!--                  v-model="dialogContent.insertTime"-->
-<!--                  type="datetime"-->
-<!--                  placeholder="选择日期时间"-->
-<!--                  value-format="x"-->
-<!--                  size="large">-->
-<!--              </el-date-picker>-->
-<!--            </el-form-item>-->
-<!--          </el-col>-->
-<!--        </el-row>-->
         <el-row :gutter="10">
           <el-col :span="12">
             <el-form-item label="经度(度分)：" prop="longitude">
@@ -158,7 +121,7 @@
 
         <el-row :gutter="10">
           <el-col :span="24">
-            <el-form-item label="备注:" prop="other">
+            <el-form-item label="数据来源:" prop="other">
               <el-input type="textarea" v-model="dialogContent.other" placeholder="请输入备注"></el-input>
             </el-form-item>
           </el-col>
@@ -224,7 +187,7 @@ export default {
         {prop: 'otherEquipment', label: "其他装备数量(个)", width: 150},
         {prop: 'longitude', label: "经度", width: 150},
         {prop: 'latitude', label: "纬度", width: 150},
-        { prop: 'other', label: '备注', width: 150 }
+        { prop: 'other', label: '数据来源', width: 150 }
         // {prop: 'insertTime', label: "插入时间", width: 180}
       ],
       // 查询功能

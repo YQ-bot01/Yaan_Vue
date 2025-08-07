@@ -21,7 +21,7 @@
           {{ ($index + 1) + (currentPage - 1) * pageSize }}
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="遥感影像名称" width="150" align="center"></el-table-column>
+      <el-table-column prop="name" label="遥感影像名称" width="180" align="center"></el-table-column>
       <el-table-column prop="path" label="遥感影像路径" width="200" align="center"></el-table-column>
       <el-table-column prop="createTime" label="添加时间" align="center" width="250"></el-table-column>
       <el-table-column prop="shootingTime" label="拍摄时间" align="center" width="250"></el-table-column>
@@ -453,7 +453,7 @@ export default {
 
     handleOpen(row) {
       console.log(row);
-      window.open('/orthophotographViewer', "_blank");
+      window.open('/remotesensingimage');
     },
 
     handleEdit(title, row = {}) {

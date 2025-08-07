@@ -1,13 +1,5 @@
 import request from '@/utils/request'
 
-export function getEqList(eqListDTO) {
-    return request({
-        url: '/tp/api/open/eq/list',
-        method: 'get',
-        params: eqListDTO
-    })
-}
-
 export function getEqTownResult(eqTownResultDTO) {
     return request({
         url: '/tp/api/open/eq/assessment',
@@ -16,11 +8,18 @@ export function getEqTownResult(eqTownResultDTO) {
     })
 }
 
-export function getEqOutputMap(eqOutputMapDTO) {
-  return request({
-        url: '/tp/api/open/eq/output/map',
+export function getEqList(eqListDTO) {
+    return request({
+        url: '/tp/api/open/eq/list',
         method: 'get',
-        params: eqOutputMapDTO
+        params: eqListDTO
+    })
+}
+export function getEqListZ(eqListDTO) {
+    return request({
+        url: '/tp/api/open/eq/listZ',
+        method: 'get',
+        params: eqListDTO
     })
 }
 
@@ -31,6 +30,14 @@ export function getEqOutputReport(eqOutputReportDTO) {
 
     params: eqOutputReportDTO
   })
+}
+
+export function getEqOutputMap(eqOutputMapDTO) {
+    return request({
+        url: '/tp/api/open/eq/output/map',
+        method: 'get',
+        params: eqOutputMapDTO
+    })
 }
 export function getEqOutPutJueCe(eqOutputJueCeDTO) {
     return request({

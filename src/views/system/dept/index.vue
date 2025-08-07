@@ -58,7 +58,7 @@
         :expand-row-keys="firstLevelKeys"
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
-      <el-table-column prop="deptName" label="应急工作组名称" width="300"></el-table-column>
+      <el-table-column prop="deptName" label="抗震救灾指挥部成员" width="300"></el-table-column>
       <!--         <el-table-column prop="orderNum"  align="center" label="排序" width="200"></el-table-column>-->
       <el-table-column prop="status" align="center" label="状态" width="200">
         <template #default="scope">
@@ -183,7 +183,7 @@ const {queryParams, form, rules} = toRefs(data);
 function getList() {
   loading.value = true;
   listDept(queryParams.value).then(response => {
-    console.log("response", response);
+    console.log("listDept response", response);
 
     // 对返回数据中的时间字段 createTime 进行格式化
     const formattedData = response.data.map(item => ({

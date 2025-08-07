@@ -42,11 +42,7 @@ export const constantRoutes = [
     component: () => import('@/views/login'),
     hidden: true
   },
-  {
-    path: '/register',
-    component: () => import('@/views/register'),
-    hidden: true
-  },
+
   {
     path: "/:pathMatch(.*)*",
     component: () => import('@/views/error/404'),
@@ -98,13 +94,17 @@ export const constantRoutes = [
   },
   {
     path:'/thd',
-    // component: () =>import('@/components/Cesium/thd.vue'),
     component: () =>import('@/components/Cesium/CommandScreen.vue'),
     hidden: true
   },
   {
     path:'/orthophotographViewer',
     component: () =>import('@/components/Cesium/orthophotographViewer'),
+    hidden: true
+  },
+  {
+    path:'/remotesensingimage',
+    component: () =>import('@/components/Cesium/remotesensingimage.vue'),
     hidden: true
   },
 

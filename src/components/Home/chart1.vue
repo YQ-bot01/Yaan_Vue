@@ -18,32 +18,42 @@ const chartOptions = ref([]);
 const chartInstances = ref([]);
 
 const calculateMagnitudeData = (data, years) => {
-    const currentYear = new Date().getFullYear();
-    const startYear = currentYear - years;
-    const magnitudeCounts = {
-      '<3': Array(years + 1).fill(0),
-      '3-4.5': Array(years + 1).fill(0),
-      '4.5-6': Array(years + 1).fill(0),
-      '≥6': Array(years + 1).fill(0),
-    };
-    data.forEach(item => {
-      const year = new Date(item.occurrenceTime).getFullYear();
-      const yearIndex = currentYear - year;
+  console.log("开始计算", data);
+  const currentYear = new Date().getFullYear();
+  const startYear = currentYear - years + 1;
 
-    if (year >= startYear && yearIndex >= 0 && yearIndex <= years) {
-      if (item.magnitude < 3) {
+  const magnitudeCounts = {
+    '<3': Array(years).fill(0),
+    '3-4.5': Array(years).fill(0),
+    '4.5-6': Array(years).fill(0),
+    '≥6': Array(years).fill(0),
+  };
+
+  data.forEach(item => {
+    const year = new Date(item.occurrenceTime).getFullYear();
+    const yearIndex = year - startYear; // ✅ 改成升序计算
+
+    const mag = parseFloat(item.magnitude);
+
+    if (!isNaN(mag) && year >= startYear && yearIndex >= 0 && yearIndex < years) {
+      if (mag < 3) {
         magnitudeCounts['<3'][yearIndex]++;
-      } else if (item.magnitude < 4.5) {
+      } else if (mag >= 3 && mag < 4.5) {
         magnitudeCounts['3-4.5'][yearIndex]++;
-      } else if (item.magnitude < 6) {
+      } else if (mag >= 4.5 && mag < 6) {
         magnitudeCounts['4.5-6'][yearIndex]++;
-      } else {
+      } else if (mag >= 6) {
         magnitudeCounts['≥6'][yearIndex]++;
       }
     }
   });
-    return magnitudeCounts;
+
+  console.log(magnitudeCounts);
+  return magnitudeCounts;
 };
+
+
+
 
 const initChart = async () => {
   const currentYear = new Date().getFullYear();
@@ -51,68 +61,79 @@ const initChart = async () => {
   const tenYearMagnitudes = calculateMagnitudeData(props.eqData, 10);
 
   // 以下是流光折线图的一些配置的
-  var data1 = tenYearMagnitudes['<3'];
-  var data2 = tenYearMagnitudes['3-4.5'];
-  var data3 = tenYearMagnitudes['4.5-6'];
-  var data4 = tenYearMagnitudes['≥6'];
+  const data1 = tenYearMagnitudes['<3'];
+  const data2 = tenYearMagnitudes['3-4.5'];
+  const data3 = tenYearMagnitudes['4.5-6'];
+  const data4 = tenYearMagnitudes['≥6'];
 
-  var json = {
+  const xcategory = Array.from({ length: 10 }, (_, i) => (currentYear - 9 + i).toString());
+
+  const json = {
     chart0: {
-      xcategory: Array.from({ length: 10 }, (_, i) => (currentYear - i).toString()),
+      xcategory: xcategory,
       low: data1,
       lowLine: [],
     }
   };
-  var json2 = {
+  const json2 = {
     chart0: {
-      xcategory: Array.from({ length: 10 }, (_, i) => (currentYear - i).toString()),
+      xcategory: xcategory,
       low: data2,
       lowLine: [],
     }
   };
-  var json3 = {
+  const json3 = {
     chart0: {
-      xcategory: Array.from({ length: 10 }, (_, i) => (currentYear - i).toString()),
+      xcategory: xcategory,
       low: data3,
       lowLine: [],
     }
   };
-  var json4 = {
+  const json4 = {
     chart0: {
-      xcategory: Array.from({ length: 10 }, (_, i) => (currentYear - i).toString()),
+      xcategory: xcategory,
       low: data4,
       lowLine: [],
     }
   };
 
-  var zrUtil = echarts.util;
-  zrUtil.each(json.chart0.xcategory, function(item, index) {
-    json.chart0.lowLine.push([{
-      coord: [index, json.chart0.low[index]]
-    }, {
-      coord: [index + 1, json.chart0.low[index + 1]]
-    }]);
+  const zrUtil = echarts.util;
+
+  // 每个数据段单独构造 lowLine，避免错乱
+  zrUtil.each(json.chart0.xcategory, function (item, index) {
+    if (index < json.chart0.low.length - 1) {
+      json.chart0.lowLine.push([
+        { coord: [index, json.chart0.low[index]] },
+        { coord: [index + 1, json.chart0.low[index + 1]] }
+      ]);
+    }
   });
-  zrUtil.each(json.chart0.xcategory, function(item, index) {
-    json2.chart0.lowLine.push([{
-      coord: [index, json2.chart0.low[index]]
-    }, {
-      coord: [index + 1, json2.chart0.low[index + 1]]
-    }]);
+
+  zrUtil.each(json2.chart0.xcategory, function (item, index) {
+    if (index < json2.chart0.low.length - 1) {
+      json2.chart0.lowLine.push([
+        { coord: [index, json2.chart0.low[index]] },
+        { coord: [index + 1, json2.chart0.low[index + 1]] }
+      ]);
+    }
   });
-  zrUtil.each(json.chart0.xcategory, function(item, index) {
-    json3.chart0.lowLine.push([{
-      coord: [index, json3.chart0.low[index]]
-    }, {
-      coord: [index + 1, json3.chart0.low[index + 1]]
-    }]);
+
+  zrUtil.each(json3.chart0.xcategory, function (item, index) {
+    if (index < json3.chart0.low.length - 1) {
+      json3.chart0.lowLine.push([
+        { coord: [index, json3.chart0.low[index]] },
+        { coord: [index + 1, json3.chart0.low[index + 1]] }
+      ]);
+    }
   });
-  zrUtil.each(json.chart0.xcategory, function(item, index) {
-    json4.chart0.lowLine.push([{
-      coord: [index, json4.chart0.low[index]]
-    }, {
-      coord: [index + 1, json4.chart0.low[index + 1]]
-    }]);
+
+  zrUtil.each(json4.chart0.xcategory, function (item, index) {
+    if (index < json4.chart0.low.length - 1) {
+      json4.chart0.lowLine.push([
+        { coord: [index, json4.chart0.low[index]] },
+        { coord: [index + 1, json4.chart0.low[index + 1]] }
+      ]);
+    }
   });
   // ----------------------------------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 import axios from "axios";
 import {tianDitulocalApi} from "@/utils/server.js";
-
+import {TianDiTuToken} from "@/cesium/tool/config.js";
 let generalCompute = {
     async getReverseGeocode(lon, lat) {
         try {
@@ -9,13 +9,14 @@ let generalCompute = {
                 params: {
                     postStr: JSON.stringify({lon, lat, ver: 1}),
                     type: 'geocode',
-                    tk: 'd6b4dece749d481fe817775d0aafeb42'
+                    tk: TianDiTuToken
                 }
             });
             // console.log(response,"response")
             return response.data.result.addressComponent;
         } catch (error) {
-            console.error("逆地理编码失败:", error);
+            // console.error("逆地理编码失败:", error);
+            console.error("逆地理编码失败");
             return null;
         }
     },

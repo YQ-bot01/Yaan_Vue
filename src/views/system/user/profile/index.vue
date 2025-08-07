@@ -30,7 +30,7 @@
                         <div class="pull-right">{{ state.user.email }}</div>
                      </li>
                      <li class="list-group-item">
-                        <svg-icon icon-class="tree" />隶属工作组
+                        <svg-icon icon-class="tree" />隶属部门
                         <div class="pull-right" v-if="state.user.dept">{{ state.user.dept.deptName }}</div>
                      </li>
                      <li class="list-group-item">

@@ -1,17 +1,5 @@
 <template>
   <div class="app-container">
-    <!--    <div style="margin-bottom:5px;">-->
-    <!--      <el-input-->
-    <!--          v-model="requestParams"-->
-    <!--          placeholder="请输入查询内容"-->
-    <!--          clearable-->
-    <!--          :prefix-icon="Search"-->
-    <!--          class="search-input"-->
-    <!--      />-->
-    <!--      <el-button type="primary" class="button" @click="handleQuery()">搜索</el-button>-->
-    <!--    </div>-->
-
-
     <el-row :gutter="10" class="mb8">
       <el-form-item label="灾情数据统计">
         <el-input
@@ -27,18 +15,24 @@
         <el-button type="success" plain icon="Search" class="button" @click="openFilter()">筛选数据
         </el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button type="primary" plain icon="Download" class="button" @click="dialogVisible = true">导出数据
-        </el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="warning" plain icon="Delete" class="button" @click="clearSelection()">清空选择
-        </el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="danger" plain icon="Delete" class="button" @click="handleDeleteAll()">删除记录
-        </el-button>
-      </el-col>
+      <!-- 只有 admin 才显示这三个按钮 -->
+      <template v-if="isAdmin">
+        <el-col :span="1.5">
+          <el-button type="primary" plain icon="Download" class="button" @click="dialogVisible = true">
+            导出数据
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="warning" plain icon="Delete" class="button" @click="clearSelection">
+            清空选择
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="danger" plain icon="Delete" class="button" @click="handleDeleteAll">
+            删除记录
+          </el-button>
+        </el-col>
+      </template>
       <el-col :span="1.5">
         <el-select
             v-model="flag"
@@ -141,6 +135,18 @@ import {ElMessage, ElMessageBox} from "element-plus";
 import {exportExcel, getField, getData, deleteData, searchData} from "@/api/system/excel.js";
 import {Search} from "@element-plus/icons-vue";
 import {getExcelUploadEarthquake, getExcelUploadEqList, queryEq} from "@/api/system/eqlist.js";
+import useUserStore from "@/store/modules/user.js";
+
+
+// 获取用户名
+const userStore = useUserStore()
+console.log("隐藏",userStore)
+// 计算属性判断是否admin
+const isAdmin = computed(() => {
+  return userStore.name === 'admin'  // 这里是name字段和你后台的用户名字段对应
+})
+
+
 
 const dialogVisible = ref(false)
 const flag = ref()

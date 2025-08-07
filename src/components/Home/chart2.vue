@@ -15,70 +15,70 @@
       </el-carousel-item>
 
       <!-- 各区县人口总数表 -->
-      <el-carousel-item>
-        <div class="chart-container population-chart-container" >
-          <img src="@/assets/各区县人口.png" alt="各区县人口" style="width: 127%; height: auto;">
-          <span
-              style="padding-left: 5px;margin-left: 3%; background: linear-gradient(to right, rgb(218, 45, 45) 0%, rgba(254, 254, 254, 0) 90%); color: white; font-size: 13px;">
-            更新时间：{{ populationDataChartUpdateTime }}
-          </span>
-          <div ref="populationDataChart" class="chart"></div> <!-- 人口数据图表容器 -->
-        </div>
-      </el-carousel-item>
+<!--      <el-carousel-item>-->
+<!--        <div class="chart-container population-chart-container" >-->
+<!--          <img src="@/assets/各区县人口.png" alt="各区县人口" style="width: 127%; height: auto;">-->
+<!--          <span-->
+<!--              style="padding-left: 5px;margin-left: 3%; background: linear-gradient(to right, rgb(218, 45, 45) 0%, rgba(254, 254, 254, 0) 90%); color: white; font-size: 13px;">-->
+<!--            更新时间：{{ populationDataChartUpdateTime }}-->
+<!--          </span>-->
+<!--          <div ref="populationDataChart" class="chart"></div> &lt;!&ndash; 人口数据图表容器 &ndash;&gt;-->
+<!--        </div>-->
+<!--      </el-carousel-item>-->
 
-      <el-carousel-item>
-        <div class="chart-container">
-          <img src="@/assets/隐患点.png" alt="隐患点" style="width: 127%; height: auto;">
+<!--      <el-carousel-item>-->
+<!--        <div class="chart-container">-->
+<!--          <img src="@/assets/隐患点.png" alt="隐患点" style="width: 127%; height: auto;">-->
 
-          <!-- 风险点信息 -->
-          <div v-if="riskPointData.length > 0" class="riskPoint" @mouseenter="pauseSlide" @mouseleave="resumeSlide" style="margin-top: -20px">
-            <div class="button-top" style="margin-bottom: 5px;">
-              <span @click="slideUp" class="white-text">▲</span>
-            </div>
+<!--          &lt;!&ndash; 风险点信息 &ndash;&gt;-->
+<!--          <div v-if="riskPointData.length > 0" class="riskPoint" @mouseenter="pauseSlide" @mouseleave="resumeSlide" style="margin-top: -20px">-->
+<!--            <div class="button-top" style="margin-bottom: 5px;">-->
+<!--              <span @click="slideUp" class="white-text">▲</span>-->
+<!--            </div>-->
 
-            <div class="container" :style="{ transform: `translateY(${translateY.value}px)`, transition: 'transform 0.5s ease' }">
-              <el-col>
-                <div class="newColCommon">
-                  <span class="label">隐患点地点：</span>{{ location || '暂无数据' }}
-                </div>
-              </el-col>
-              <el-col>
-                <div class="newColCommon">
-                  <span class="label">隐患点类型：</span>{{ riskPointType || '暂无数据' }}
-                </div>
-              </el-col>
-              <el-col>
-                <div class="newColCommon">
-                  <span class="label">与震中距离：</span>{{ distance ? distance + ' 千米' : '暂无数据' }}
-                </div>
-              </el-col>
-              <el-col>
-                <div class="newColCommon">
-                  <span class="label">险情等级：</span>{{ riskLevel || '暂无数据' }}
-                </div>
-              </el-col>
-              <el-col>
-                <div class="newColCommon">
-                  <span class="label">稳定性：</span>{{ stability || '暂无数据' }}
-                </div>
-              </el-col>
-            </div>
+<!--            <div class="container" :style="{ transform: `translateY(${translateY.value}px)`, transition: 'transform 0.5s ease' }">-->
+<!--              <el-col>-->
+<!--                <div class="newColCommon">-->
+<!--                  <span class="label">隐患点地点：</span>{{ location || '暂无数据' }}-->
+<!--                </div>-->
+<!--              </el-col>-->
+<!--              <el-col>-->
+<!--                <div class="newColCommon">-->
+<!--                  <span class="label">隐患点类型：</span>{{ riskPointType || '暂无数据' }}-->
+<!--                </div>-->
+<!--              </el-col>-->
+<!--              <el-col>-->
+<!--                <div class="newColCommon">-->
+<!--                  <span class="label">与震中距离：</span>{{ distance ? distance + ' 千米' : '暂无数据' }}-->
+<!--                </div>-->
+<!--              </el-col>-->
+<!--              <el-col>-->
+<!--                <div class="newColCommon">-->
+<!--                  <span class="label">险情等级：</span>{{ riskLevel || '暂无数据' }}-->
+<!--                </div>-->
+<!--              </el-col>-->
+<!--              <el-col>-->
+<!--                <div class="newColCommon">-->
+<!--                  <span class="label">稳定性：</span>{{ stability || '暂无数据' }}-->
+<!--                </div>-->
+<!--              </el-col>-->
+<!--            </div>-->
 
-            <div class="button-bottom" style="margin-top: 5px;">
-              <span @click="slideDown" class="white-text">▼</span>
-            </div>
-          </div>
+<!--            <div class="button-bottom" style="margin-top: 5px;">-->
+<!--              <span @click="slideDown" class="white-text">▼</span>-->
+<!--            </div>-->
+<!--          </div>-->
 
-          <!-- 如果没有数据，显示暂无数据 -->
-          <div v-else class="no-data">
-            <div>与震中距离：暂无数据</div>
-            <div>隐患点地点：暂无数据</div>
-            <div>隐患点类型：暂无数据</div>
-            <div>险情等级：暂无数据</div>
-            <div>稳定性：暂无数据</div>
-          </div>
-        </div>
-      </el-carousel-item>
+<!--          &lt;!&ndash; 如果没有数据，显示暂无数据 &ndash;&gt;-->
+<!--          <div v-else class="no-data">-->
+<!--            <div>与震中距离：暂无数据</div>-->
+<!--            <div>隐患点地点：暂无数据</div>-->
+<!--            <div>隐患点类型：暂无数据</div>-->
+<!--            <div>险情等级：暂无数据</div>-->
+<!--            <div>稳定性：暂无数据</div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </el-carousel-item>-->
 
 
     </el-carousel>
@@ -526,7 +526,6 @@ const initPopulationDataChart = () => {
 // 获取隐患点数据
 const handleRiskPoint = () => {
   getRiskPoint(props.lastEq.eqid).then((res) => {
-    // console.log("handleRiskPoint", res); // 打印整个响应数据
 
     if (res && res.data && res.data.length > 0) {
       riskPointData.value = res.data; // 将数据存入数组
@@ -618,7 +617,7 @@ const slideDown = () => {
 // 监听lastEq属性的变化，调用处理余震数据的函数
 watch(() => props.lastEq,() => {
   handleAftershockData();
-  handleRiskPoint();
+  // handleRiskPoint();
   getEqInfo(props.lastEq.eqid)
 });
 

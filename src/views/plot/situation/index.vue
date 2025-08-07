@@ -92,7 +92,8 @@
         </el-pagination>
       </el-form>
       <el-form v-if="showToolbar" class="noteContainer">
-        <div class="modelAdj">信息标注工具<span style="margin-left: 10px;" @click="showToolbar = false">隐藏工具栏</span></div>
+        <div class="modelAdj">信息标注工具<span style="margin-left: 10px;"
+                                                @click="showToolbar = false">隐藏工具栏</span></div>
         <el-row>
           <el-col :span="13">
             <el-tree class="plotTool" :data="plotTreeData" :props="defaultProps" @node-click="handleNodeClick"
@@ -101,8 +102,7 @@
           <el-col :span="11">
           <span class="plotTreeItem" v-for="(item,index) in plotTreeClassification" @click="treeItemClick(item)">
             <el-tooltip class="plottreetooltip" effect="dark" :content="item.name" placement="top-start">
-<!--              <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()"  width="17%" height="43.3px">-->
-              <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +item.img+ '.png?t=' + new Date().getTime()" width="17%" height="43.3px">
+              <img :src="iconRoad +item.img+ '.png?t=' + new Date().getTime()" width="17%" height="43.3px">
             </el-tooltip>
           </span>
           </el-col>
@@ -112,11 +112,10 @@
           :eqOccurrenceTime="eqOccurrenceTime"
           :addMarkDialogFormVisible="addMarkDialogFormVisible"
           @wsSendPoint="wsSendPoint"
-          @drawPoints="drawPoints"
-          @ifPointAnimate="ifPointAnimation"
           @clearMarkDialogForm="resetAddMarkCollection"
           @sendPlot="sendPlot"
       />
+<!--      @ifPointAnimate="ifPointAnimation"-->
       <addPolylineDialog
           :eqOccurrenceTime="eqOccurrenceTime"
           :addPolylineDialogFormVisible="addPolylineDialogFormVisible"
@@ -228,19 +227,21 @@
 
       </el-dialog>
 
-      <el-button style="position: absolute;top: 90px;left: 10px;z-index: 1;" v-if="!showEqList" @click="showEqList = true">显示地震列表</el-button>
-      <el-button style="position: absolute;top: 500px;left: 10px;z-index: 1;" v-if="!showToolbar" @click="showToolbar = true">显示工具栏</el-button>
+      <el-button style="position: absolute;top: 90px;left: 10px;z-index: 1;" v-if="!showEqList"
+                 @click="showEqList = true">显示地震列表
+      </el-button>
+      <el-button style="position: absolute;top: 500px;left: 10px;z-index: 1;" v-if="!showToolbar"
+                 @click="showToolbar = true">显示工具栏
+      </el-button>
     </div>
-    <!-- Cesium 视图 -->
-    <!--    <layeredShowPlot :zoomLevel="zoomLevel" :pointsLayer="pointsLayer"/>-->
+
 
     <div class="legend-container" style="position: absolute;bottom: 0;right: 0;" v-if="showLegend">
       <el-table stripe :row-style="{ height: '30px' }" :cell-style="{ padding: '0px' }" :data="legendPlotData"
                 style="width: 100%">
         <el-table-column label="图标" width="50">
           <template v-slot="scope">
-<!--        <img :src="'http://59.213.183.7/prod-api/' +'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>-->
-            <img :src="'http://localhost:8080'+'/uploads/PlotsPic/' +scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>
+           <img :src="iconRoad+scope.row.icon+ '.png?t=' + new Date().getTime()" alt="icon" style="width: 20px; height: 20px;"/>
           </template>
         </el-table-column>
         <el-table-column prop="plotType" label="类型" width="180"></el-table-column>
@@ -291,10 +292,9 @@
     <!--      地震列表组件-点击列表“详情”显示专题图列表      -->
     <plotSearch
         :eqid="eqid"
-
         :plotArray="plots"
     ></plotSearch>
-<!--    :plotArray="plotArray"-->
+    <!--    :plotArray="plotArray"-->
 
   </div>
 </template>
@@ -306,7 +306,8 @@ import {ElMessage} from 'element-plus'
 import {initCesium} from '@/cesium/tool/initCesium.js'
 import {getExcelPlotInfo, getPlot, getPlotIcon} from '@/api/system/plot'
 import {getAllEq, getAllEqList, getEqById, getEqListById} from '@/api/system/eqlist'
-import {initWebSocket, websocketonmessage} from '@/cesium/WS.js'
+// import {initWebSocket, websocketonmessage} from '@/cesium/WS.js'
+import {initWebSocket,wsAdd} from '@/cesium/WS.js'
 import cesiumPlot from '@/cesium/plot/cesiumPlot'
 import addMarkCollectionDialog from "@/components/Cesium/addMarkCollectionDialog"
 import addPolylineDialog from "@/components/Cesium/addPolylineDialog.vue"
@@ -320,7 +321,6 @@ import {plotType} from "../../../cesium/plot/plotType.js";
 import {downloadPlotExcel} from "../../../api/system/excel.js";
 import {getToken} from "../../../utils/auth.js";
 import * as XLSX from "xlsx";
-import layeredShowPlot from '@/components/Cesium/layeredShowPlot.vue'
 import html2canvas from "html2canvas";
 import {querySituationData} from "@/api/system/model.js";
 import plotSearch from '@/components/Cesium/plotSearch.vue'
@@ -329,16 +329,24 @@ import {Position} from "@element-plus/icons-vue";
 import {TianDiTuToken} from "@/cesium/tool/config.js";
 import {tianditu} from "@/utils/server.js";
 import timeLine from "@/cesium/timeLine.js";
+import siChuanCity from "@/assets/geoJson/sichuan.json";
+import sichuanCounty from "@/assets/geoJson/sichuanCounty.json";
+import yaAnVillage from "@/assets/geoJson/yaan.json";
+import layer from "@/cesium/layer.js";
 
 export default {
   components: {
     Position,
     ThematicMapPreview,
     dataSourcePanel,
-    addMarkCollectionDialog, commonPanel, addPolygonDialog, addPolylineDialog, layeredShowPlot, plotSearch
+    addMarkCollectionDialog, commonPanel, addPolygonDialog, addPolylineDialog, plotSearch
   },
   data: function () {
     return {
+      iconRoad: '', // 初始化为空字符串
+      siChuanCityEntity: [],
+      siChuanCountyEntity: [],
+      siChuanVillageEntity: [],
       //----------menu选择框----------------
       menus: [
         {
@@ -382,7 +390,7 @@ export default {
       addPolygonDialogFormVisible: false,// mian标绘信息填写对话框的显示和隐藏
       showMarkCollection: false, // 点标绘控件的显示和隐藏
       openAddStatus: true, // 用来控制添加billboard按钮的状态，点一次后只有添加完点才能再点击
-      ifPointAnimate: false, // 说明是否为新标绘的点
+      // ifPointAnimate: false, // 说明是否为新标绘的点
       //-----------弹窗部分--------------
       selectedEntityHighDiy: null,
       popupPosition: {x: 0, y: 0}, // 弹窗显示位置，传值给子组件
@@ -490,8 +498,6 @@ export default {
       //----------------------------------
       renderedPlotIds: new Set(), // 用于存储已经渲染的 plotid
       //----------------------------------
-      zoomLevel: '市', // 初始化缩放层级
-      pointsLayer: [], //传到子组件
       //----------------------------------
       plotList: [], // 用于指定地震标绘点导出
       plots: [],
@@ -510,7 +516,7 @@ export default {
 
       //-----------导出图片----------------
       loading: false, // 控制加载状态
-      loadingupdate:false,//上传
+      loadingupdate: false,//上传
       //向预览组件传递数据
       imgshowURL: null,// 保存预览图片的 URL
       imgurlFromDate: "",
@@ -557,6 +563,9 @@ export default {
   },
 
   mounted() {
+    import('@/utils/server.js').then((module) => {
+      this.iconRoad = module.iconRoad;
+    });
     // 初始化地图
     this.init()
     // 生成实体点击事件的handler
@@ -599,6 +608,14 @@ export default {
   // },
   methods: {
 
+    removeDataSourcesLayer(layerName) {
+      // 通过图层名称获取数据源对象如果存在，则执行移除操作
+      const dataSource = window.viewer.dataSources.getByName(layerName)[0];
+      if (dataSource) {
+        window.viewer.dataSources.remove(dataSource);
+      }
+    },
+
     updateQuery() {
       let tempEqid = this.eqid;
       this.eqid = "";
@@ -615,22 +632,6 @@ export default {
     addTrafficLayer() {
       // 获取天地图API令牌
       let token = TianDiTuToken;
-
-      // 检查是否存在'TrafficLayer'图层
-      // 创建并添加交通图层
-      let trafficLayer = viewer.imageryLayers.addImageryProvider(
-          new Cesium.WebMapTileServiceImageryProvider({
-            // 天地图交通图层的URL模板
-            // url: "http://t0.tianditu.com/cva_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cva&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&tk=" + token,
-            url: `${tianditu}/cva_w/wmts?service=wmts&request=GetTile&version=1.0.0&LAYER=cva&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&tk=${token}`,
-            layer: "tdtAnnoLayer",
-            style: "default",
-            format: "image/jpeg", // 根据实际返回的图像格式调整
-            tileMatrixSetID: "w", // 如果URL中已经指定了tileMatrixSet，则此参数可能不是必需的
-            show: true
-          })
-      );
-
       // 检查是否存在'TrafficTxtLayer'图层
       // 创建并添加交通注记图层
       let traffictxtLayer = viewer.imageryLayers.addImageryProvider(
@@ -668,7 +669,7 @@ export default {
         sheets: this.sheet,
         excelContent: this.excelContent
       };
-      console.log(plotBTO,"plotBTO downloadExcel")
+      console.log(plotBTO, "plotBTO downloadExcel")
 
       // console.log("sheet:",sheet)
 
@@ -711,7 +712,7 @@ export default {
         this.isLoaded = false
         this.downloadConfirmed = false
         this.loading = false
-        console.log("this.loading，模板下载结束",this.loading)
+        console.log("this.loading，模板下载结束", this.loading)
       })
     },
 
@@ -721,11 +722,8 @@ export default {
       Arrow.disable();
       Arrow.init(viewer);
       viewer._cesiumWidget._creditContainer.style.display = 'none' // 隐藏版权信息
-      // 监听相机高度并更新 zoomLevel
-      viewer.camera.changed.addEventListener(() => {
-        const cameraHeight = viewer.camera.positionCartographic.height
-        this.updateZoomLevel(cameraHeight)
-      })
+
+
       window.viewer = viewer
       let options = {}
       // 用于在使用重置导航重置地图视图时设置默认视图控制。接受的值是Cesium.Cartographic 和 Cesium.Rectangle.
@@ -747,23 +745,84 @@ export default {
       document.getElementsByClassName('cesium-baseLayerPicker-sectionTitle')[0].innerHTML = '影像服务'
       document.getElementsByClassName('cesium-baseLayerPicker-sectionTitle')[1].innerHTML = '地形服务'
       this.addTrafficLayer()
+      layer.loadYaAnVillageLayer();
+      window.viewer.camera.changed.addEventListener(this.handleCameraChange);
+    },
+    handleCameraChange() {
+      // 定义相机高度阈值
+      let CITY_LAYER_HEIGHT = 1000000; // 市级图层的高度阈值
+      let COUNTY_LAYER_HEIGHT = 100000; // 区县级图层的高度阈值
+      let VILLAGE_LAYER_HEIGHT = 10000; // 道路级图层的高度阈值
+      let height = window.viewer.camera.positionCartographic.height; // 获取相机高度
+      console.log("当前相机高度:", height);
+
+      // 根据高度动态加载或移除图层
+      if (height > CITY_LAYER_HEIGHT) {
+        // 移除区县级和道路级标签
+        layer.removeSiChuanCountyLayer()
+        layer.removeYaAnVillageLayer()
+        // 加载市级图层
+        layer.loadSichuanCityLayer();
+      } else if (height > COUNTY_LAYER_HEIGHT) {
+        // 移除市级和道路级标签
+        layer.removeSichuanCityLayer()
+        layer.removeYaAnVillageLayer()
+        // 加载区县级图层
+        layer.loadSiChuanCountyLayer();
+      }
+      else {
+        layer.removeSichuanCityLayer()
+        layer.removeSiChuanCountyLayer()
+        // 加载乡镇级图层
+        layer.loadYaAnVillageLayer();
+      }
     },
     // 初始化ws
     initWebsocket() {
+      let that=this
       // console.log("this.eqid---------------------", this.eqid)
       this.websock = initWebSocket(this.eqid)
-      this.websock.onmessage = websocketonmessage;//涉及功能导入功能
+      this.websock.onmessage = function (e) {
+        // message=e
+        console.log("e",e)
+        try {
+          console.log("socketmessage",JSON.parse(e.data))
+          const msg = JSON.parse(e.data);
+          let markType = msg.type
+          let markOperate = msg.operate // 标绘的（add、delete）
+          if (markOperate === "add") {
+            if (that.eqid === msg.data.plot.earthquakeId) {
+              let markData = msg.data
+              wsAdd(markType, markData)
+              console.log(that.plots,"that.plots add")
+              console.log(msg.data.plot,"push msg.plot")
+              that.plots = that.plots.filter(plot => plot.plotId !== msg.data.plot.plotId);
+              that.plots.push(msg.data.plot);
+            }
+
+          }
+          else if (markOperate === "delete") {
+            let id = msg.id
+            console.log(that.plots,"that.plots delete")
+            that.plots = that.plots.filter(plot => plot.plotId !== id);
+            console.log(id,markType)
+            timeLine.deletePointById(id, markType)
+          }
+        }
+        catch (err) {
+          console.log(err, 'ws中catch到错误');
+        }
+      };
     },
     // 获取本次地震数据库中的数据渲染到地图上
     initPlot(eqid) {
-      this.pointsLayer = []
       let that = this
       getPlot({eqid}).then(res => {
         let data = res
 
         that.plotList = data
         that.plots = data
-        console.log("数据：", data)
+        console.log("initPlot 数据：", data)
 
         let pointArr = data.filter(e => e.drawtype === 'point')
         let points = []
@@ -784,9 +843,8 @@ export default {
             that.renderedPlotIds.add(item.plotId);
           }
         })
-        that.drawPoints(points, false)
-        that.pointsLayer = [...points]
-        console.log(that.pointsLayer)
+        // that.drawPoints(points, false)
+        cesiumPlot.drawPoints(points, false);
         let polylineArr = data.filter(e => e.drawtype === 'polyline');
         console.log("pointArr", pointArr)
         console.log("polylineArr", polylineArr)
@@ -817,19 +875,11 @@ export default {
           let polygonData = polygonMap[plotId];
           that.getDrawPolygonInfo(polygonData);
         });
-        let straightArr = data.filter(e => e.drawtype === 'straight');
-        Arrow.showStraightArrow(straightArr)
-        console.log("straightArr----------------", straightArr)
 
-        let attackArr = data.filter(e => e.drawtype === 'attack');
-        Arrow.showAttackArrow(attackArr)
-
-        let pincerArr = data.filter(e => e.drawtype === 'pincer');
-        Arrow.showPincerArrow(pincerArr)
-        // // 长轮询逻辑：等待一段时间后继续请求
-        // setTimeout(() => {
-        //   fetchData(); // 递归调用以实现长轮询
-        // }, 5000); // 设置 5 秒的轮询间隔（可以根据需求调整）
+        let arrowArr = this.plots.filter(e => e.drawtype === 'straight' || e.drawtype === 'attack' || e.drawtype === 'pincer');
+        arrowArr.forEach(item => {
+          cesiumPlot.addArrow(item, "标绘点")
+        })
       })
     },
 
@@ -865,12 +915,12 @@ export default {
 
     confirmDownload() {
       this.loading = true
-      console.log(this.loading,"this.loading 导出")
+      console.log(this.loading, "this.loading 导出")
       this.sheet = this.selectedNodes.map(node => {
         const typeKey = Object.keys(plotType).find(key => plotType[key].name === node);
         const fields = [];
 
-        console.log("typeKey",typeKey)
+        console.log("typeKey", typeKey)
         console.log(fields)
 
         // 指定类型列表
@@ -905,8 +955,7 @@ export default {
               {name: "标注附近道路", type: "text"},
               {name: "标注附近道路距离(米)", type: "text"},
           );
-        }
-        else {
+        } else {
           fields.unshift(
               {name: "绘制类型", type: "text"},
               {name: "经度", type: "text"},
@@ -934,7 +983,7 @@ export default {
 
         if (typeKey) {
           const typeData = plotType[typeKey];
-          console.log("typeData:",typeData)
+          console.log("typeData:", typeData)
           for (const [key, value] of Object.entries(typeData)) {
             if (value.name !== undefined && value.type !== undefined) {
               // 仅处理有 content 的字段或 type 为 text 的 字段
@@ -1015,7 +1064,7 @@ export default {
             const plotTypeFields = plotInfo.plotType ? Object.values(plotType).find(team => team.name === plotInfo.plotType) : null;
             const filteredPlotTypeInfo = Object.keys(plotTypeFields).filter(key => key !== 'name')
                 .reduce((obj, key) => {
-                  if (plotTypeInfo&&plotTypeInfo[key] !== undefined) {
+                  if (plotTypeInfo && plotTypeInfo[key] !== undefined) {
                     obj[plotTypeFields[key].name] = plotTypeInfo[key];
                   }
                   return obj;
@@ -1049,7 +1098,7 @@ export default {
               "角度": plotInfo.angle,
               "开始时间": plotInfo.startTime ? plotInfo.startTime.replace("T", " ") : "", // 检查是否为 null 或 undefined
               "结束时间": plotInfo.endTime ? plotInfo.endTime.replace("T", " ") : "", // 同样检查
-              "标注所在省":plotInfo.belongProvince,
+              "标注所在省": plotInfo.belongProvince,
               "标注所在市": plotInfo.belongCity,
               "标注所在区县": plotInfo.belongCounty,
               "标注所在城镇": plotInfo.belongTown,
@@ -1116,8 +1165,7 @@ export default {
           console.log(888)
           this.isLoaded = true;
         });
-      }
-      else {
+      } else {
         this.excelPanel = "下载导入标绘模板"
         this.isLoaded = true;
       }
@@ -1140,7 +1188,7 @@ export default {
     },
 
     beforeUpload(file) {
-      this.loadingupdate=true
+      this.loadingupdate = true
       const type = file.name.split('.').pop();
       // 获取不带扩展名的文件名
       const filename = file.name.slice(0, file.name.lastIndexOf('.'));
@@ -1184,7 +1232,7 @@ export default {
       };
 
       reader.readAsArrayBuffer(file);
-      this.uploadUrl = import.meta.env.VITE_APP_BASE_API +`/excel/importPlotExcel/${filename}&${this.eqid}`;
+      this.uploadUrl = import.meta.env.VITE_APP_BASE_API + `/excel/importPlotExcel/${filename}&${this.eqid}`;
       // this.uploadUrl = `http://localhost:8080/excel/importPlotExcel/${filename}&${this.eqid}&${this.fieldMapping}`;
       return true;
     },
@@ -1192,7 +1240,7 @@ export default {
     handleSuccess(response) {
       this.plotArray = []
       const startTime = performance.now();
-      console.log(response,"response handleSuccess")
+      console.log(response, "response handleSuccess")
       // 解构 response 中的 plotDataList 和 updatedPlotProperty
       const {plotDataList, updatedPlotProperty} = response.data;
       // 记录开始时间
@@ -1599,7 +1647,7 @@ export default {
 
       flattenedResult.forEach(data => {
         this.wsSendPoint(JSON.stringify(data)); // 将 data 转换为 JSON 字符串发送
-        this.drawPoints(data.data.plot, true)
+        // this.drawPoints(data.data.plot, false)
       });
 
       return flattenedResult;
@@ -1945,7 +1993,7 @@ export default {
           this.popupData = {}
         }
 
-        console.log(window.selectedEntity)
+        console.log("window.selectedEntity",window.selectedEntity)
 
         if (Object.prototype.toString.call(window.selectedEntity) === '[object Array]' && window.selectedEntity[0]._layers !== "聚合标绘点") {
 
@@ -2226,62 +2274,7 @@ export default {
     // 切换地震，渲染切换地震的标绘
     plotAdj(row) {
 
-      console.log("所有信息",row)
-      // {
-      //   "eqid": "69b02afc-9aa8-4c32-8272-d5672d845c3c",
-      //     "eqqueueId": "69b02afc-9aa8-4c32-8272-d5672d845c3c01",
-      //     "earthquakeName": "四川省雅安市名山区",
-      //     "earthquakeFullName": "2025年03月14日四川省雅安市名山区前进镇6.5级地震",
-      //     "eqAddr": "四川省雅安市名山区前进镇",
-      //     "magnitude": "6.5",
-      //     "intensity": "",
-      //     "depth": "12.0",
-      //     "occurrenceTime": "2025-03-14T12:55:51",
-      //     "eqType": "T",
-      //     "source": "2",
-      //     "eqAddrCode": "511803",
-      //     "townCode": "51180311800000",
-      //     "pac": "",
-      //     "type": "",
-      //     "longitude": "103.20",
-      //     "latitude": "30.04",
-      //     "geom": null,
-      //     "time": "2025-03-14 12:55:51"
-      // }
-
-      // {
-      //   "eqid": "69b02afc-9aa8-4c32-8272-d5672d845c3c",
-      //     "eqqueueId": "69b02afc-9aa8-4c32-8272-d5672d845c3c01",
-      //     "earthquakeName": "四川省雅安市名山区",
-      //     "earthquakeFullName": "2025年03月14日四川省雅安市名山区前进镇6.5级地震",
-      //     "eqAddr": "四川省雅安市名山区前进镇",
-      //     "geom": {
-      //   "type": "Point",
-      //       "coordinates": [
-      //     103.2,
-      //     30.04
-      //   ]
-      // },
-      //   "intensity": "",
-      //     "magnitude": "6.5",
-      //     "depth": "12.0",
-      //     "occurrenceTime": "2025-03-14T12:55:51",
-      //     "eqType": "T",
-      //     "source": "2",
-      //     "eqAddrCode": "511803",
-      //     "townCode": "51180311800000",
-      //     "pac": "",
-      //     "type": "",
-      //     "isDeleted": 0,
-      //     "district": "名山区",
-      //     "province": "四川省",
-      //     "city": "雅安市",
-      //     "time": "2025-03-14 12:55:51",
-      //     "latitude": "NaN",
-      //     "longitude": "NaN"
-      // }
-
-
+      console.log("所有信息", row)
       this.eqInfo = row
       // console.log("剩余1：", window.pointDataSource.entities)
       window.viewer.entities.removeAll();
@@ -2301,21 +2294,21 @@ export default {
       this.renderedPlotIds.clear(); // 清空已渲染 ID 集合
       this.initPlot(row.eqid)
       this.eqOccurrenceTime = row.occurrenceTime.replace('T', ' ') + ':00';
-      console.log("更换地震后的时间",this.eqOccurrenceTime)
+      console.log("更换地震后的时间", this.eqOccurrenceTime)
       this.title = this.timestampToTimeChina(row.occurrenceTime) + row.earthquakeName + row.magnitude
 
       // 输入框有无内容调用接口不同返回数据格式不同
       let latitude = null
       let longitude = null
 
-      if (!this.queryParams){
+      if (!this.queryParams) {
         latitude = row.latitude
         longitude = row.longitude
-      }else{
+      } else {
         latitude = row.geom.coordinates[1]
         longitude = row.geom.coordinates[0]
       }
-      
+
       window.viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(parseFloat(longitude), parseFloat(latitude), 60000),
         orientation: {
@@ -2332,8 +2325,8 @@ export default {
     getEq() {
       let that = this
       getAllEqList().then(res => {
-        console.log("********************************************************")
-        console.log("res", res)
+        // console.log("********************************************************")
+        console.log("getEq res", res)
         let resData = res.data.filter(item => item.magnitude >= 5)
         let data = []
         for (let i = 0; i < resData.length; i++) {
@@ -2368,7 +2361,6 @@ export default {
         // 初始化标绘所需的viewer、ws、pinia
         let cesiumStore = useCesiumStore()
         cesiumPlot.init(window.viewer, this.websock, cesiumStore)
-
         console.log("websock:", this.websock)
       })
     },
@@ -2598,7 +2590,7 @@ export default {
       // 删除全局视角锁定（解决箭头标绘绘制时双击会聚焦在点上）
       window.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
       this.isShowMessageIcon = true
-      this.messageIcon = import.meta.env.VITE_APP_BASE_API +'/uploads/PlotsPic/' + item.img + '.png?t=' + new Date().getTime()
+      this.messageIcon = this.iconRoad + item.img + '.png?t=' + new Date().getTime()
 
       if (item.plottype === '点图层') {
         console.log("点图层")
@@ -2707,20 +2699,20 @@ export default {
       }
     },
     // 画点
-    drawPoint(pointInfo) {
-      if (this.ifPointAnimate) {
-        cesiumPlot.drawPoint(pointInfo, true)
-      } else {
-        cesiumPlot.drawPoint(pointInfo)
-      }
-    },
-    drawPoints(pointInfo, bool) {
-      cesiumPlot.drawPoints(pointInfo, bool, 5000);
-    },
+    // drawPoint(pointInfo) {
+    //   if (this.ifPointAnimate) {
+    //     cesiumPlot.drawPoint(pointInfo, true)
+    //   } else {
+    //     cesiumPlot.drawPoint(pointInfo)
+    //   }
+    // },
+    // drawPoints(pointInfo, bool) {
+    //   cesiumPlot.drawPoints(pointInfo, bool);
+    // },
 
-    ifPointAnimation(val) {
-      this.ifPointAnimate = val
-    },
+    // ifPointAnimation(val) {
+    //   this.ifPointAnimate = val
+    // },
     // 重置标绘信息填写的绑定数据
     resetAddMarkCollection() {
       let cesiumStore = useCesiumStore()
@@ -2737,22 +2729,25 @@ export default {
     },
     // ws发送数据（只有点的是在这里）
     wsSendPoint(data) {
-      if (JSON.parse(data).operate === "delete") {
-        this.plots = this.plots.filter(plot => plot.plotId !== JSON.parse(data).id);
-        console.log(this.plots,"this.plots wsSendPoint")
-      }
-      else if (JSON.parse(data).operate === "add") {
-        let markData = JSON.parse(data).data
-        markData.plot.longitude = Number(markData.plot.geom.coordinates[0])
-        markData.plot.latitude = Number(markData.plot.geom.coordinates[1])
-        this.plots.push(markData.plot)
-        console.log(this.plots,"this.plots wsSendPoint existingPlot")
-        if(this.loadingupdate===true){
-          this.loadingupdate=false
-        }
-      }
-      console.log(this.websock, "websock:")
-      console.log(data, "wsSendPoint(data)")
+      // if (JSON.parse(data).operate === "delete") {
+      //   this.plots = this.plots.filter(plot => plot.plotId !== JSON.parse(data).id);
+      //   console.log(this.plots, "this.plots wsSendPoint")
+      // }
+      // else if (JSON.parse(data).operate === "add") {
+      //   let markData = JSON.parse(data).data
+      //   markData.plot.longitude = Number(markData.plot.geom.coordinates[0])
+      //   markData.plot.latitude = Number(markData.plot.geom.coordinates[1])
+      //
+      //   this.plots.push(markData.plot);
+      //   this.plots = this.plots.filter(plot => plot.plotId !== JSON.parse(data).id);
+      //   console.log(this.plots, "this.plots wsSendPoint existingPlot");
+      //
+      //   if (this.loadingupdate === true) {
+      //     this.loadingupdate = false
+      //   }
+      // }
+      // console.log(this.websock, "websock:")
+      // console.log(data, "wsSendPoint(data)")
       // this.websock.onopen = () => {
       this.websock.send(data)
     },
@@ -3026,20 +3021,7 @@ export default {
         heights: heights // 高度单独返回
       };
     },
-    /*获取目前相机所属高度*/
-    updateZoomLevel(cameraHeight) {
-      // console.log("层级",cameraHeight)
-      // 根据相机高度设置 zoomLevel
-      if (cameraHeight > 200000) {
-        this.zoomLevel = '市'
-      } else if (cameraHeight > 70000) {
-        this.zoomLevel = '区/县'
-      } else if (cameraHeight > 4000) {
-        this.zoomLevel = '乡/镇'
-      } else {
-        this.zoomLevel = '村'
-      }
-    },
+
 
     // 搜索框
     handleQuery() {

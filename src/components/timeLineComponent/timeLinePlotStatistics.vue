@@ -52,6 +52,8 @@ export default {
       this.showZoomStatistic()
     },
     plots(newVal, oldVal) {
+      this.updateTimeStatistic()
+      // this.showZoomStatistic()
     },
     currentTime(newVal) {
       let currentTimeLocaltmp=timeTransfer.timestampToTimeChina(this.currentTime)
@@ -75,6 +77,7 @@ export default {
         // console.log("viewCenterCoordinate watch", newVal)
         if (this.typeIsYaan) {
           let belongCounty = await this.getPlotBelongCounty(newVal.lon, newVal.lat)
+          // console.log(belongCounty,"belongCounty")
           if (belongCounty != this.viewCenterCountyNew) {
             this.viewCenterCountyNew = belongCounty
             this.viewCenterCityNew=  "雅安市"
@@ -350,7 +353,7 @@ export default {
           this.centerPosionName = '雅安市'
         }
         else if(this.selectedDistrict==="回到震中"){
-            if (this.zoomLevel === "区/县") {
+            if (this.zoomLevel === "区/县"||this.zoomLevel === "乡镇") {
               this.dataInTimeAndZoom = originalArray.filter(data => data.belongCounty === this.viewCenterCountyNew);
               this.centerPosionName = this.viewCenterCountyNew
             } else {
@@ -364,7 +367,7 @@ export default {
         }
       }
       else{
-          if (this.zoomLevel === "区/县") {
+        if (this.zoomLevel === "区/县"||this.zoomLevel === "乡镇") {
             this.dataInTimeAndZoom = originalArray.filter(data => data.belongCounty === this.viewCenterCountyNew);
             this.centerPosionName = this.viewCenterCountyNew
           } else {
