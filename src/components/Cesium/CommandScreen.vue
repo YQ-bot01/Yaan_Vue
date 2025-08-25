@@ -607,13 +607,13 @@
           :popupData="dataSourcePopupData"
       />
     </div>
-    <commandScreenTitle
-        :eqyear="eqyear"
-        :eqmonth="eqmonth"
-        :eqday="eqday"
-        :centerPoint="centerPoint"
-        @toggle-component="toggleComponent"
-    />
+<!--    <commandScreenTitle-->
+<!--        :eqyear="eqyear"-->
+<!--        :eqmonth="eqmonth"-->
+<!--        :eqday="eqday"-->
+<!--        :centerPoint="centerPoint"-->
+<!--        @toggle-component="toggleComponent"-->
+<!--    />-->
 
     <timeLinePlay
         :viewer="viewer"
@@ -627,50 +627,50 @@
     />
 
     <!--   灾情总览-->
-    <div v-show="showSidebarComponents">
-      <div class="pop_left_background">
-        <timeLineEmergencyResponse
-            :edit="false"
-            :eqid="eqid"
-            :centerPoint="centerPoint"
-            :currentTime="currentTimeString"
-        />
-        <!--   人员伤亡-左中   -->
-        <timeLinePersonnelCasualties
-            :eqid="eqid"
-            :currentTime="currentTimeString"
-        />
-        <!--        震中信息组件-->
-        <timeLineBaseInfo
-            :centerPoint="centerPoint"
-        />
-      </div>
-      <timeLineLegend
-          :activeComponent="activeComponent"
-          @toggleComponent="toggleComponent"
-      />
-      <div class="pop_right_background">
-        <!--生命线情况-->
-        <timeLineLifeLine
-            :eqid="eqid"
-            :currentTime="currentTimeString"
-        />
-        <timeLinePlotStatistics
-            :plots="plots"
-            :currentTime="currentTimeString"
-            :startTime="centerPoint.startTime"
-            :zoomLevel="zoomLevel"
-            :isTimeRunning="isTimeRunning"
-            :viewCenterCoordinate="viewCenterCoordinate"
-            :earthquakeName="centerPoint.earthquakeName"
-            :selectedDistrict="selectedDistrict"
-        />
-        <timeLineMiniMap
-            :viewer="viewer"
-            :centerPoint="centerPoint"
-        />
-      </div>
-    </div>
+<!--    <div v-show="showSidebarComponents">-->
+<!--      <div class="pop_left_background">-->
+<!--        <timeLineEmergencyResponse-->
+<!--            :edit="false"-->
+<!--            :eqid="eqid"-->
+<!--            :centerPoint="centerPoint"-->
+<!--            :currentTime="currentTimeString"-->
+<!--        />-->
+<!--        &lt;!&ndash;   人员伤亡-左中   &ndash;&gt;-->
+<!--        <timeLinePersonnelCasualties-->
+<!--            :eqid="eqid"-->
+<!--            :currentTime="currentTimeString"-->
+<!--        />-->
+<!--        &lt;!&ndash;        震中信息组件&ndash;&gt;-->
+<!--        <timeLineBaseInfo-->
+<!--            :centerPoint="centerPoint"-->
+<!--        />-->
+<!--      </div>-->
+<!--      <timeLineLegend-->
+<!--          :activeComponent="activeComponent"-->
+<!--          @toggleComponent="toggleComponent"-->
+<!--      />-->
+<!--      <div class="pop_right_background">-->
+<!--        &lt;!&ndash;生命线情况&ndash;&gt;-->
+<!--        <timeLineLifeLine-->
+<!--            :eqid="eqid"-->
+<!--            :currentTime="currentTimeString"-->
+<!--        />-->
+<!--        <timeLinePlotStatistics-->
+<!--            :plots="plots"-->
+<!--            :currentTime="currentTimeString"-->
+<!--            :startTime="centerPoint.startTime"-->
+<!--            :zoomLevel="zoomLevel"-->
+<!--            :isTimeRunning="isTimeRunning"-->
+<!--            :viewCenterCoordinate="viewCenterCoordinate"-->
+<!--            :earthquakeName="centerPoint.earthquakeName"-->
+<!--            :selectedDistrict="selectedDistrict"-->
+<!--        />-->
+<!--        <timeLineMiniMap-->
+<!--            :viewer="viewer"-->
+<!--            :centerPoint="centerPoint"-->
+<!--        />-->
+<!--      </div>-->
+<!--    </div>-->
 
     <!--    两侧组件 end-->
 
@@ -1815,7 +1815,7 @@ export default {
         // })
 
         // 设置cesium的指南针、比例尺、放大缩小重置
-        this.init_cesium_navigation(this.centerPoint.longitude, this.centerPoint.latitude, viewer)
+        // this.init_cesium_navigation(this.centerPoint.longitude, this.centerPoint.latitude, viewer)
 
         // 坡度分析绑定地形自动加载地形
         const switchToLocalDEM = () => {
@@ -1973,22 +1973,36 @@ export default {
             }
           }
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-        this.drawPredict()
+        this.drawPredictLuDing()
       })
     },
-    drawPredict(){
-      // Cesium.GeoJsonDataSource.load(LuDingHuaPo).then((dataSource) => {
-      //   viewer.dataSources.add(dataSource);
-      //   viewer.zoomTo(dataSource);
-      // });
+    // 101.9095080490772 102.3224246981676 29.85781343494273 29.21314977102056
+    drawPredictLuDing(){
       // / 提取每个多边形的第一个点
+      // LuDingHuaPo.features.forEach(feature => {
+      //   const geometry = feature.geometry;
+      //   if (geometry.type === 'Polygon') {
+      //     const points = geometry.coordinates[0]; // 取第一个数组，即外环
+      //     points.forEach(point => {
+      //       const entity = viewer.entities.add({
+      //         position: Cesium.Cartesian3.fromDegrees(point[0], point[1]),
+      //         point: {
+      //           pixelSize: 5,
+      //           color: Cesium.Color.RED
+      //         }
+      //       });
+      //     });
+      //   }
+      // });
       LuDingHuaPo.features.forEach(feature => {
         const geometry = feature.geometry;
         if (geometry.type === 'Polygon') {
-          const points = geometry.coordinates[0]; // 取第一个数组，即外环
-          points.forEach(point => {
+          // 遍历所有的环（外环和内环）
+          geometry.coordinates.forEach(ring => {
+            // 取每个环的第一个点
+            const firstPoint = ring[0];
             const entity = viewer.entities.add({
-              position: Cesium.Cartesian3.fromDegrees(point[0], point[1]),
+              position: Cesium.Cartesian3.fromDegrees(firstPoint[0], firstPoint[1]),
               point: {
                 pixelSize: 5,
                 color: Cesium.Color.RED
@@ -1997,80 +2011,242 @@ export default {
           });
         }
       });
+      const northLat =29.88781343494273; // 向北30公里
+      const westLon = 101.9295080490772; // 向西30公里
+      const lonPerKm = 1 / 111.32;
+      const latPerKm = 1 / 111.32;
+      const csvFile = 'src/assets/geoJson/paper/predictLuDing.csv';
+      Papa.parse(csvFile, {
+        download: true,
+        header: false,
+        complete: (results) => {
+          // console.log(results,"results Papa")
+          // 解析 CSV 数据
+          const data = results.data;
+
+          for (let y=0;y<data.length;y++){
+            for(let x=0;x<data[y].length;x++){
+              const value = parseInt(data[y][x], 10); // 网格的值
+              // 计算网格的实际经纬度
+              const gridLon = westLon + x * lonPerKm;
+              const gridLat = northLat - y * latPerKm;
+
+              const positions = Cesium.Cartesian3.fromDegreesArray([
+                gridLon, gridLat, // 左下角
+                gridLon + lonPerKm, gridLat, // 右下角
+                gridLon + lonPerKm, gridLat - latPerKm, // 右上角
+                gridLon, gridLat - latPerKm // 左上角
+              ]);
+
+              // 根据值选择颜色
+              let color=Cesium.Color.WHITE;
+              if( value === 1){color =Cesium.Color.fromBytes(189, 227, 197)}
+              if( value === 2){color =Cesium.Color.fromBytes(179, 212, 230)}
+              if( value === 3){color =Cesium.Color.fromBytes(231, 233, 88)}
+              if( value === 4){color =Cesium.Color.fromBytes(175, 52, 58)}
+
+              // 绘制网格
+              this.viewer.entities.add({
+                polygon: {
+                  hierarchy: new Cesium.PolygonHierarchy(positions), // 正确创建 PolygonHierarchy
+                  material: color.withAlpha(0.3), // 设置透明度
+                  outline: true,
+                  outlineColor: Cesium.Color.BLACK
+                }
+              });
+            }
+          }
+        }
+      });
+
+      const minLon = 100.9095080490772; // 最小经度
+      const maxLon = 104.3224246981676; // 最大经度
+      const minLat = 27.21314977102056; // 最小纬度
+      const maxLat = 30.85781343494273; // 最大纬度
+
+      const interval = 10 / 60; // 每隔10分钟的经纬度间隔
+
+      // 绘制经线
+      for (let lon = Math.ceil(minLon * 60) / 60; lon <= maxLon; lon += interval) {
+        const positions = Cesium.Cartesian3.fromDegreesArray([
+          lon, minLat, // 经线的起始点
+          lon, maxLat  // 经线的结束点
+        ]);
+
+        this.viewer.entities.add({
+          polyline: {
+            positions: positions,
+            material: Cesium.Color.fromBytes(127, 127, 127, 255),
+            width: 2
+          }
+        });
+      }
+
+      // 绘制纬线
+      for (let lat = Math.ceil(minLat * 60) / 60; lat <= maxLat; lat += interval) {
+        const positions = Cesium.Cartesian3.fromDegreesArray([
+          minLon, lat, // 纬线的起始点
+          maxLon, lat  // 纬线的结束点
+        ]);
+
+        this.viewer.entities.add({
+          polyline: {
+            positions: positions,
+            material: Cesium.Color.fromBytes(127, 127, 127, 255),
+            width: 2
+          }
+        });
+      }
     },
-    // },
-    // drawPredict() {
-    //   // 中心点经纬度
-    //   const centerLon = 102.8333; // 102°50'00"
-    //   const centerLat = 30.4167;  // 20°25'00"
-    //
-    //   // 计算纬度偏移量
-    //   const latPerKm = 1 / 111.32; // 每公里纬度变化量
-    //   const northLat = centerLat + 30 * latPerKm; // 向北30公里
-    //   // const southLat = centerLat - 40 * latPerKm; // 向南40公里
-    //
-    //   // 计算经度偏移量
-    //   const lonPerKm = 1 / (111.32 * Math.cos(centerLat * Math.PI / 180)); // 每公里经度变化量
-    //   const westLon = centerLon - 30 * lonPerKm; // 向西30公里
-    //   // const eastLon = centerLon + 40 * lonPerKm; // 向东40公里
-    //
-    //   // 读取 CSV 文件
-    //   const csvFile = 'src/assets/LuShan.csv';
-    //   Papa.parse(csvFile, {
-    //     download: true,
-    //     header: false,
-    //     complete: (results) => {
-    //       // console.log(results,"results Papa")
-    //       // 解析 CSV 数据
-    //       const data = results.data;
-    //
-    //       for (let y=0;y<data.length;y++){
-    //         for(let x=0;x<data[y].length;x++){
-    //
-    //           // 遍历数据并绘制网格
-    //           // data.forEach((row) => {
-    //           //   console.log(row,"row Papa")
-    //           //   row.forEach((item)=>{
-    //           //     console.log(item)
-    //           //   })
-    //           // const x = parseInt(row.x, 10); // 网格的 x 坐标
-    //           // const y = parseInt(row.y, 10); // 网格的 y 坐标
-    //           const value = parseInt(data[y][x], 10); // 网格的值
-    //
-    //
-    //           // 计算网格的实际经纬度
-    //           const gridLon = westLon + x * lonPerKm;
-    //           const gridLat = northLat - y * latPerKm;
-    //
-    //           if(value==1){
-    //             console.log(value,x,y,"value,x,y")
-    //             console.log(gridLon,gridLat, gridLon + lonPerKm, gridLat, gridLon + lonPerKm, gridLat + latPerKm, gridLon, gridLat + latPerKm,"positions gridLon")
-    //           }
-    //
-    //           const positions = Cesium.Cartesian3.fromDegreesArray([
-    //             gridLon, gridLat, // 左下角
-    //             gridLon + lonPerKm, gridLat, // 右下角
-    //             gridLon + lonPerKm, gridLat - latPerKm, // 右上角
-    //             gridLon, gridLat - latPerKm // 左上角
-    //           ]);
-    //
-    //           // 根据值选择颜色
-    //           const color = value === 1 ? Cesium.Color.RED : Cesium.Color.WHITE;
-    //
-    //           // 绘制网格
-    //           this.viewer.entities.add({
-    //             polygon: {
-    //               hierarchy: new Cesium.PolygonHierarchy(positions), // 正确创建 PolygonHierarchy
-    //               material: color.withAlpha(0.3), // 设置透明度
-    //               outline: true,
-    //               outlineColor: Cesium.Color.BLACK
-    //             }
-    //           });
-    //         }
-    //       }
-    //     }
-    //   });
-    // },
+
+    drawPredictLuShan() {
+      // const northLat =29.21314977102056; // 向北30公里
+      // const westLon = 101.9095080490772; // 向西30公里
+      // const lonPerKm = 1 / 111.32;
+      // 中心点经纬度
+      //   // 中心点经纬度
+        const centerLon = 102.8333; // 102°50'00"
+        const centerLat = 30.4167;  // 20°25'00"
+
+        // 计算纬度偏移量
+        const latPerKm = 1 / 111.32; // 每公里纬度变化量
+        const northLat = centerLat + 30 * latPerKm; // 向北30公里
+        // const southLat = centerLat - 40 * latPerKm; // 向南40公里
+
+        // 计算经度偏移量
+        const lonPerKm = 1 / (111.32 * Math.cos(centerLat * Math.PI / 180)); // 每公里经度变化量
+        const westLon = centerLon - 30 * lonPerKm; // 向西30公里
+        // const eastLon = centerLon + 40 * lonPerKm; // 向东40公里
+
+
+      // 读取 CSV 文件
+      const csvFile = 'src/assets/geoJson/paper/LSPredict72h.csv';
+      Papa.parse(csvFile, {
+        download: true,
+        header: false,
+        complete: (results) => {
+          // console.log(results,"results Papa")
+          // 解析 CSV 数据
+          const data = results.data;
+
+          for (let y=0;y<data.length;y++){
+            for(let x=0;x<data[y].length;x++){
+              const value = parseInt(data[y][x], 10); // 网格的值
+              // 计算网格的实际经纬度
+              const gridLon = westLon + x * lonPerKm;
+              const gridLat = northLat - y * latPerKm;
+
+              // if(value==1){
+              //   console.log(value,x,y,"value,x,y")
+              //   console.log(gridLon,gridLat, gridLon + lonPerKm, gridLat, gridLon + lonPerKm, gridLat + latPerKm, gridLon, gridLat + latPerKm,"positions gridLon")
+              // }
+
+              const positions = Cesium.Cartesian3.fromDegreesArray([
+                gridLon, gridLat, // 左下角
+                gridLon + lonPerKm, gridLat, // 右下角
+                gridLon + lonPerKm, gridLat - latPerKm, // 右上角
+                gridLon, gridLat - latPerKm // 左上角
+              ]);
+
+              // 根据值选择颜色
+              let color=Cesium.Color.WHITE;
+              if( value === 1){color =Cesium.Color.fromBytes(189, 227, 197)}
+              if( value === 2){color =Cesium.Color.fromBytes(179, 212, 230)}
+              if( value === 3){color =Cesium.Color.fromBytes(231, 233, 88)}
+              if( value === 4){color =Cesium.Color.fromBytes(175, 52, 58)}
+              // const color = value === 1 ? Cesium.Color.RED : Cesium.Color.WHITE;
+
+              // 绘制网格
+              this.viewer.entities.add({
+                polygon: {
+                  hierarchy: new Cesium.PolygonHierarchy(positions), // 正确创建 PolygonHierarchy
+                  material: color.withAlpha(0.3), // 设置透明度
+                  outline: true,
+                  outlineColor: Cesium.Color.BLACK
+                }
+              });
+            }
+          }
+        }
+      });
+
+      const csvFile1 = 'src/assets/geoJson/paper/LuShan.csv';
+      Papa.parse(csvFile1, {
+        download: true,
+        header: false,
+        complete: (results) => {
+          // console.log(results,"results Papa")
+          // 解析 CSV 数据
+          const data = results.data;
+
+          for (let y=0;y<data.length;y++){
+            for(let x=0;x<data[y].length;x++){
+              const value = parseInt(data[y][x], 10); // 网格的值
+              // 计算网格的实际经纬度
+              const gridLon = westLon + x * lonPerKm;
+              const gridLat = northLat - y * latPerKm;
+
+              // const positions = Cesium.Cartesian3.fromDegreesArray([
+              //   gridLon, gridLat, // 左下角
+              //   gridLon + lonPerKm, gridLat, // 右下角
+              //   gridLon + lonPerKm, gridLat - latPerKm, // 右上角
+              //   gridLon, gridLat - latPerKm // 左上角
+              // ]);
+              if (value === 1) {
+                this.viewer.entities.add({
+                  position: Cesium.Cartesian3.fromDegrees(gridLon, gridLat),
+                  point: {
+                    pixelSize: 5, // 点的大小
+                    color: Cesium.Color.RED // 点的颜色
+                  }
+                });
+              }
+
+            }
+          }
+        }
+      });
+
+      // 定义经纬度范围
+      const minLon = 100.9095080490772; // 最小经度
+      const maxLon = 104.3224246981676; // 最大经度
+      const minLat = 27.21314977102056; // 最小纬度
+      const maxLat = 30.85781343494273; // 最大纬度
+
+      const interval = 10 / 60; // 每隔10分钟的经纬度间隔
+
+      // 绘制经线
+      for (let lon = Math.ceil(minLon * 60) / 60; lon <= maxLon; lon += interval) {
+        const positions = Cesium.Cartesian3.fromDegreesArray([
+          lon, minLat, // 经线的起始点
+          lon, maxLat  // 经线的结束点
+        ]);
+
+        this.viewer.entities.add({
+          polyline: {
+            positions: positions,
+            material: Cesium.Color.fromBytes(127, 127, 127, 255),
+            width: 2
+          }
+        });
+      }
+
+      // 绘制纬线
+      for (let lat = Math.ceil(minLat * 60) / 60; lat <= maxLat; lat += interval) {
+        const positions = Cesium.Cartesian3.fromDegreesArray([
+          minLon, lat, // 纬线的起始点
+          maxLon, lat  // 纬线的结束点
+        ]);
+
+        this.viewer.entities.add({
+          polyline: {
+            positions: positions,
+            material: Cesium.Color.fromBytes(127, 127, 127, 255),
+            width: 2
+          }
+        });
+      }
+    },
 
     init_cesium_navigation(longitude, latitude, viewer) {
       let options = {}
@@ -2110,7 +2286,7 @@ export default {
       });
       timeLine.addDataSourceLayer("pointData")
       timeLine.addDataSourceLayer("label")
-      timeLine.addCenterPoint(this.centerPoint)
+      // timeLine.addCenterPoint(this.centerPoint)
     },
     updateZoomLevel(cameraHeight) {
       if (cameraHeight < 50000) {
@@ -6515,6 +6691,7 @@ li {
 .cyber-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 25px rgba(94, 234, 255, 0.5),
+
   0 4px 20px rgba(0, 0, 0, 0.3);
   background: linear-gradient(135deg,
   #0a2840 0%,

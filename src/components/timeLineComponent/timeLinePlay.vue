@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="topLastRecordTimeLabel">
-      {{ this.lastRecordTimeLocal }}
-    </div>
+<!--    <div class="topLastRecordTimeLabel">-->
+<!--      {{ this.lastRecordTimeLocal }}-->
+<!--    </div>-->
 <!--    <div class="topLastRecordContentLabel">-->
 <!--      <span class="marquee">{{ this.lastRecordContent }}</span>-->
 <!--    </div>-->
