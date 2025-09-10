@@ -66,3 +66,5 @@ package.json中使用`--force`
   },
 ```
 部分里的'%2B': '+'改为'%2B': '%2B',该文件中有两个encode,均需要修改
+<img width="1266" height="713" alt="image" src="https://github.com/user-attachments/assets/83dd58ac-67f4-4522-84e1-51a173995363" />
+
